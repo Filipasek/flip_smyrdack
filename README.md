@@ -1,8 +1,8 @@
 # flip_smyrdack
 
-A new Flutter project.
+Nowa aplikacja firmy Flip&Smyrdack
 
-## Getting Started
+## bla bla
 
 This project is a starting point for a Flutter application.
 
