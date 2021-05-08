@@ -1,4 +1,4 @@
-package com.example.flip_smyrdack
+package pl.filipguzdek.flipsmyrdack
 
 import io.flutter.embedding.android.FlutterActivity
 
