@@ -35,6 +35,8 @@ class AuthService {
       'name': name,
       'contactData': contactData,
       'avatar': avatar,
+      'created': DateTime.now(),
+      'verified': false,
     }, SetOptions(merge: true));
   }
 

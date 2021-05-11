@@ -69,9 +69,9 @@ class _AppState extends State<App> {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: Theme.of(context).primaryColor,
-        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
     return HomeScreen();
