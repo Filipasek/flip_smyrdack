@@ -17,6 +17,7 @@ class HomeScreen extends StatelessWidget {
           User? _user = snapshot.data;
           if (_user == null) return LoginScreen();
           Provider.of<UserData>(context, listen: false).currentUserId = _user.uid;
+          Provider.of<UserData>(context, listen: false).currentUserPhoto = _user.photoURL;
           return MainScreen();
         } else {
           return Scaffold(

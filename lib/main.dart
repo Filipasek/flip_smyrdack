@@ -41,15 +41,15 @@ class MyApp extends StatelessWidget {
             headline5: TextStyle(color: Colors.black),
           ),
         ),
-        darkTheme: ThemeData(
-          fontFamily: 'Comfortaa',
-          primaryColor: Color.fromRGBO(40, 44, 55, 1),
-          accentColor: Color.fromRGBO(255, 182, 185, 1),
-          textTheme: TextTheme(
-            bodyText2: TextStyle(color: Colors.grey),
-            headline5: TextStyle(color: Colors.white),
-          ),
-        ),
+        // darkTheme: ThemeData(
+        //   fontFamily: 'Comfortaa',
+        //   primaryColor: Color.fromRGBO(40, 44, 55, 1),
+        //   accentColor: Color.fromRGBO(255, 182, 185, 1),
+        //   textTheme: TextTheme(
+        //     bodyText2: TextStyle(color: Colors.grey),
+        //     headline5: TextStyle(color: Colors.white),
+        //   ),
+        // ),
         home: App(),
       ),
     );

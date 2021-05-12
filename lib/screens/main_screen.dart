@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/screens/add_trip.dart';
+import 'package:flip_smyrdack/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +14,36 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
+    Future firebaseData = FirebaseFirestore.instance.collection('trips').get();
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        elevation: 0.0,
+        // elevation: 0.0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return AddTripScreen();
+              },
+            ),
+          ),
+          icon: Icon(Icons.add_location_alt_outlined),
+        ),
+        actions: [
+          Container(
+            padding: EdgeInsets.all(5.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(100.0),
+              child: GestureDetector(
+                //TODO: animation
+                onTap: () => UserData().logout(),
+                child: Image.network(
+                  Provider.of<UserData>(context).currentUserPhoto!,
+                ),
+              ),
+            ),
+          ),
+        ],
         title: Text(
           'Flip&Smyrdack',
           style: GoogleFonts.comfortaa(
@@ -28,14 +56,31 @@ class _MainScreenState extends State<MainScreen> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-        future: FirebaseFirestore.instance.collection('trips').get(),
+        future: firebaseData,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return ListView.builder(
-            itemCount: 2,
-            itemBuilder: (context, index) {
-              return Destinations(index);
-            },
-          );
+          if (snapshot.hasData) {
+            List data = snapshot.data.docs;
+            int length = data.length;
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  firebaseData =
+                      FirebaseFirestore.instance.collection('trips').get();
+                });
+                return firebaseData;
+              },
+              child: ListView.builder(
+                itemCount: length,
+                itemBuilder: (context, index) {
+                  dynamic info = data[index];
+                  return Destinations(index, info['name'], info['date'],
+                      info['difficulty'], info['cost'], info['image']);
+                },
+              ),
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
         },
       ),
     );
@@ -44,7 +89,13 @@ class _MainScreenState extends State<MainScreen> {
 
 class Destinations extends StatelessWidget {
   int index;
-  Destinations(this.index);
+  String name;
+  String difficulty;
+  Timestamp date;
+  int cost;
+  String imageUrl;
+  Destinations(this.index, this.name, this.date, this.difficulty, this.cost,
+      this.imageUrl);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -61,12 +112,17 @@ class Destinations extends StatelessWidget {
         child: Container(
           child: Stack(
             children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child: Image(
-                  image: AssetImage('assets/images/photo$index.jpg'),
-                  height: 300.0,
-                  fit: BoxFit.fitHeight,
+              Hero(
+                tag: 'image$index',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: Image(
+                    image: NetworkImage(
+                      imageUrl,
+                    ),
+                    height: 300.0,
+                    fit: BoxFit.fitHeight,
+                  ),
                 ),
               ),
               Container(
@@ -81,14 +137,21 @@ class Destinations extends StatelessWidget {
                   // splashColor: Color.fromRGBO(120, 254, 224, 1),
                   color: Colors.white.withOpacity(0.0001),
                   padding: EdgeInsets.fromLTRB(10.0, 300.0, 10.0, 5.0),
-                  onPressed: () {},
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return DetailsScreen(
+                            name, index, date, difficulty, cost, imageUrl);
+                      },
+                    ),
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       Expanded(
                         child: Center(
                           child: Text(
-                            "Duże Jezioro",
+                            name,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
                             style: TextStyle(
@@ -103,13 +166,13 @@ class Destinations extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '5zł',
+                            '${cost}zł',
                             style: TextStyle(
                               color: Colors.transparent,
                             ),
                           ),
                           Text("Kiedy: niedziela, 16 maja"),
-                          Text('5zł'),
+                          Text('${cost}zł'),
                         ],
                       ),
                     ],
