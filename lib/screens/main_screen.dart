@@ -1,10 +1,13 @@
+// import 'dart:html';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -73,8 +76,18 @@ class _MainScreenState extends State<MainScreen> {
                 itemCount: length,
                 itemBuilder: (context, index) {
                   dynamic info = data[index];
-                  return Destinations(index, info['name'], info['date'],
-                      info['difficulty'], info['cost'], info['image']);
+                  return Destinations(
+                    index,
+                    info['name'],
+                    info['date'],
+                    info['difficulty'],
+                    info['transportCost'],
+                    info['photo0'],
+                    info['description'],
+                    info['endTime'],
+                    info['otherCosts'],
+                    info['startTime'],
+                  );
                 },
               ),
             );
@@ -91,11 +104,27 @@ class Destinations extends StatelessWidget {
   int index;
   String name;
   String difficulty;
+  String description;
   Timestamp date;
-  int cost;
-  String imageUrl;
-  Destinations(this.index, this.name, this.date, this.difficulty, this.cost,
-      this.imageUrl);
+  int transportCost;
+  int otherCosts;
+  String startTime;
+  String endTime;
+  String imageUrl; //TODO: list
+
+  Destinations(
+    this.index,
+    this.name,
+    this.date,
+    this.difficulty,
+    this.transportCost,
+    this.imageUrl,
+    this.description,
+    this.endTime,
+    this.otherCosts,
+    this.startTime,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -141,7 +170,19 @@ class Destinations extends StatelessWidget {
                     MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return DetailsScreen(
-                            name, index, date, difficulty, cost, imageUrl);
+                          index,
+                          name,
+                          date,
+                          difficulty,
+                          transportCost,
+                          imageUrl,
+                          description,
+                          endTime,
+                          otherCosts,
+                          startTime,
+                        );
+                        // return DetailsScreen(
+                        //     name, index, date, difficulty, cost, imageUrl);
                       },
                     ),
                   ),
@@ -161,18 +202,19 @@ class Destinations extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Text("Trudność: łatwa"),
+                      Text("Trudność: $difficulty"),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${cost}zł',
+                            '${otherCosts + transportCost}zł',
                             style: TextStyle(
                               color: Colors.transparent,
                             ),
                           ),
-                          Text("Kiedy: niedziela, 16 maja"),
-                          Text('${cost}zł'),
+                          Text(
+                              "Kiedy: ${DateFormat('EEEE, dd MMM').format(date.toDate().toLocal())}"),
+                          Text('${otherCosts + transportCost}zł'),
                         ],
                       ),
                     ],

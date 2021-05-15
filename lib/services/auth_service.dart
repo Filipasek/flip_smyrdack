@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,9 +8,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../main.dart';
 // ignore: unused_import
 import 'package:provider/provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
+  static final FirebaseStorage _storage = FirebaseStorage.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final _firestore = FirebaseFirestore.instance;
   static void signUpUser(
@@ -29,8 +33,73 @@ class AuthService {
     }
   }
 
+  static Future addTripToDatabase(
+    String name,
+    int transportCost,
+    int otherCosts,
+    String description,
+    DateTime date,
+    TimeOfDay startTime,
+    TimeOfDay endTime,
+    List<File> photos,
+    String difficulty,
+  ) async {
+    Future<bool> uploadFile(File file, String _id, int index) async {
+      // File file = File(filePath);
+
+      try {
+        await FirebaseStorage.instance
+            .ref('photos/${_id}_$index.${file.path.split(".").last}')
+            .putFile(file);
+        return true;
+      } on FirebaseException catch (e) {
+        // e.g, e.code == 'canceled'
+        return false;
+      }
+    }
+
+    int _id = DateTime.now().microsecondsSinceEpoch;
+
+    for (int i = 0; i < photos.length; i++) {
+      await uploadFile(photos[i], _id.toString(), i);
+    }
+
+    _firestore.collection('/trips').doc(_id.toString()).set({
+      'name': name,
+      'transportCost': transportCost,
+      'otherCosts': otherCosts,
+      'description': description,
+      'date': date,
+      'startTime': '${startTime.hour}:${startTime.minute}',
+      'endTime': '${endTime.hour}:${endTime.minute}',
+      'createdTimestamp': _id,
+      'photosCount': photos.length,
+      'photo0': await FirebaseStorage.instance
+          .ref('photos/${_id}_0.${photos[0].path.split(".").last}')
+          .getDownloadURL(),
+      'photo1': await FirebaseStorage.instance
+          .ref('photos/${_id}_1.${photos[1].path.split(".").last}')
+          .getDownloadURL(),
+      'photo2': await FirebaseStorage.instance
+          .ref('photos/${_id}_2.${photos[2].path.split(".").last}')
+          .getDownloadURL(),
+      'photo3': photos.length >= 4
+          ? await FirebaseStorage.instance
+          .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
+          .getDownloadURL()
+          : 'none',
+      'photo4': photos.length >= 5
+          ? await FirebaseStorage.instance
+          .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
+          .getDownloadURL()
+          : 'none',
+      'difficulty': difficulty,
+      // 'transportCost': transportCost,
+    }, SetOptions(merge: true));
+  }
+
   static Future addUserToDatabase(
-      userId, String? name, String? contactData, String? avatar) async {
+      userId, String? name, String? contactData, String? avatar, bool isVerified, String phoneNumber, List<UserInfo> userInfo, UserMetadata metadata) async {
     _firestore.collection('/users').doc(userId).set({
       'name': name,
       'contactData': contactData,
@@ -51,7 +120,8 @@ class AuthService {
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final UserCredential authResult = await _auth.signInWithCredential(credential);
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
     final User? user = authResult.user;
 
     assert(!user!.isAnonymous);
@@ -61,7 +131,7 @@ class AuthService {
     assert(user!.uid == currentUser!.uid);
 
     await addUserToDatabase(
-        user!.uid, user.displayName, user.email, user.photoURL);
+        user!.uid, user.displayName, user.email, user.photoURL, user.emailVerified, user.phoneNumber ?? 'none', user.providerData, user.metadata,);
     //needs to be checked if user exists
   }
 

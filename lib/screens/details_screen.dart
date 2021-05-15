@@ -1,15 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:intl/intl.dart';
 
 class DetailsScreen extends StatefulWidget {
-  String name;
   int index;
+  String name;
   String difficulty;
-  int cost;
+  String description;
   Timestamp date;
-  String imageUrl;
-  DetailsScreen(this.name, this.index, this.date, this.difficulty, this.cost,
-      this.imageUrl);
+  int transportCost;
+  int otherCosts;
+  String startTime;
+  String endTime;
+  String imageUrl; //TODO: list
+
+  DetailsScreen(
+    this.index,
+    this.name,
+    this.date,
+    this.difficulty,
+    this.transportCost,
+    this.imageUrl,
+    this.description,
+    this.endTime,
+    this.otherCosts,
+    this.startTime,
+  );
+
+  // String name;
+  // int index;
+  // String difficulty;
+  // int cost;
+  // Timestamp date;
+  // String imageUrl;
+  // DetailsScreen(this.name, this.index, this.date, this.difficulty, this.cost,
+  //     this.imageUrl);
   @override
   _DetailsScreenState createState() => _DetailsScreenState();
 }
@@ -49,21 +75,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 children: [
                   // SingleInfoText('Trudność: łatwa'),
                   SingleInfoTextBold('Informacje podstawowe:'),
+                  Container(margin: EdgeInsets.only(bottom: 10.0)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CreateColumnOfInfo('Trudność', 'łatwa'),
-                      CreateColumnOfInfo('Kiedy', '13 maja'),
-                      CreateColumnOfInfo('Chętnych', '5 osób'),
+                      CreateColumnOfInfo('Trudność', widget.difficulty),
+                      CreateColumnOfInfo("Kiedy",
+                          "${DateFormat('dd MMM').format(widget.date.toDate().toLocal())}"),
+                      CreateColumnOfInfo('Chętnych', 'dużo osób'),
                     ],
                   ),
-                  Container(margin: EdgeInsets.only(bottom: 5.0)),
+                  Container(margin: EdgeInsets.only(bottom: 10.0)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CreateColumnOfInfo('Wyjście', '13:38'),
-                      CreateColumnOfInfo('Czas', '3h'),
-                      CreateColumnOfInfo('Zejście', '17:00'),
+                      CreateColumnOfInfo('Wyjście', widget.startTime),
+                      CreateColumnOfInfo('Czas', 'trochę'),
+                      CreateColumnOfInfo('Zejście', widget.endTime),
                     ],
                   ),
                   Container(margin: EdgeInsets.only(bottom: 10.0)),
@@ -72,23 +100,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // CreateColumnOfInfo('Wstęp', '7 zł'),
-                      CreateColumnOfInfo('Transport', '15 zł'),
-                      CreateColumnOfInfo('Inne', '2 zł'),
+                      CreateColumnOfInfo(
+                          'Transport', '${widget.transportCost} zł'),
+                      CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
                     ],
                   ),
-                   SingleInfoTextBold('Opis:'),
-                   Text(
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce semper quam vitae lorem tempor, a condimentum felis pellentesque. Aenean cursus, augue et porttitor dapibus, lacus ex facilisis eros, vitae vestibulum lectus quam eu tortor. Sed pulvinar mi nibh. Suspendisse accumsan felis nec lorem luctus, a accumsan sapien venenatis. Nullam et lacinia lorem. Pellentesque consectetur lobortis leo, id porttitor libero tincidunt eu. Suspendisse et nibh sapien. In id risus est.',
-        // overflow: TextOverflow.ellipsis,
-        // maxLines: 2,
-        textAlign: TextAlign.justify,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.headline5!.color,
-          // fontWeight: FontWeight.bold,
+                  SingleInfoTextBold('Opis:'),
+                  Text(
+                    widget.description,
+                    // maxLines: 2,
+                    textAlign: TextAlign.justify,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.headline5!.color,
+                      // fontWeight: FontWeight.bold,
 
-          fontSize: 16.0,
-        ),
-      ),
+                      fontSize: 16.0,
+                    ),
+                  ),
                 ],
               ),
             ),

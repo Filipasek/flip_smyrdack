@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,11 @@ class AddTripScreen extends StatefulWidget {
 }
 
 class _AddTripScreenState extends State<AddTripScreen> {
+  String? name, description, difficulty;
+  int? transportCost, otherCosts;
+  TimeOfDay? startTime, endTime;
+  DateTime? date;
+
   bool error = false;
   String errorText = '';
   final _formKey = GlobalKey<FormState>();
@@ -40,17 +46,15 @@ class _AddTripScreenState extends State<AddTripScreen> {
                   ),
                   child: Column(
                     children: [
-                      CustomTextField(
-                          'Nazwa miejsca', 'text', 3, _setError, _removeError),
+                      CustomTextField('Nazwa miejsca', 'text', 3, setName),
                       SizedBox(height: 5.0),
-                      CustomTextField('Koszt transportu (w zł)', 'int', 1,
-                          _setError, _removeError),
+                      CustomTextField('Koszt transportu (w zł)', 'int', 1, settransportCost),
                       SizedBox(height: 5.0),
-                      CustomTextField('Inne koszty (w zł)', 'int', 1, _setError,
-                          _removeError),
+                      CustomTextField('Inne koszty (w zł)', 'int', 1, setOtherCosts),
                       SizedBox(height: 5.0),
-                      CustomTextField(
-                          'Opis', 'text', 50, _setError, _removeError),
+                      CustomTextField('Trudność', 'string', 3, setDifficulty),
+                      SizedBox(height: 5.0),
+                      CustomTextField('Opis', 'text', 50, setDescription),
                       SizedBox(height: 5.0),
                       Container(
                         margin: EdgeInsets.only(
@@ -217,7 +221,14 @@ class _AddTripScreenState extends State<AddTripScreen> {
                     if (_image!.length < 3) {
                       setState(() {
                         error = true;
-                        errorText = 'Wybierz minimum 3 zdjęcia';
+                        errorText = 'Wybierz minimum 3 zdjęcia (max 5)';
+                        // errorText = _image![0].path.split(".").last;
+                      });
+                    } else if (_image!.length > 5) {
+                      setState(() {
+                        error = true;
+                        errorText = 'Wybierz maksymalnie 5 zdjęć';
+                        // errorText = _image![0].path.split(".").last;
                       });
                     } else {
                       setState(() {
@@ -225,6 +236,18 @@ class _AddTripScreenState extends State<AddTripScreen> {
                         errorText = '';
                       });
                       _formKey.currentState!.save();
+
+                      AuthService.addTripToDatabase(
+                        name!,
+                        transportCost!,
+                        otherCosts!,
+                        description!,
+                        selectedDate,
+                        selectedTimeStart,
+                        selectedTimeEnd,
+                        _image!,
+                        difficulty!,
+                      );
                     }
 
                     // _saveApiKey(_apiKey.trim());
@@ -286,7 +309,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   }
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     setState(() {
       if (pickedFile != null) {
@@ -303,30 +326,54 @@ class _AddTripScreenState extends State<AddTripScreen> {
       }
     });
   }
+  // int? transportCost, otherCosts;
+  // TimeOfDay? startTime, endTime;
+  // DateTime? date;
 
-  _setError(String newErrorText) {
-    setState(() {
-      error = true;
-      errorText = newErrorText;
-    });
+  void setName(dynamic data) {
+    name = data;
   }
 
-  _removeError() {
-    setState(() {
-      error = false;
-      errorText = '';
-    });
+  void setDescription(dynamic data) {
+    description = data;
   }
+  void setDifficulty(dynamic data) {
+    difficulty = data;
+  }
+
+  void settransportCost(dynamic data) {
+    transportCost = int.parse(data);
+  }
+
+  void setOtherCosts(dynamic data) {
+    otherCosts = int.parse(data);
+  }
+
+  void setStartTime(dynamic data) {
+    startTime = data;
+  }
+
+  void setEndTime(dynamic data) {
+    endTime = data;
+  }
+
+  void setDate(dynamic data) {
+    date = data;
+  }
+  // void SettingVariables();
 }
 
 class CustomTextField extends StatefulWidget {
+  final ValueChanged<dynamic> callback;
   String nazwa;
   String type;
   int length;
-  Function setError;
-  Function removeError;
   CustomTextField(
-      this.nazwa, this.type, this.length, this.setError, this.removeError);
+    this.nazwa,
+    this.type,
+    this.length,
+    this.callback,
+  );
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
 }
@@ -346,8 +393,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
         showCursor: true,
         autocorrect: true,
         autofocus: false,
+        maxLines: null,
         cursorColor: Theme.of(context).accentColor,
         decoration: InputDecoration(
+          
           labelStyle: TextStyle(
             color: Theme.of(context).textTheme.headline5!.color,
           ),
@@ -369,22 +418,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           return null;
         },
         onChanged: (text) {
-          if (text.length < widget.length)
-            widget.setError(
-                '\"${widget.nazwa}\" musi mieć minimum ${widget.length} znaki');
+          widget.callback(text);
         },
       ),
     );
   }
 }
-
-// class NumbersTextFormatter extends TextInputFormatter {
-//   @override
-//   TextEditingValue formatEditUpdate(
-//       TextEditingValue oldValue, TextEditingValue newValue) {
-//     return TextEditingValue(
-//       text: newValue.text?.toUpperCase(),
-//       selection: newValue.selection,
-//     );
-//   }
-// }
