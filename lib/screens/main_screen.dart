@@ -16,14 +16,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  
   @override
   Widget build(BuildContext context) {
     Future firebaseData = FirebaseFirestore.instance.collection('trips').get();
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        // elevation: 0.0,
+        elevation: 0.0,
         leading: IconButton(
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -35,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
           icon: Icon(Icons.add_location_alt_outlined),
         ),
         actions: [
+          Text('new'),
           Container(
             padding: EdgeInsets.all(5.0),
             child: ClipRRect(
@@ -74,28 +74,70 @@ class _MainScreenState extends State<MainScreen> {
                 });
                 return firebaseData;
               },
-              child: ListView.builder(
-                itemCount: length,
-                itemBuilder: (context, index) {
-                  dynamic info = data[index];
-                  List<String> photosList = [];
-                  for(int i = 0; i< info['photosCount']; i++){
-                    photosList = [...photosList, ...[info['photo$i']]];
-                  }
-                  return Destinations(
-                    index,
-                    info['name'],
-                    info['date'],
-                    info['difficulty'],
-                    info['transportCost'],
-                    photosList,
-                    info['description'],
-                    info['endTime'],
-                    info['otherCosts'],
-                    info['startTime'],
-                  );
-                },
-              ),
+              child: length > 0
+                  ? ListView.builder(
+                      itemCount: length,
+                      itemBuilder: (context, index) {
+                        dynamic info = data[index];
+                        List<String> photosList = [];
+                        for (int i = 0; i < info['photosCount']; i++) {
+                          photosList = [
+                            ...photosList,
+                            ...[info['photo$i']]
+                          ];
+                        }
+                        return Destinations(
+                          index,
+                          info['name'],
+                          info['date'],
+                          info['difficulty'],
+                          info['transportCost'],
+                          photosList,
+                          info['description'],
+                          info['endTime'],
+                          info['otherCosts'],
+                          info['startTime'],
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Container(
+                        margin: EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.hiking_rounded,
+                              size: 100.0,
+                              color: Colors.black,
+                            ),
+                            SizedBox(height: 15.0),
+                            Text(
+                              'Nie ma żadnych nadchodzących wypraw',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 24.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 20.0),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  firebaseData = FirebaseFirestore.instance
+                                      .collection('trips')
+                                      .get();
+                                });
+                              },
+                              icon: Icon(
+                                Icons.refresh_rounded,
+                                size: 30.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
             );
           } else {
             return Center(child: CircularProgressIndicator());
