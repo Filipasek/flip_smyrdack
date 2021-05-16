@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:badges/badges.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,7 +16,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   int? transportCost, otherCosts;
   TimeOfDay? startTime, endTime;
   DateTime? date;
-
+  String? _chosenValue;
   bool error = false;
   String errorText = '';
   final _formKey = GlobalKey<FormState>();
@@ -48,11 +49,42 @@ class _AddTripScreenState extends State<AddTripScreen> {
                     children: [
                       CustomTextField('Nazwa miejsca', 'text', 3, setName),
                       SizedBox(height: 5.0),
-                      CustomTextField('Koszt transportu (w zł)', 'int', 1, settransportCost),
+                      CustomTextField('Koszt transportu (w zł)', 'int', 1,
+                          settransportCost),
                       SizedBox(height: 5.0),
-                      CustomTextField('Inne koszty (w zł)', 'int', 1, setOtherCosts),
+                      CustomTextField(
+                          'Inne koszty (w zł)', 'int', 1, setOtherCosts),
                       SizedBox(height: 5.0),
-                      CustomTextField('Trudność', 'string', 3, setDifficulty),
+                      // CustomTextField('Trudność', 'string', 3, setDifficulty),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 15.0),
+                        width: double.infinity,
+                        child: DropdownButtonFormField<String>(
+                          value: _chosenValue,
+                          hint: Text('Wybierz trudność'),
+                          items: <String>[
+                            'Banalne',
+                            'Umiarkowane',
+                            'Wymagające',
+                            'O holibka...'
+                          ].map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) {
+                            setState(() {
+                              _chosenValue = value!;
+                            });
+                          },
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return "Wpisz dane";
+                            }
+                          },
+                        ),
+                      ),
                       SizedBox(height: 5.0),
                       CustomTextField('Opis', 'text', 50, setDescription),
                       SizedBox(height: 5.0),
@@ -188,14 +220,18 @@ class _AddTripScreenState extends State<AddTripScreen> {
                               ),
                             ),
                           );
-                        return Container(
-                          margin: EdgeInsets.only(right: 15.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15.0),
-                            child: Image.file(
-                              _image![index - 1],
-                              height: 100.0,
-                              fit: BoxFit.fitHeight,
+                        return Badge(
+                          padding: EdgeInsets.all(0.0),
+                          badgeContent: Icon(Icons.highlight_remove),
+                          child: Container(
+                            // margin: EdgeInsets.only(right: 15.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15.0),
+                              child: Image.file(
+                                _image![index - 1],
+                                height: 200.0,
+                                fit: BoxFit.fitHeight,
+                              ),
                             ),
                           ),
                         );
@@ -212,7 +248,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                 : SizedBox(),
             Container(
               margin: EdgeInsets.only(
-                  bottom: 5.0, left: 15.0, right: 15.0, top: 20.0),
+                  bottom: 35.0, left: 15.0, right: 15.0, top: 20.0),
               width: double.infinity,
               height: 50.0,
               child: RaisedButton(
@@ -308,6 +344,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
       });
   }
 
+  void removeImage(int index) {}
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -337,6 +374,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   void setDescription(dynamic data) {
     description = data;
   }
+
   void setDifficulty(dynamic data) {
     difficulty = data;
   }
@@ -384,9 +422,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Container(
       margin: EdgeInsets.only(bottom: 5.0, left: 15.0, right: 15.0),
       child: TextFormField(
-        // inputFormatters: [
-        //   widget.type == 'int' ? UpperCaseTextFormatter(),
-        // ],
         keyboardType:
             widget.type == 'int' ? TextInputType.number : TextInputType.text,
         style: TextStyle(color: Theme.of(context).textTheme.headline5!.color),
@@ -396,7 +431,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
         maxLines: null,
         cursorColor: Theme.of(context).accentColor,
         decoration: InputDecoration(
-          
           labelStyle: TextStyle(
             color: Theme.of(context).textTheme.headline5!.color,
           ),
@@ -414,6 +448,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             return "Wpisz dane";
           } else if (value.length < widget.length) {
             return '\"${widget.nazwa}\" musi mieć minimum ${widget.length} znaki';
+          } else if (widget.type == 'int' && int.parse(value) < 0) {
+            return 'Kwota nie może być ujemna!';
           }
           return null;
         },

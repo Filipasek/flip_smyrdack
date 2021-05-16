@@ -5,11 +5,13 @@ import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  initializeDateFormatting('pl_PL');
   runApp(MyApp());
 }
 

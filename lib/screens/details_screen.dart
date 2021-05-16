@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class DetailsScreen extends StatefulWidget {
   int index;
@@ -43,6 +44,78 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
+    var column = Column(
+      children: [
+        Container(
+          child: Hero(
+            tag: 'image${widget.index}',
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.vertical(bottom: Radius.circular(15.0)),
+              child: Image(
+                image: NetworkImage(widget.imageUrl),
+                // height: 300.0,
+                width: double.infinity,
+                fit: BoxFit.fitWidth,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 5.0),
+          child: Column(
+            children: [
+              // SingleInfoText('Trudność: łatwa'),
+              SingleInfoTextBold('Informacje podstawowe:'),
+              Container(margin: EdgeInsets.only(bottom: 10.0)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CreateColumnOfInfo('Trudność', widget.difficulty),
+                  CreateColumnOfInfo(
+                      "Kiedy",
+                      "${DateFormat(
+                        'dd MMM',
+                      ).format(widget.date.toDate().toLocal())}"),
+                  CreateColumnOfInfo('Chętnych', 'dużo osób'),
+                ],
+              ),
+              Container(margin: EdgeInsets.only(bottom: 10.0)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CreateColumnOfInfo('Wyjście', widget.startTime),
+                  CreateColumnOfInfo('Czas', 'trochę'),
+                  CreateColumnOfInfo('Zejście', widget.endTime),
+                ],
+              ),
+              Container(margin: EdgeInsets.only(bottom: 10.0)),
+              SingleInfoTextBold('Koszty:'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // CreateColumnOfInfo('Wstęp', '7 zł'),
+                  CreateColumnOfInfo('Transport', '${widget.transportCost} zł'),
+                  CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
+                ],
+              ),
+              SingleInfoTextBold('Opis:'),
+              Text(
+                widget.description,
+                // maxLines: 2,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.headline5!.color,
+                  // fontWeight: FontWeight.bold,
+
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
     return Scaffold(
       // bottomNavigationBar: Container(
       //   height: 50.0,
@@ -63,61 +136,55 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       BorderRadius.vertical(bottom: Radius.circular(15.0)),
                   child: Image(
                     image: NetworkImage(widget.imageUrl),
-                    height: 300.0,
-                    fit: BoxFit.fitHeight,
+                    // height: 300.0,
+                    width: double.infinity,
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 5.0),
-              child: Column(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: SingleInfoTextBold('Informacje podstawowe:'),
+            ),
+            Container(
+              height: 200.0,
+              child: GridView.count(
+                childAspectRatio: 2,
+                physics: NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                primary: true,
+                mainAxisSpacing: 0.0,
                 children: [
-                  // SingleInfoText('Trudność: łatwa'),
-                  SingleInfoTextBold('Informacje podstawowe:'),
-                  Container(margin: EdgeInsets.only(bottom: 10.0)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CreateColumnOfInfo('Trudność', widget.difficulty),
-                      CreateColumnOfInfo("Kiedy",
-                          "${DateFormat('dd MMM').format(widget.date.toDate().toLocal())}"),
-                      CreateColumnOfInfo('Chętnych', 'dużo osób'),
-                    ],
-                  ),
-                  Container(margin: EdgeInsets.only(bottom: 10.0)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CreateColumnOfInfo('Wyjście', widget.startTime),
-                      CreateColumnOfInfo('Czas', 'trochę'),
-                      CreateColumnOfInfo('Zejście', widget.endTime),
-                    ],
-                  ),
-                  Container(margin: EdgeInsets.only(bottom: 10.0)),
-                  SingleInfoTextBold('Koszty:'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // CreateColumnOfInfo('Wstęp', '7 zł'),
-                      CreateColumnOfInfo(
-                          'Transport', '${widget.transportCost} zł'),
-                      CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
-                    ],
-                  ),
-                  SingleInfoTextBold('Opis:'),
-                  Text(
-                    widget.description,
-                    // maxLines: 2,
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.headline5!.color,
-                      // fontWeight: FontWeight.bold,
-
-                      fontSize: 16.0,
-                    ),
-                  ),
+                  CreateColumnOfInfo('Trudność', widget.difficulty),
+                  CreateColumnOfInfo("Kiedy",
+                      "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}"),
+                  CreateColumnOfInfo('Chętnych', 'dużo osób'),
+                  CreateColumnOfInfo('Wyjście', widget.startTime),
+                  CreateColumnOfInfo('Czas chodzenia', 'trochę'),
+                  CreateColumnOfInfo('Zejście', widget.endTime),
+                  CreateColumnOfInfo('Transport', '${widget.transportCost} zł'),
+                  SizedBox(),
+                  CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: SingleInfoTextBold('Opis:'),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 40.0),
+              child: Text(
+                widget.description,
+                // maxLines: 2,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.headline5!.color,
+                  // fontWeight: FontWeight.bold,
+
+                  fontSize: 16.0,
+                ),
               ),
             ),
           ],
@@ -133,13 +200,11 @@ class CreateColumnOfInfo extends StatelessWidget {
   CreateColumnOfInfo(this.topText, this.bottomText);
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          SingleInfoText(topText),
-          SingleInfoTextBold(bottomText),
-        ],
-      ),
+    return Column(
+      children: [
+        SingleInfoText(topText),
+        SingleInfoTextBold(bottomText),
+      ],
     );
   }
 }
@@ -150,7 +215,7 @@ class SingleInfoText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // width: double.infinity/3,
+      height: 20.0,
       child: Text(
         text,
         // overflow: TextOverflow.ellipsis,
@@ -186,37 +251,37 @@ class SingleInfoTextBold extends StatelessWidget {
   }
 }
 
-class MySeparator extends StatelessWidget {
-  final double height;
-  final Color color;
+// class MySeparator extends StatelessWidget {
+//   final double height;
+//   final Color color;
 
-  const MySeparator({this.height = 1, this.color = Colors.grey});
+//   const MySeparator({this.height = 1, this.color = Colors.grey});
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final boxWidth = constraints.constrainWidth();
-          final dashWidth = 15.0;
-          final dashHeight = height;
-          final dashCount = (boxWidth / (2 * dashWidth)).floor();
-          return Flex(
-            children: List.generate(dashCount, (_) {
-              return SizedBox(
-                width: dashWidth,
-                height: dashHeight,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: color),
-                ),
-              );
-            }),
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            direction: Axis.horizontal,
-          );
-        },
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 2.0),
+//       child: LayoutBuilder(
+//         builder: (BuildContext context, BoxConstraints constraints) {
+//           final boxWidth = constraints.constrainWidth();
+//           final dashWidth = 15.0;
+//           final dashHeight = height;
+//           final dashCount = (boxWidth / (2 * dashWidth)).floor();
+//           return Flex(
+//             children: List.generate(dashCount, (_) {
+//               return SizedBox(
+//                 width: dashWidth,
+//                 height: dashHeight,
+//                 child: DecoratedBox(
+//                   decoration: BoxDecoration(color: color),
+//                 ),
+//               );
+//             }),
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             direction: Axis.horizontal,
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }

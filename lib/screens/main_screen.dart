@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  
   @override
   Widget build(BuildContext context) {
     Future firebaseData = FirebaseFirestore.instance.collection('trips').get();
@@ -144,13 +146,14 @@ class Destinations extends StatelessWidget {
               Hero(
                 tag: 'image$index',
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   child: Image(
                     image: NetworkImage(
                       imageUrl,
                     ),
                     height: 300.0,
-                    fit: BoxFit.fitHeight,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -213,7 +216,7 @@ class Destinations extends StatelessWidget {
                             ),
                           ),
                           Text(
-                              "Kiedy: ${DateFormat('EEEE, dd MMM').format(date.toDate().toLocal())}"),
+                              "Kiedy: ${DateFormat('EEEE, dd MMM', 'pl_PL').format(date.toDate().toLocal())}"),
                           Text('${otherCosts + transportCost}zł'),
                         ],
                       ),

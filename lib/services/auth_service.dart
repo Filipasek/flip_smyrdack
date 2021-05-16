@@ -63,15 +63,15 @@ class AuthService {
     for (int i = 0; i < photos.length; i++) {
       await uploadFile(photos[i], _id.toString(), i);
     }
-
     _firestore.collection('/trips').doc(_id.toString()).set({
       'name': name,
       'transportCost': transportCost,
       'otherCosts': otherCosts,
       'description': description,
       'date': date,
-      'startTime': '${startTime.hour}:${startTime.minute}',
-      'endTime': '${endTime.hour}:${endTime.minute}',
+      'startTime':
+          '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
+      'endTime': '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
       'createdTimestamp': _id,
       'photosCount': photos.length,
       'photo0': await FirebaseStorage.instance
@@ -85,13 +85,13 @@ class AuthService {
           .getDownloadURL(),
       'photo3': photos.length >= 4
           ? await FirebaseStorage.instance
-          .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
-          .getDownloadURL()
+              .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
+              .getDownloadURL()
           : 'none',
       'photo4': photos.length >= 5
           ? await FirebaseStorage.instance
-          .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
-          .getDownloadURL()
+              .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
+              .getDownloadURL()
           : 'none',
       'difficulty': difficulty,
       // 'transportCost': transportCost,
@@ -99,7 +99,14 @@ class AuthService {
   }
 
   static Future addUserToDatabase(
-      userId, String? name, String? contactData, String? avatar, bool isVerified, String phoneNumber, List<UserInfo> userInfo, UserMetadata metadata) async {
+      userId,
+      String? name,
+      String? contactData,
+      String? avatar,
+      bool isVerified,
+      String phoneNumber,
+      List<UserInfo> userInfo,
+      UserMetadata metadata) async {
     _firestore.collection('/users').doc(userId).set({
       'name': name,
       'contactData': contactData,
@@ -131,7 +138,15 @@ class AuthService {
     assert(user!.uid == currentUser!.uid);
 
     await addUserToDatabase(
-        user!.uid, user.displayName, user.email, user.photoURL, user.emailVerified, user.phoneNumber ?? 'none', user.providerData, user.metadata,);
+      user!.uid,
+      user.displayName,
+      user.email,
+      user.photoURL,
+      user.emailVerified,
+      user.phoneNumber ?? 'none',
+      user.providerData,
+      user.metadata,
+    );
     //needs to be checked if user exists
   }
 
