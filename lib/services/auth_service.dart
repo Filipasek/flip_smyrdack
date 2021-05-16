@@ -9,6 +9,8 @@ import '../main.dart';
 // ignore: unused_import
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
@@ -33,6 +35,17 @@ class AuthService {
     }
   }
 
+  static Future<File?> compressImage(String photoId, File image) async {
+    final tempDir = await getTemporaryDirectory();
+    final path = tempDir.path;
+    File? compressedImageFile = await FlutterImageCompress.compressAndGetFile(
+      image.absolute.path,
+      '$path/img_$photoId.jpg',
+      quality: 50,
+    );
+    return compressedImageFile;
+  }
+
   static Future<bool> addTripToDatabase(
     String name,
     int transportCost,
@@ -50,7 +63,7 @@ class AuthService {
       try {
         await FirebaseStorage.instance
             .ref('photos/${_id}_$index.${file.path.split(".").last}')
-            .putFile(file);
+            .putFile((await compressImage('${_id}_$index', file))!);
       } on FirebaseException catch (e) {
         // e.g, e.code == 'canceled'
         return false;

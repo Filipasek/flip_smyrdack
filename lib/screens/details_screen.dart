@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class DetailsScreen extends StatefulWidget {
   int index;
@@ -14,7 +17,7 @@ class DetailsScreen extends StatefulWidget {
   int otherCosts;
   String startTime;
   String endTime;
-  String imageUrl; //TODO: list
+  List<String> imageUrl; //TODO: list
 
   DetailsScreen(
     this.index,
@@ -44,78 +47,56 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    var column = Column(
-      children: [
-        Container(
-          child: Hero(
-            tag: 'image${widget.index}',
-            child: ClipRRect(
-              borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(15.0)),
-              child: Image(
-                image: NetworkImage(widget.imageUrl),
-                // height: 300.0,
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
-              ),
+    int indexx = 0;
+    List<String> imgList = widget.imageUrl;
+    final List<Widget> imageSliders = imgList.map(
+      (item) {
+        indexx++;
+        return Container(
+          child: Container(
+            margin: EdgeInsets.all(5.0),
+            child: Hero(
+              tag: 'image${widget.index}$indexx',
+              child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  child: Stack(
+                    children: <Widget>[
+                      Image.network(item,
+                          fit: BoxFit.cover, width: 1200.0, height: 600.0),
+                      // Positioned( //TODO: dodać opis miejsca na zdjęciu
+                      //   bottom: 0.0,
+                      //   left: 0.0,
+                      //   right: 0.0,
+                      //   child: Container(
+                      //     decoration: BoxDecoration(
+                      //       gradient: LinearGradient(
+                      //         colors: [
+                      //           Color.fromARGB(200, 0, 0, 0),
+                      //           Color.fromARGB(0, 0, 0, 0)
+                      //         ],
+                      //         begin: Alignment.bottomCenter,
+                      //         end: Alignment.topCenter,
+                      //       ),
+                      //     ),
+                      //     padding: EdgeInsets.symmetric(
+                      //         vertical: 10.0, horizontal: 20.0),
+                      //     child: Text(
+                      //       'Widok ze szczytu',
+                      //       style: TextStyle(
+                      //         color: Colors.white,
+                      //         fontSize: 20.0,
+                      //         fontWeight: FontWeight.bold,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  )),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 5.0),
-          child: Column(
-            children: [
-              // SingleInfoText('Trudność: łatwa'),
-              SingleInfoTextBold('Informacje podstawowe:'),
-              Container(margin: EdgeInsets.only(bottom: 10.0)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CreateColumnOfInfo('Trudność', widget.difficulty),
-                  CreateColumnOfInfo(
-                      "Kiedy",
-                      "${DateFormat(
-                        'dd MMM',
-                      ).format(widget.date.toDate().toLocal())}"),
-                  CreateColumnOfInfo('Chętnych', 'dużo osób'),
-                ],
-              ),
-              Container(margin: EdgeInsets.only(bottom: 10.0)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CreateColumnOfInfo('Wyjście', widget.startTime),
-                  CreateColumnOfInfo('Czas', 'trochę'),
-                  CreateColumnOfInfo('Zejście', widget.endTime),
-                ],
-              ),
-              Container(margin: EdgeInsets.only(bottom: 10.0)),
-              SingleInfoTextBold('Koszty:'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // CreateColumnOfInfo('Wstęp', '7 zł'),
-                  CreateColumnOfInfo('Transport', '${widget.transportCost} zł'),
-                  CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
-                ],
-              ),
-              SingleInfoTextBold('Opis:'),
-              Text(
-                widget.description,
-                // maxLines: 2,
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.headline5!.color,
-                  // fontWeight: FontWeight.bold,
-
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+        );
+      },
+    ).toList();
     return Scaffold(
       // bottomNavigationBar: Container(
       //   height: 50.0,
@@ -128,20 +109,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              child: Hero(
-                tag: 'image${widget.index}',
-                child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.vertical(bottom: Radius.circular(15.0)),
-                  child: Image(
-                    image: NetworkImage(widget.imageUrl),
-                    // height: 300.0,
-                    width: double.infinity,
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
+            // Container(
+            //   child: Hero(
+            //     tag: 'image${widget.index}',
+            //     child: ClipRRect(
+            //       borderRadius:
+            //           BorderRadius.vertical(bottom: Radius.circular(15.0)),
+            //       child: Image(
+            //         image: NetworkImage(widget.imageUrl),
+            //         // height: 300.0,
+            //         width: double.infinity,
+            //         fit: BoxFit.fitWidth,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            CarouselSlider(
+              options: CarouselOptions(
+                aspectRatio: 2.0,
+                enlargeCenterPage: true,
+                enableInfiniteScroll: false,
+                initialPage: 2,
+                autoPlay: true,
+                height: 220.0,
+                // reverse: true,
+                viewportFraction: 0.99,
               ),
+              items: imageSliders,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),

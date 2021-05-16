@@ -343,60 +343,63 @@ class _AddTripScreenState extends State<AddTripScreen> {
                     width: double.infinity,
                     height: 50.0,
                     child: RaisedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_image!.length < 3) {
-                            setState(() {
-                              error = true;
-                              errorText = 'Wybierz minimum 3 zdjęcia (max 5)';
-                              loading = false;
-                              // errorText = _image![0].path.split(".").last;
-                            });
-                          } else if (_image!.length > 5) {
-                            setState(() {
-                              error = true;
-                              errorText = 'Wybierz maksymalnie 5 zdjęć';
-                              loading = false;
-                              // errorText = _image![0].path.split(".").last;
-                            });
-                          } else {
-                            // _formKey.currentState!.save();
+                      onPressed: loading
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                if (_image!.length < 3) {
+                                  setState(() {
+                                    error = true;
+                                    errorText =
+                                        'Wybierz minimum 3 zdjęcia (max 5)';
+                                    loading = false;
+                                    // errorText = _image![0].path.split(".").last;
+                                  });
+                                } else if (_image!.length > 5) {
+                                  setState(() {
+                                    error = true;
+                                    errorText = 'Wybierz maksymalnie 5 zdjęć';
+                                    loading = false;
+                                    // errorText = _image![0].path.split(".").last;
+                                  });
+                                } else {
+                                  // _formKey.currentState!.save();
 
-                            setState(() {
-                              error = false;
-                              errorText = '';
-                              loading = true;
-                            });
+                                  setState(() {
+                                    error = false;
+                                    errorText = '';
+                                    loading = true;
+                                  });
 
-                            try {
-                              AuthService.addTripToDatabase(
-                                name!,
-                                transportCost!,
-                                otherCosts!,
-                                description!,
-                                selectedDate,
-                                selectedTimeStart,
-                                selectedTimeEnd,
-                                _image!,
-                                difficulty!,
-                              ).then((bool value) {
-                                setState(() {
-                                  isSent = value;
-                                  isDone = true;
-                                  loading = false;
-                                });
-                              });
-                            } catch (e) {
-                              setState(() {
-                                isSent = false;
-                                isDone = true;
-                                loading = false;
-                                sendingErrorText = e.toString();
-                              });
-                            }
-                          }
-                        }
-                      },
+                                  try {
+                                    AuthService.addTripToDatabase(
+                                      name!,
+                                      transportCost!,
+                                      otherCosts!,
+                                      description!,
+                                      selectedDate,
+                                      selectedTimeStart,
+                                      selectedTimeEnd,
+                                      _image!,
+                                      difficulty!,
+                                    ).then((bool value) {
+                                      setState(() {
+                                        isSent = value;
+                                        isDone = true;
+                                        loading = false;
+                                      });
+                                    });
+                                  } catch (e) {
+                                    setState(() {
+                                      isSent = false;
+                                      isDone = true;
+                                      loading = false;
+                                      sendingErrorText = e.toString();
+                                    });
+                                  }
+                                }
+                              }
+                            },
                       color: Color.fromRGBO(0, 191, 166, 1),
                       child: Text(
                         "Dodaj wyprawę",

@@ -78,13 +78,17 @@ class _MainScreenState extends State<MainScreen> {
                 itemCount: length,
                 itemBuilder: (context, index) {
                   dynamic info = data[index];
+                  List<String> photosList = [];
+                  for(int i = 0; i< info['photosCount']; i++){
+                    photosList = [...photosList, ...[info['photo$i']]];
+                  }
                   return Destinations(
                     index,
                     info['name'],
                     info['date'],
                     info['difficulty'],
                     info['transportCost'],
-                    info['photo0'],
+                    photosList,
                     info['description'],
                     info['endTime'],
                     info['otherCosts'],
@@ -112,7 +116,7 @@ class Destinations extends StatelessWidget {
   int otherCosts;
   String startTime;
   String endTime;
-  String imageUrl; //TODO: list
+  List<String> imageUrl; //TODO: list
 
   Destinations(
     this.index,
@@ -144,12 +148,12 @@ class Destinations extends StatelessWidget {
           child: Stack(
             children: <Widget>[
               Hero(
-                tag: 'image$index',
+                tag: 'image${index}0',
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),
                   child: Image(
                     image: NetworkImage(
-                      imageUrl,
+                      imageUrl[0],
                     ),
                     height: 300.0,
                     width: double.infinity,
