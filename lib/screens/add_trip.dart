@@ -12,12 +12,14 @@ class AddTripScreen extends StatefulWidget {
 }
 
 class _AddTripScreenState extends State<AddTripScreen> {
+  bool isSent = false, isDone = false;
   String? name, description, difficulty;
+  String sendingErrorText = '';
   int? transportCost, otherCosts;
   TimeOfDay? startTime, endTime;
   DateTime? date;
   String? _chosenValue;
-  bool error = false;
+  bool error = false, loading = false;
   String errorText = '';
   final _formKey = GlobalKey<FormState>();
   DateTime selectedDate = DateTime.now();
@@ -31,281 +33,383 @@ class _AddTripScreenState extends State<AddTripScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         title: Text('Dodaj wyprawę'),
+        elevation: 0.0,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(10.0),
+          child: loading
+              ? LinearProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).accentColor),
+                  backgroundColor:
+                      Theme.of(context).accentColor.withOpacity(0.3),
+                )
+              : SizedBox(),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Form(
-              key: _formKey,
-              child: Container(
-                margin: EdgeInsets.only(bottom: 20.0, top: 20.0),
-                child: Theme(
-                  data: ThemeData(
-                    primaryColor: Theme.of(context).accentColor,
-                  ),
-                  child: Column(
-                    children: [
-                      CustomTextField('Nazwa miejsca', 'text', 3, setName),
-                      SizedBox(height: 5.0),
-                      CustomTextField('Koszt transportu (w zł)', 'int', 1,
-                          settransportCost),
-                      SizedBox(height: 5.0),
-                      CustomTextField(
-                          'Inne koszty (w zł)', 'int', 1, setOtherCosts),
-                      SizedBox(height: 5.0),
-                      // CustomTextField('Trudność', 'string', 3, setDifficulty),
-                      Container(
-                        padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 15.0),
-                        width: double.infinity,
-                        child: DropdownButtonFormField<String>(
-                          value: _chosenValue,
-                          hint: Text('Wybierz trudność'),
-                          items: <String>[
-                            'Banalne',
-                            'Umiarkowane',
-                            'Wymagające',
-                            'O holibka...'
-                          ].map((String value) {
-                            return new DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
-                            setState(() {
-                              _chosenValue = value!;
-                            });
-                          },
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return "Wpisz dane";
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 5.0),
-                      CustomTextField('Opis', 'text', 50, setDescription),
-                      SizedBox(height: 5.0),
-                      Container(
-                        margin: EdgeInsets.only(
-                            bottom: 5.0, left: 15.0, right: 15.0),
-                        width: double.infinity,
-                        height: 50.0,
-                        child: RaisedButton(
-                          color: Color.fromRGBO(255, 182, 185, 1),
-                          onPressed: () => _selectDate(context),
-                          child: Text(
-                            "Data: " +
-                                "${df.format(selectedDate.toLocal())}"
-                                    .split(' ')[0],
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.white,
-                            ),
+      body: isDone
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  isSent
+                      ? Icon(Icons.done_outline,
+                          size: 70.0, color: Color.fromRGBO(132, 207, 150, 1))
+                      : Icon(Icons.close,
+                          size: 70.0, color: Color.fromRGBO(249, 101, 116, 1)),
+                  SizedBox(height: 20.0),
+                  isSent
+                      ? Text(
+                          'Wyprawa została wysłana',
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            color: Colors.black,
+                          ),
+                        )
+                      : Text(
+                          'Coś poszło nie tak',
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            color: Colors.black,
                           ),
                         ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(
-                            bottom: 5.0, left: 15.0, right: 15.0),
-                        width: double.infinity,
-                        height: 50.0,
-                        child: RaisedButton(
-                          color: Color.fromRGBO(255, 182, 185, 1),
-                          onPressed: () => _selectTimeStart(context),
-                          child: Text(
-                            "Rozpoczęcie: ${selectedTimeStart.hour}:${selectedTimeStart.minute}",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(
-                            bottom: 5.0, left: 15.0, right: 15.0),
-                        width: double.infinity,
-                        height: 50.0,
-                        child: RaisedButton(
-                          color: Color.fromRGBO(255, 182, 185, 1),
-                          onPressed: () => _selectTimeEnd(context),
-                          child: Text(
-                            "Zakończenie: ${selectedTimeEnd.hour}:${selectedTimeEnd.minute}",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            _image == null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15.0),
-                        border: Border.all(
-                          width: 3.0,
-                          color: Color.fromRGBO(255, 182, 185, 1),
-                        ),
-                      ),
-                      width: double.infinity,
-                      height: 100.0,
-                      margin:
-                          EdgeInsets.only(bottom: 5.0, left: 15.0, right: 15.0),
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11.0),
-                        ),
-                        splashColor:
-                            Color.fromRGBO(255, 182, 185, 1).withOpacity(0.6),
-                        highlightColor:
-                            Color.fromRGBO(255, 182, 185, 1).withOpacity(0.2),
-                        onPressed: getImage,
-                        child: Center(
-                          child: Icon(
-                            Icons.add_a_photo_outlined,
-                            color: Color.fromRGBO(255, 182, 185, 1),
-                          ),
-                        ),
-                      ),
+                  Text(
+                    sendingErrorText,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.black,
                     ),
-                  )
-                : Container(
-                    margin:
-                        EdgeInsets.only(bottom: 5.0, left: 15.0, right: 15.0),
-                    width: double.infinity,
-                    height: 200.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _image!.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0)
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(15.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15.0),
-                                border: Border.all(
-                                  width: 3.0,
-                                  color: Color.fromRGBO(255, 182, 185, 1),
-                                ),
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Form(
+                    key: _formKey,
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 20.0, top: 20.0),
+                      child: Theme(
+                        data: ThemeData(
+                          primaryColor: Theme.of(context).accentColor,
+                        ),
+                        child: Column(
+                          children: [
+                            CustomTextField(
+                                'Nazwa miejsca', 'text', 3, setName, loading),
+                            SizedBox(height: 5.0),
+                            CustomTextField('Koszt transportu (w zł)', 'int', 1,
+                                settransportCost, loading),
+                            SizedBox(height: 5.0),
+                            CustomTextField('Inne koszty (w zł)', 'int', 1,
+                                setOtherCosts, loading),
+                            SizedBox(height: 5.0),
+                            // CustomTextField('Trudność', 'string', 3, setDifficulty),
+                            Container(
+                              padding:
+                                  EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 15.0),
+                              width: double.infinity,
+                              child: DropdownButtonFormField<String>(
+                                value: difficulty,
+                                hint: Text('Wybierz trudność'),
+                                items: <String>[
+                                  'Banalne',
+                                  'Umiarkowane',
+                                  'Wymagające',
+                                  'O holibka...'
+                                ].map((String value) {
+                                  return new DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: loading
+                                    ? null
+                                    : (String? value) {
+                                        setState(() {
+                                          difficulty = value!;
+                                        });
+                                      },
+                                validator: (String? value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Wpisz dane";
+                                  }
+                                },
                               ),
-                              width: 150.0,
-                              // height: 100.0,
-                              margin: EdgeInsets.only(right: 15.0),
-                              child: FlatButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(11.0),
-                                ),
-                                splashColor: Color.fromRGBO(255, 182, 185, 1)
-                                    .withOpacity(0.6),
-                                highlightColor: Color.fromRGBO(255, 182, 185, 1)
-                                    .withOpacity(0.2),
-                                onPressed: getImage,
-                                child: Center(
-                                  child: Icon(
-                                    Icons.add_a_photo_outlined,
-                                    color: Color.fromRGBO(255, 182, 185, 1),
+                            ),
+                            SizedBox(height: 5.0),
+                            CustomTextField(
+                                'Opis', 'text', 50, setDescription, loading),
+                            SizedBox(height: 5.0),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  bottom: 5.0, left: 15.0, right: 15.0),
+                              width: double.infinity,
+                              height: 50.0,
+                              child: RaisedButton(
+                                color: Color.fromRGBO(255, 182, 185, 1),
+                                onPressed:
+                                    loading ? null : () => _selectDate(context),
+                                child: Text(
+                                  "Data: " +
+                                      "${df.format(selectedDate.toLocal())}"
+                                          .split(' ')[0],
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
                             ),
-                          );
-                        return Badge(
-                          padding: EdgeInsets.all(0.0),
-                          badgeContent: Icon(Icons.highlight_remove),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  bottom: 5.0, left: 15.0, right: 15.0),
+                              width: double.infinity,
+                              height: 50.0,
+                              child: RaisedButton(
+                                color: Color.fromRGBO(255, 182, 185, 1),
+                                onPressed: loading
+                                    ? null
+                                    : () => _selectTimeStart(context),
+                                child: Text(
+                                  "Rozpoczęcie: ${selectedTimeStart.hour}:${selectedTimeStart.minute}",
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  bottom: 5.0, left: 15.0, right: 15.0),
+                              width: double.infinity,
+                              height: 50.0,
+                              child: RaisedButton(
+                                color: Color.fromRGBO(255, 182, 185, 1),
+                                onPressed: loading
+                                    ? null
+                                    : () => _selectTimeEnd(context),
+                                child: Text(
+                                  "Zakończenie: ${selectedTimeEnd.hour}:${selectedTimeEnd.minute}",
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  _image == null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(15.0),
                           child: Container(
-                            // margin: EdgeInsets.only(right: 15.0),
-                            child: ClipRRect(
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15.0),
-                              child: Image.file(
-                                _image![index - 1],
-                                height: 200.0,
-                                fit: BoxFit.fitHeight,
+                              border: Border.all(
+                                width: 3.0,
+                                color: Color.fromRGBO(255, 182, 185, 1),
+                              ),
+                            ),
+                            width: double.infinity,
+                            height: 100.0,
+                            margin: EdgeInsets.only(
+                                bottom: 5.0, left: 15.0, right: 15.0),
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11.0),
+                              ),
+                              splashColor: Color.fromRGBO(255, 182, 185, 1)
+                                  .withOpacity(0.6),
+                              highlightColor: Color.fromRGBO(255, 182, 185, 1)
+                                  .withOpacity(0.2),
+                              onPressed: loading ? null : getImage,
+                              child: Center(
+                                child: Icon(
+                                  Icons.add_a_photo_outlined,
+                                  color: Color.fromRGBO(255, 182, 185, 1),
+                                ),
                               ),
                             ),
                           ),
-                        );
+                        )
+                      : Container(
+                          margin: EdgeInsets.only(
+                              bottom: 5.0, left: 15.0, right: 15.0),
+                          width: double.infinity,
+                          height: 210.0,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _image!.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == 0)
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                        border: Border.all(
+                                          width: 3.0,
+                                          color:
+                                              Color.fromRGBO(255, 182, 185, 1),
+                                        ),
+                                      ),
+                                      width: 150.0,
+                                      // height: 100.0,
+                                      margin: EdgeInsets.only(right: 15.0),
+                                      child: FlatButton(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(11.0),
+                                        ),
+                                        splashColor:
+                                            Color.fromRGBO(255, 182, 185, 1)
+                                                .withOpacity(0.6),
+                                        highlightColor:
+                                            Color.fromRGBO(255, 182, 185, 1)
+                                                .withOpacity(0.2),
+                                        onPressed: loading ? null : getImage,
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.add_a_photo_outlined,
+                                            color: Color.fromRGBO(
+                                                255, 182, 185, 1),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                    right: 20.0, top: 10.0),
+                                child: Badge(
+                                  padding: EdgeInsets.all(0.0),
+                                  badgeColor: Color.fromRGBO(255, 182, 185, 1),
+                                  // elevation: 0,
+                                  badgeContent: Container(
+                                    height: 30.0,
+                                    width: 30.0,
+                                    child: IconButton(
+                                      padding: EdgeInsets.all(0),
+                                      icon: Icon(Icons.highlight_remove,
+                                          color: Colors.white),
+                                      onPressed: loading
+                                          ? null
+                                          : () {
+                                              setState(() {
+                                                _image!.removeAt(index - 1);
+                                              });
+                                            },
+                                    ),
+                                  ),
+                                  child: Container(
+                                    // margin: EdgeInsets.only(right: 15.0),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                      child: Image.file(
+                                        _image![index - 1],
+                                        height: 200.0,
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                  error
+                      ? Text(
+                          errorText,
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        )
+                      : SizedBox(),
+                  Container(
+                    margin: EdgeInsets.only(
+                        bottom: 35.0, left: 15.0, right: 15.0, top: 20.0),
+                    width: double.infinity,
+                    height: 50.0,
+                    child: RaisedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          if (_image!.length < 3) {
+                            setState(() {
+                              error = true;
+                              errorText = 'Wybierz minimum 3 zdjęcia (max 5)';
+                              loading = false;
+                              // errorText = _image![0].path.split(".").last;
+                            });
+                          } else if (_image!.length > 5) {
+                            setState(() {
+                              error = true;
+                              errorText = 'Wybierz maksymalnie 5 zdjęć';
+                              loading = false;
+                              // errorText = _image![0].path.split(".").last;
+                            });
+                          } else {
+                            // _formKey.currentState!.save();
+
+                            setState(() {
+                              error = false;
+                              errorText = '';
+                              loading = true;
+                            });
+
+                            try {
+                              AuthService.addTripToDatabase(
+                                name!,
+                                transportCost!,
+                                otherCosts!,
+                                description!,
+                                selectedDate,
+                                selectedTimeStart,
+                                selectedTimeEnd,
+                                _image!,
+                                difficulty!,
+                              ).then((bool value) {
+                                setState(() {
+                                  isSent = value;
+                                  isDone = true;
+                                  loading = false;
+                                });
+                              });
+                            } catch (e) {
+                              setState(() {
+                                isSent = false;
+                                isDone = true;
+                                loading = false;
+                                sendingErrorText = e.toString();
+                              });
+                            }
+                          }
+                        }
                       },
+                      color: Color.fromRGBO(0, 191, 166, 1),
+                      child: Text(
+                        "Dodaj wyprawę",
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-            error
-                ? Text(
-                    errorText,
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
-                  )
-                : SizedBox(),
-            Container(
-              margin: EdgeInsets.only(
-                  bottom: 35.0, left: 15.0, right: 15.0, top: 20.0),
-              width: double.infinity,
-              height: 50.0,
-              child: RaisedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    if (_image!.length < 3) {
-                      setState(() {
-                        error = true;
-                        errorText = 'Wybierz minimum 3 zdjęcia (max 5)';
-                        // errorText = _image![0].path.split(".").last;
-                      });
-                    } else if (_image!.length > 5) {
-                      setState(() {
-                        error = true;
-                        errorText = 'Wybierz maksymalnie 5 zdjęć';
-                        // errorText = _image![0].path.split(".").last;
-                      });
-                    } else {
-                      setState(() {
-                        error = false;
-                        errorText = '';
-                      });
-                      _formKey.currentState!.save();
-
-                      AuthService.addTripToDatabase(
-                        name!,
-                        transportCost!,
-                        otherCosts!,
-                        description!,
-                        selectedDate,
-                        selectedTimeStart,
-                        selectedTimeEnd,
-                        _image!,
-                        difficulty!,
-                      );
-                    }
-
-                    // _saveApiKey(_apiKey.trim());
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (_) => MyApp()),
-                    // );
-                  }
-                },
-                color: Color.fromRGBO(0, 191, 166, 1),
-                child: Text(
-                  "Dodaj wyprawę",
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -406,11 +510,13 @@ class CustomTextField extends StatefulWidget {
   String nazwa;
   String type;
   int length;
+  bool loading;
   CustomTextField(
     this.nazwa,
     this.type,
     this.length,
     this.callback,
+    this.loading,
   );
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
@@ -422,6 +528,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Container(
       margin: EdgeInsets.only(bottom: 5.0, left: 15.0, right: 15.0),
       child: TextFormField(
+        enabled: !widget.loading,
         keyboardType:
             widget.type == 'int' ? TextInputType.number : TextInputType.text,
         style: TextStyle(color: Theme.of(context).textTheme.headline5!.color),

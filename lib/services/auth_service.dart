@@ -33,7 +33,7 @@ class AuthService {
     }
   }
 
-  static Future addTripToDatabase(
+  static Future<bool> addTripToDatabase(
     String name,
     int transportCost,
     int otherCosts,
@@ -51,51 +51,57 @@ class AuthService {
         await FirebaseStorage.instance
             .ref('photos/${_id}_$index.${file.path.split(".").last}')
             .putFile(file);
-        return true;
       } on FirebaseException catch (e) {
         // e.g, e.code == 'canceled'
         return false;
       }
+      return true;
     }
 
     int _id = DateTime.now().microsecondsSinceEpoch;
 
     for (int i = 0; i < photos.length; i++) {
-      await uploadFile(photos[i], _id.toString(), i);
+      if (!(await uploadFile(photos[i], _id.toString(), i))) return false;
     }
-    _firestore.collection('/trips').doc(_id.toString()).set({
-      'name': name,
-      'transportCost': transportCost,
-      'otherCosts': otherCosts,
-      'description': description,
-      'date': date,
-      'startTime':
-          '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
-      'endTime': '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
-      'createdTimestamp': _id,
-      'photosCount': photos.length,
-      'photo0': await FirebaseStorage.instance
-          .ref('photos/${_id}_0.${photos[0].path.split(".").last}')
-          .getDownloadURL(),
-      'photo1': await FirebaseStorage.instance
-          .ref('photos/${_id}_1.${photos[1].path.split(".").last}')
-          .getDownloadURL(),
-      'photo2': await FirebaseStorage.instance
-          .ref('photos/${_id}_2.${photos[2].path.split(".").last}')
-          .getDownloadURL(),
-      'photo3': photos.length >= 4
-          ? await FirebaseStorage.instance
-              .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
-              .getDownloadURL()
-          : 'none',
-      'photo4': photos.length >= 5
-          ? await FirebaseStorage.instance
-              .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
-              .getDownloadURL()
-          : 'none',
-      'difficulty': difficulty,
-      // 'transportCost': transportCost,
-    }, SetOptions(merge: true));
+    try {
+      _firestore.collection('/trips').doc(_id.toString()).set({
+        'name': name,
+        'transportCost': transportCost,
+        'otherCosts': otherCosts,
+        'description': description,
+        'date': date,
+        'startTime':
+            '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
+        'endTime':
+            '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
+        'createdTimestamp': _id,
+        'photosCount': photos.length,
+        'photo0': await FirebaseStorage.instance
+            .ref('photos/${_id}_0.${photos[0].path.split(".").last}')
+            .getDownloadURL(),
+        'photo1': await FirebaseStorage.instance
+            .ref('photos/${_id}_1.${photos[1].path.split(".").last}')
+            .getDownloadURL(),
+        'photo2': await FirebaseStorage.instance
+            .ref('photos/${_id}_2.${photos[2].path.split(".").last}')
+            .getDownloadURL(),
+        'photo3': photos.length >= 4
+            ? await FirebaseStorage.instance
+                .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
+                .getDownloadURL()
+            : 'none',
+        'photo4': photos.length >= 5
+            ? await FirebaseStorage.instance
+                .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
+                .getDownloadURL()
+            : 'none',
+        'difficulty': difficulty,
+        // 'transportCost': transportCost,
+      }, SetOptions(merge: true));
+    } on FirebaseException catch (e) {
+      return false;
+    }
+    return true;
   }
 
   static Future addUserToDatabase(
