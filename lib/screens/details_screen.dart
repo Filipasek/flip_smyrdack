@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -8,15 +9,14 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class DetailsScreen extends StatefulWidget {
-  int index;
-  String name;
-  String difficulty;
-  String description;
+  String name, startTime, endTime, difficulty, description;
   Timestamp date;
-  int transportCost;
-  int otherCosts;
-  String startTime;
-  String endTime;
+  int index,
+      transportCost,
+      otherCosts,
+      elevation,
+      elev_differences,
+      trip_length;
   List<String> imageUrl; //TODO: list
 
   DetailsScreen(
@@ -30,6 +30,9 @@ class DetailsScreen extends StatefulWidget {
     this.endTime,
     this.otherCosts,
     this.startTime,
+    this.elev_differences,
+    this.elevation,
+    this.trip_length,
   );
 
   // String name;
@@ -55,44 +58,53 @@ class _DetailsScreenState extends State<DetailsScreen> {
         return Container(
           child: Container(
             margin: EdgeInsets.all(5.0),
-            child: Hero(
-              tag: 'image${widget.index}$indexx',
-              child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  child: Stack(
-                    children: <Widget>[
-                      Image.network(item,
-                          fit: BoxFit.cover, width: 1200.0, height: 600.0),
-                      // Positioned( //TODO: dodać opis miejsca na zdjęciu
-                      //   bottom: 0.0,
-                      //   left: 0.0,
-                      //   right: 0.0,
-                      //   child: Container(
-                      //     decoration: BoxDecoration(
-                      //       gradient: LinearGradient(
-                      //         colors: [
-                      //           Color.fromARGB(200, 0, 0, 0),
-                      //           Color.fromARGB(0, 0, 0, 0)
-                      //         ],
-                      //         begin: Alignment.bottomCenter,
-                      //         end: Alignment.topCenter,
-                      //       ),
-                      //     ),
-                      //     padding: EdgeInsets.symmetric(
-                      //         vertical: 10.0, horizontal: 20.0),
-                      //     child: Text(
-                      //       'Widok ze szczytu',
-                      //       style: TextStyle(
-                      //         color: Colors.white,
-                      //         fontSize: 20.0,
-                      //         fontWeight: FontWeight.bold,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  )),
-            ),
+            child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                child: Stack(
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return FullscreenImageScreen(item);
+                          },
+                        ),
+                      ),
+                      child: Hero(
+                        tag: item,
+                        child: Image.network(item,
+                            fit: BoxFit.cover, width: 1200.0, height: 600.0),
+                      ),
+                    ),
+                    // Positioned( //TODO: dodać opis miejsca na zdjęciu
+                    //   bottom: 0.0,
+                    //   left: 0.0,
+                    //   right: 0.0,
+                    //   child: Container(
+                    //     decoration: BoxDecoration(
+                    //       gradient: LinearGradient(
+                    //         colors: [
+                    //           Color.fromARGB(200, 0, 0, 0),
+                    //           Color.fromARGB(0, 0, 0, 0)
+                    //         ],
+                    //         begin: Alignment.bottomCenter,
+                    //         end: Alignment.topCenter,
+                    //       ),
+                    //     ),
+                    //     padding: EdgeInsets.symmetric(
+                    //         vertical: 10.0, horizontal: 20.0),
+                    //     child: Text(
+                    //       'Widok ze szczytu',
+                    //       style: TextStyle(
+                    //         color: Colors.white,
+                    //         fontSize: 20.0,
+                    //         fontWeight: FontWeight.bold,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
+                )),
           ),
         );
       },
@@ -143,7 +155,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               child: SingleInfoTextBold('Informacje podstawowe:'),
             ),
             Container(
-              height: 200.0,
+              height: 260.0,
               child: GridView.count(
                 childAspectRatio: 2,
                 physics: NeverScrollableScrollPhysics(),
@@ -156,8 +168,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}"),
                   CreateColumnOfInfo('Chętnych', 'dużo osób'),
                   CreateColumnOfInfo('Wyjście', widget.startTime),
-                  CreateColumnOfInfo('Czas chodzenia', 'trochę'),
+                  CreateColumnOfInfo('Czas', 'trochę'),
                   CreateColumnOfInfo('Zejście', widget.endTime),
+                  CreateColumnOfInfo('Przewyższenia',
+                      '${widget.elev_differences.toString()} m'),
+                  CreateColumnOfInfo(
+                      'Wysokosć', '${widget.elevation.toString()} m'),
+                  CreateColumnOfInfo(
+                      'Długość', '${widget.trip_length.toString()} m'),
                   CreateColumnOfInfo('Transport', '${widget.transportCost} zł'),
                   SizedBox(),
                   CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),

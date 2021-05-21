@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -47,9 +48,13 @@ class _MainScreenState extends State<MainScreen> {
                 itemBuilder: (context) {
                   List<PopupMenuEntry> list = [
                     PopupMenuItem(
-                      child: Provider.of<UserData>(context, listen: false).isVerified! ? Text('Konto zweryfikowane') : Text("Zweryfikuj konto"),
+                      child: Provider.of<UserData>(context, listen: false)
+                              .isVerified!
+                          ? Text('Konto zweryfikowane')
+                          : Text("Zweryfikuj konto"),
                       value: 0,
-                      enabled: !Provider.of<UserData>(context, listen: false).isVerified!,
+                      enabled: !Provider.of<UserData>(context, listen: false)
+                          .isVerified!,
                     ),
                     PopupMenuItem(
                       child: Text("Wyloguj się"),
@@ -237,6 +242,11 @@ class Destinations extends StatelessWidget {
                 tag: 'image${index}0',
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),
+                  // child: CachedNetworkImage(
+                  //   imageUrl: imageUrl[0],
+                  //   placeholder: (context, url) => CircularProgressIndicator(),
+                  //   errorWidget: (context, url, error) => Icon(Icons.error),
+                  // ),
                   child: Image(
                     image: NetworkImage(
                       imageUrl[0],
@@ -273,6 +283,9 @@ class Destinations extends StatelessWidget {
                           endTime,
                           otherCosts,
                           startTime,
+                          515,
+                          1045,
+                          2000,
                         );
                         // return DetailsScreen(
                         //     name, index, date, difficulty, cost, imageUrl);
