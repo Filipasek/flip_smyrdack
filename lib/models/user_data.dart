@@ -4,8 +4,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class UserData extends ChangeNotifier {
   //Logout
-  String? currentUserId;
-  String? currentUserPhoto;
+  String? currentUserId, currentUserPhoto, name, mail;
+  bool? isAdmin, isVerified;
   Future<void> logout() async {
     GoogleSignIn().signOut();
     FirebaseAuth.instance.signOut();

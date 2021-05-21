@@ -23,28 +23,72 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) {
-                return AddTripScreen();
-              },
-            ),
-          ),
-          icon: Icon(Icons.add_location_alt_outlined),
-        ),
+        leading: Provider.of<UserData>(context).isAdmin!
+            ? IconButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return AddTripScreen();
+                    },
+                  ),
+                ),
+                icon: Icon(Icons.add_location_alt_outlined),
+              )
+            : null,
         actions: [
-          Text('new'),
+          Text('v5'),
           Container(
             padding: EdgeInsets.all(5.0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
-              child: GestureDetector(
-                //TODO: animation
-                onTap: () => UserData().logout(),
+              child: PopupMenuButton(
+                enableFeedback: true,
+                tooltip: 'Hello',
+                itemBuilder: (context) {
+                  List<PopupMenuEntry> list = [
+                    PopupMenuItem(
+                      child: Provider.of<UserData>(context, listen: false).isVerified! ? Text('Konto zweryfikowane') : Text("Zweryfikuj konto"),
+                      value: 0,
+                      enabled: !Provider.of<UserData>(context, listen: false).isVerified!,
+                    ),
+                    PopupMenuItem(
+                      child: Text("Wyloguj się"),
+                      value: 1,
+                      enabled: true,
+                    ),
+                    // PopupMenuItem(
+                    //   child: Text("Setting Language"),
+                    //   value: 1,
+                    // ),
+                    // PopupMenuDivider(
+                    //   height: 10,
+                    // ),
+                    // CheckedPopupMenuItem(
+                    //   child: Text(
+                    //     "Nie zweryfikowano",
+                    //     style: TextStyle(color: Colors.black),
+                    //   ),
+                    //   value: 2,
+                    //   checked: false,
+
+                    // ),
+                  ];
+                  return list;
+                },
+                onSelected: (value) {
+                  switch (value) {
+                    case 1:
+                      UserData().logout();
+                      break;
+                    default:
+                  }
+                },
                 child: Image.network(
                   Provider.of<UserData>(context).currentUserPhoto!,
                 ),
+                // icon: Icon(
+                //   Icons.settings,
+                // ),
               ),
             ),
           ),

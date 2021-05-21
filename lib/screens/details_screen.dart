@@ -102,6 +102,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       //   height: 50.0,
       //   child: Center(child: Text('helo')),
       // ),
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
         title: Text(widget.name),

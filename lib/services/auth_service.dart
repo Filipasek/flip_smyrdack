@@ -41,7 +41,7 @@ class AuthService {
     File? compressedImageFile = await FlutterImageCompress.compressAndGetFile(
       image.absolute.path,
       '$path/img_$photoId.jpg',
-      quality: 50,
+      quality: 40,
     );
     return compressedImageFile;
   }
@@ -118,21 +118,42 @@ class AuthService {
   }
 
   static Future addUserToDatabase(
-      userId,
-      String? name,
-      String? contactData,
-      String? avatar,
-      bool isVerified,
-      String phoneNumber,
-      List<UserInfo> userInfo,
-      UserMetadata metadata) async {
+    userId,
+    String? name,
+    String? contactData,
+    String? avatar,
+    bool isVerified,
+    String phoneNumber,
+  ) async {
     _firestore.collection('/users').doc(userId).set({
       'name': name,
       'contactData': contactData,
       'avatar': avatar,
-      'created': DateTime.now(),
+      'last_login': DateTime.now(),
+      'first_login': DateTime.now(),
       'verified': false,
-    }, SetOptions(merge: true));
+      'admin': false,
+      'phoneNumber': phoneNumber,
+      'hasBeenVerifiedByGoogleOrSomethingIdk': isVerified,
+    }, SetOptions(merge: false));
+  }
+
+  static Future updateUserInDatabase(
+    userId,
+    String? name,
+    String? contactData,
+    String? avatar,
+    bool isVerified,
+    String phoneNumber,
+  ) async {
+    _firestore.collection('/users').doc(userId).update({
+      'name': name,
+      'contactData': contactData,
+      'avatar': avatar,
+      'last_login': DateTime.now(),
+      'phoneNumber': phoneNumber,
+      'hasBeenVerifiedByGoogleOrSomethingIdk': isVerified,
+    });
   }
 
   static void signInWithGoogle() async {
@@ -155,18 +176,26 @@ class AuthService {
 
     final User? currentUser = _auth.currentUser;
     assert(user!.uid == currentUser!.uid);
-
-    await addUserToDatabase(
-      user!.uid,
-      user.displayName,
-      user.email,
-      user.photoURL,
-      user.emailVerified,
-      user.phoneNumber ?? 'none',
-      user.providerData,
-      user.metadata,
-    );
     //needs to be checked if user exists
+    if (authResult.additionalUserInfo!.isNewUser) {
+      await addUserToDatabase(
+        user!.uid,
+        user.displayName,
+        user.email,
+        user.photoURL,
+        user.emailVerified,
+        user.phoneNumber ?? 'none',
+      );
+    } else {
+      await updateUserInDatabase(
+        user!.uid,
+        user.displayName,
+        user.email,
+        user.photoURL,
+        user.emailVerified,
+        user.phoneNumber ?? 'none',
+      );
+    }
   }
 
   static void logout(context) async {
