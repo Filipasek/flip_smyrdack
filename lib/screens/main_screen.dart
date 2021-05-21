@@ -146,6 +146,11 @@ class _MainScreenState extends State<MainScreen> {
                           info['endTime'],
                           info['otherCosts'],
                           info['startTime'],
+                          info['eagers'],
+                          info['createdTimestamp'],
+                          info['elevation'],
+                          info['elevation_difference'],
+                          info['trip_length'],
                         );
                       },
                     )
@@ -207,7 +212,10 @@ class Destinations extends StatelessWidget {
   int otherCosts;
   String startTime;
   String endTime;
+  List eager;
   List<String> imageUrl; //TODO: list
+  int _id;
+  int elevation, elev_difference, trip_length;
 
   Destinations(
     this.index,
@@ -220,6 +228,11 @@ class Destinations extends StatelessWidget {
     this.endTime,
     this.otherCosts,
     this.startTime,
+    this.eager,
+    this._id,
+    this.elevation,
+    this.elev_difference,
+    this.trip_length,
   );
 
   @override
@@ -238,19 +251,12 @@ class Destinations extends StatelessWidget {
         child: Container(
           child: Stack(
             children: <Widget>[
-              Hero(
-                tag: 'image${index}0',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0),
-                  // child: CachedNetworkImage(
-                  //   imageUrl: imageUrl[0],
-                  //   placeholder: (context, url) => CircularProgressIndicator(),
-                  //   errorWidget: (context, url, error) => Icon(Icons.error),
-                  // ),
-                  child: Image(
-                    image: NetworkImage(
-                      imageUrl[0],
-                    ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Hero(
+                  tag: imageUrl[0],
+                  child: Image.network(
+                    imageUrl[0],
                     height: 300.0,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -283,9 +289,11 @@ class Destinations extends StatelessWidget {
                           endTime,
                           otherCosts,
                           startTime,
-                          515,
-                          1045,
-                          2000,
+                          elev_difference,
+                          elevation,
+                          trip_length,
+                          eager,
+                          _id,
                         );
                         // return DetailsScreen(
                         //     name, index, date, difficulty, cost, imageUrl);

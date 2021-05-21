@@ -17,6 +17,7 @@ class AuthService {
   static final FirebaseStorage _storage = FirebaseStorage.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final _firestore = FirebaseFirestore.instance;
+  // var admin = require('firebase-admin');
   static void signUpUser(
       BuildContext context, String name, String email, String password) async {
     name = name.trim();
@@ -46,17 +47,40 @@ class AuthService {
     return compressedImageFile;
   }
 
+  static Future<bool> addUserToTrip(String _id, String _userId) async {
+    try {
+      await _firestore.collection('/trips').doc(_id.toString()).update({
+        "eagers": FieldValue.arrayUnion([_userId]),
+      });
+    } catch (e) {
+      return Future.error(e);
+    }
+    return true;
+  }
+  static Future<bool> removeUserFromTrip(String _id, String _userId) async {
+    try {
+      await _firestore.collection('/trips').doc(_id.toString()).update({
+        "eagers": FieldValue.arrayRemove([_userId]),
+      });
+    } catch (e) {
+      return Future.error(e);
+    }
+    return true;
+  }
+
   static Future<bool> addTripToDatabase(
-    String name,
-    int transportCost,
-    int otherCosts,
-    String description,
-    DateTime date,
-    TimeOfDay startTime,
-    TimeOfDay endTime,
-    List<File> photos,
-    String difficulty,
-  ) async {
+      String name,
+      int transportCost,
+      int otherCosts,
+      String description,
+      DateTime date,
+      TimeOfDay startTime,
+      TimeOfDay endTime,
+      List<File> photos,
+      String difficulty,
+      int elevation,
+      int elev_differences,
+      int trip_length) async {
     Future<bool> uploadFile(File file, String _id, int index) async {
       // File file = File(filePath);
 
@@ -109,6 +133,9 @@ class AuthService {
                 .getDownloadURL()
             : 'none',
         'difficulty': difficulty,
+        'elevation': elevation,
+        'elevation_differences': elev_differences,
+        'trip_length': trip_length,
         // 'transportCost': transportCost,
       }, SetOptions(merge: true));
     } on FirebaseException catch (e) {

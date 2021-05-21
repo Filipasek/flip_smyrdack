@@ -14,9 +14,13 @@ class _FullscreenImageScreenState extends State<FullscreenImageScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: PhotoView(
-        imageProvider: NetworkImage(widget.fileTag),
-        heroAttributes: PhotoViewHeroAttributes(tag: widget.fileTag),
+      child: GestureDetector(
+        onTap: () =>
+            Navigator.of(context).pop(),
+        child: PhotoView(
+          imageProvider: NetworkImage(widget.fileTag),
+          heroAttributes: PhotoViewHeroAttributes(tag: widget.fileTag),
+        ),
       ),
     );
   }

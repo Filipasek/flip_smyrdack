@@ -15,7 +15,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   bool isSent = false, isDone = false;
   String? name, description, difficulty;
   String sendingErrorText = '';
-  int? transportCost, otherCosts;
+  int? transportCost, otherCosts, elevation, elev_differences, trip_length;
   TimeOfDay? startTime, endTime;
   DateTime? date;
   String? _chosenValue;
@@ -101,6 +101,15 @@ class _AddTripScreenState extends State<AddTripScreen> {
                             CustomTextField(
                                 'Nazwa miejsca', 'text', 3, setName, loading),
                             SizedBox(height: 5.0),
+                            CustomTextField('Wysokość (w metrach)', 'int', 3,
+                                setElevation, loading),
+                            SizedBox(height: 5.0),
+                            CustomTextField('Przewyższenia (w metrach)', 'int', 3,
+                                setElevationDifferences, loading),
+                            SizedBox(height: 5.0),
+                            CustomTextField('Długość trasy (w metrach)', 'int', 3,
+                                setTripLength, loading),
+                            SizedBox(height: 5.0),
                             CustomTextField('Koszt transportu (w zł)', 'int', 1,
                                 settransportCost, loading),
                             SizedBox(height: 5.0),
@@ -117,8 +126,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                 hint: Text('Wybierz trudność'),
                                 items: <String>[
                                   'Banalne',
-                                  'Umiarkowane',
-                                  'Wymagające',
+                                  'Średnie',
+                                  'Trudne',
                                   'O holibka...'
                                 ].map((String value) {
                                   return new DropdownMenuItem<String>(
@@ -382,6 +391,9 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       selectedTimeEnd,
                                       _image!,
                                       difficulty!,
+                                      elevation!,
+                                      elev_differences!,
+                                      trip_length!,
                                     ).then((bool value) {
                                       setState(() {
                                         isSent = value;
@@ -476,6 +488,16 @@ class _AddTripScreenState extends State<AddTripScreen> {
 
   void setName(dynamic data) {
     name = data;
+  }
+
+  void setElevation(dynamic data) {
+    elevation = int.parse(data);
+  }
+  void setElevationDifferences(dynamic data) {
+    elev_differences = int.parse(data);
+  }
+  void setTripLength(dynamic data) {
+    trip_length = int.parse(data);
   }
 
   void setDescription(dynamic data) {
