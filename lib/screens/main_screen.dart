@@ -146,10 +146,10 @@ class _MainScreenState extends State<MainScreen> {
                           info['endTime'],
                           info['otherCosts'],
                           info['startTime'],
-                          info['eagers'],
+                          info.data().containsKey('eagers') ? info['eagers'] : [],
                           info['createdTimestamp'],
                           info['elevation'],
-                          info['elevation_difference'],
+                          info['elevation_differences'],
                           info['trip_length'],
                         );
                       },
