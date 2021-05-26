@@ -277,24 +277,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   primary: true,
                   mainAxisSpacing: 0.0,
                   children: [
-                    CreateColumnOfInfo('Trudność', widget.difficulty),
+                    CreateColumnOfInfo('Trudność', widget.difficulty, 'Szacowana trudność wycieczki'),
                     CreateColumnOfInfo("Kiedy",
-                        "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}"),
+                        "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}", 'Data dzienna rozpoczęcia wycieczki'),
                     CreateColumnOfInfo(
-                        'Chętnych', numOfPersonToString(numberOfPeople!)),
-                    CreateColumnOfInfo('Wyjście', widget.startTime),
-                    CreateColumnOfInfo('Czas', 'trochę'),
-                    CreateColumnOfInfo('Zejście', widget.endTime),
+                        'Chętnych', numOfPersonToString(numberOfPeople!), 'Ilość osób, które potwierdziły swój udział w aplikacji'),
+                    CreateColumnOfInfo('Wyjście', widget.startTime, 'Planowany czas startu (na miejscu)'),
+                    CreateColumnOfInfo('Czas', 'trochę', 'Szacowany czas chodzenia'),
+                    CreateColumnOfInfo('Zejście', widget.endTime, 'Planowany czas końca trasy'),
                     CreateColumnOfInfo('Przewyższeń',
-                        '${widget.elev_differences.toString()} m'),
+                        '${widget.elev_differences.toString()} m', 'Ilość przewyższeń według map wyrażona w metrach'),
                     CreateColumnOfInfo(
-                        'Wysokosć', '${widget.elevation.toString()} m'),
+                        'Wysokosć', '${widget.elevation.toString()} m', 'Wysokość miejsca docelowego wyrażona w metrach'),
                     CreateColumnOfInfo(
-                        'Długość', '${widget.trip_length.toString()} m'),
+                        'Długość', '${widget.trip_length.toString()} m', 'Długość trasy według map wyrażona w metrach'),
                     CreateColumnOfInfo(
-                        'Transport', '${widget.transportCost} zł'),
+                        'Transport', '${widget.transportCost} zł', 'Koszty transportu samochodem lub innymi środkami transportu'),
                     SizedBox(),
-                    CreateColumnOfInfo('Inne', '${widget.otherCosts} zł'),
+                    CreateColumnOfInfo('Inne', '${widget.otherCosts} zł', 'Inne koszty typu wstęp do parku'),
                   ],
                 ),
               ),
@@ -327,14 +327,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
 class CreateColumnOfInfo extends StatelessWidget {
   String topText;
   String bottomText;
-  CreateColumnOfInfo(this.topText, this.bottomText);
+  String tooltipText;
+  CreateColumnOfInfo(this.topText, this.bottomText, this.tooltipText);
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SingleInfoText(topText),
-        SingleInfoTextBold(bottomText),
-      ],
+    return Tooltip(
+      message: tooltipText,
+      padding: EdgeInsets.all(10.0),
+      showDuration: Duration(seconds: 4),
+      child: Column(
+        children: [
+          SingleInfoText(topText),
+          SingleInfoTextBold(bottomText),
+        ],
+      ),
     );
   }
 }

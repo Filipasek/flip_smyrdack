@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "648410956852-tojjvqp6i7msnmg745mbshq3t5m52b9f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pl.filipguzdek.flipsmyrdack",
+            "certificate_hash": "acd0b0574ff138bfb3d366c2cdf978b1d197f815"
+          }
+        },
+        {
+          "client_id": "648410956852-vi17cnefoue1t7cm352ai96npa2f3rp8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pl.filipguzdek.flipsmyrdack",
+            "certificate_hash": "fd9e2228f3e85a9514d55cc6a62134a485216d2f"
+          }
+        },
+        {
           "client_id": "648410956852-0f7828h9d4hdho1uea7eqontqtfmjcn8.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -8,11 +8,19 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // final initFuture = MobileAds.instance.initialize();
+  // final adState = AdState(initFuture);
   await Firebase.initializeApp();
   initializeDateFormatting('pl_PL');
   runApp(MyApp());
+  // runApp(
+  //   Provider.value(
+  //     value: adState,
+  //     builder: (context, child) => MyApp(),
+  //   ),
+  // );
 }
 
 class MyApp extends StatelessWidget {
@@ -67,7 +75,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     // Provider.of<ConfigData>(context, listen: false).readConfigs();
-    
+
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -80,4 +88,3 @@ class _AppState extends State<App> {
     // return Scaffold();
   }
 }
-

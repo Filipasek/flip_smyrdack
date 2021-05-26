@@ -26,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 0.0,
         leading: Provider.of<UserData>(context).isAdmin!
             ? IconButton(
+                tooltip: 'Dodaj wstawkę',
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) {
@@ -37,14 +38,19 @@ class _MainScreenState extends State<MainScreen> {
               )
             : null,
         actions: [
-          Text('v5'),
+          Tooltip(
+            message: 'Numer wersji',
+            // padding: EdgeInsets.all(15.0),
+            showDuration: Duration(seconds: 2),
+            child: Text('v7'),
+          ),
           Container(
             padding: EdgeInsets.all(5.0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
               child: PopupMenuButton(
                 enableFeedback: true,
-                tooltip: 'Hello',
+                tooltip: 'Opcje',
                 itemBuilder: (context) {
                   List<PopupMenuEntry> list = [
                     PopupMenuItem(
@@ -146,7 +152,9 @@ class _MainScreenState extends State<MainScreen> {
                           info['endTime'],
                           info['otherCosts'],
                           info['startTime'],
-                          info.data().containsKey('eagers') ? info['eagers'] : [],
+                          info.data().containsKey('eagers')
+                              ? info['eagers']
+                              : [],
                           info['createdTimestamp'],
                           info['elevation'],
                           info['elevation_differences'],
@@ -263,6 +271,13 @@ class Destinations extends StatelessWidget {
                   ),
                 ),
               ),
+              // Padding(
+              //   padding: const EdgeInsets.all(10.0),
+              //   child: Container(
+              //     alignment: Alignment.topRight,
+              //     child: Icon(Icons.verified_rounded),
+              //   ),
+              // ),
               Container(
                 width: double.infinity,
                 child: FlatButton(
@@ -320,15 +335,32 @@ class Destinations extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '${otherCosts + transportCost}zł',
-                            style: TextStyle(
-                              color: Colors.transparent,
+                          // Text(
+                          //   '${otherCosts + transportCost}zł',
+                          //   style: TextStyle(
+                          //     color: Colors.transparent,
+                          //   ),
+                          // ),
+                          Tooltip(
+                            message:
+                                'Wstawka została zweryfikowana przez Zespół Flip&Smyrdack',
+                            padding: EdgeInsets.all(15.0),
+                            showDuration: Duration(seconds: 3),
+                            child: Icon(
+                              Icons.verified_rounded,
+                              color: Colors.blue,
+                              // color: Color.fromRGBO(65, 211, 189, 1),
                             ),
                           ),
                           Text(
                               "Kiedy: ${DateFormat('EEEE, dd MMM', 'pl_PL').format(date.toDate().toLocal())}"),
-                          Text('${otherCosts + transportCost}zł'),
+                          Tooltip(
+                            message:
+                                'Łączne koszty transportu i innych dodatków typu opłaty za wstęp. Po więcej informacji wejdź we wstawkę.',
+                            padding: EdgeInsets.all(15.0),
+                            showDuration: Duration(seconds: 4),
+                            child: Text('${otherCosts + transportCost}zł'),
+                          ),
                         ],
                       ),
                     ],
