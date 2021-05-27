@@ -29,6 +29,10 @@ class HomeScreen extends StatelessWidget {
                     Map _data = snapshot.data!.data();
                     Provider.of<UserData>(context, listen: false)
                         .currentUserId = _user.uid;
+                    Provider.of<UserData>(context, listen: false).name =
+                        _user.displayName;
+                    Provider.of<UserData>(context, listen: false).mail =
+                        _user.email;
                     Provider.of<UserData>(context, listen: false)
                         .currentUserPhoto = _user.photoURL;
                     Provider.of<UserData>(context, listen: false).isAdmin =
@@ -37,7 +41,22 @@ class HomeScreen extends StatelessWidget {
                         _data['verified'];
                     return MainScreen();
                   } else if (snapshot.hasError) {
-                    return Text('Coś poszło nie tak');
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Coś poszło nie tak, błąd:',
+                            ),
+                            Text(
+                              snapshot.error.toString(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   } else {
                     return Center(child: CircularProgressIndicator());
                   }

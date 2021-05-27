@@ -12,7 +12,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // final initFuture = MobileAds.instance.initialize();
   // final adState = AdState(initFuture);
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    // options: FirebaseOptions(
+    //   apiKey: '64526134-67dc-4e9e-a93a-7eea9de7d95e',
+    //   appId: 'acf8a433-1539-4f7b-9422-1c876982b833',
+    //   messagingSenderId: 'ca75f581-5dfc-43af-b1f6-41ed391a2aad',
+    //   projectId: 'bf984c50-1a0f-4d03-a51d-752d56fc3aa7',
+    // ),
+  );
   initializeDateFormatting('pl_PL');
   runApp(MyApp());
   // runApp(

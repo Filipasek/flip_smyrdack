@@ -46,6 +46,15 @@ class AuthService {
     );
     return compressedImageFile;
   }
+  
+  // static Future<void> getUserNamesFromList(List<String> _idList) async {
+  //   try {
+  //     for (var item in _idList) {
+  //       await _firestore.collection('/users').doc(item).get();
+  //     }
+  //   } catch (e) {
+  //   }
+  // }
 
   static Future<bool> addUserToTrip(String _id, String _userId) async {
     try {
@@ -136,6 +145,8 @@ class AuthService {
         'elevation': elevation,
         'elevation_differences': elev_differences,
         'trip_length': trip_length,
+        'showable': true,
+        'verified': true, //TODO: check
         // 'transportCost': transportCost,
       }, SetOptions(merge: true));
     } on FirebaseException catch (e) {
