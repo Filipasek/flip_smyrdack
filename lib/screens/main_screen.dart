@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -29,6 +30,62 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        bottom: Provider.of<UserData>(context, listen: false).thisVersion <
+                Provider.of<UserData>(context, listen: false).currentVersion
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(30.0),
+                child: Tooltip(
+                  padding: EdgeInsets.all(15.0),
+                  showDuration: Duration(seconds: 7),
+                  message: Provider.of<UserData>(context, listen: false)
+                              .thisVersion <
+                          Provider.of<UserData>(context, listen: false)
+                              .workingVersion
+                      ? 'Aplikacja wymaga pilnej aktualizacji. Zostały dodane nowe funkcje bądź zaktualizowano sposób działania bazy danych i ta wersja aplikacji może nie działać w pełni prawidłowo, bądź nie działać w ogóle. Sprawdź w sklepie z aplikacjami czy nie ma aktualizacji.'
+                      : 'Aplikacja bądź baza danych dostała drobną aktualizację, która nie powinna wpłynąć na sposób jej działania i wszystkie funkcje powinny dalej działać, ale wszystkie nowo dodane nie będą dostępne aż do aktualizacji, Sprawdź w sklepie z aplikacjami czy nie ma dostępnej nowej wersji.',
+                  child: Center(
+                    child: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Provider.of<UserData>(context, listen: false)
+                                      .thisVersion <
+                                  Provider.of<UserData>(context, listen: false)
+                                      .workingVersion
+                              ? Icon(
+                                  Icons.gpp_maybe_outlined,
+                                  // : Icons.model_training_outlined,
+                                  size: 30.0,
+                                  color: Color.fromRGBO(249, 101, 116, 1),
+                                )
+                              : Icon(
+                                  // Icons.dangerous_rounded,
+                                  Icons.model_training_outlined,
+                                  size: 30.0,
+                                  color: Color.fromRGBO(132, 207, 150, 1),
+                                ),
+                          SizedBox(width: 10.0),
+                          Text(
+                            Provider.of<UserData>(context, listen: false)
+                                        .thisVersion <
+                                    Provider.of<UserData>(context,
+                                            listen: false)
+                                        .workingVersion
+                                ? 'Pilnie zaktualizuj aplikację!'
+                                : 'Dostępna nowa wersja aplikacji!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         elevation: 0.0,
         leading: Provider.of<UserData>(context).isAdmin!
             ? IconButton(
@@ -57,6 +114,7 @@ class _MainScreenState extends State<MainScreen> {
               child: PopupMenuButton(
                 enableFeedback: true,
                 tooltip: 'Opcje',
+                color: Color.fromRGBO(112, 238, 156, 1),
                 itemBuilder: (context) {
                   List<PopupMenuEntry> list = [
                     PopupMenuItem(
@@ -75,7 +133,12 @@ class _MainScreenState extends State<MainScreen> {
                           .isVerified!,
                     ),
                     PopupMenuItem(
-                      child: Text("Wyloguj się"),
+                      child: Text(
+                        "Wyloguj się",
+                        style: TextStyle(
+                          color: Color.fromRGBO(249, 101, 116, 1),
+                        ),
+                      ),
                       value: 2,
                       enabled: true,
                     ),
@@ -110,7 +173,6 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         );
                       });
-
                       break;
                     default:
                   }
@@ -257,7 +319,7 @@ class _MainScreenState extends State<MainScreen> {
                   ? ListView.builder(
                       itemCount: length + 1,
                       itemBuilder: (context, index) {
-                        if (index == length + 1) return SizedBox(height: 70.0);
+                        if (index == length) return SizedBox(height: 75.0);
                         dynamic info = data[index];
                         List<String> photosList = [];
                         for (int i = 0; i < info['photosCount']; i++) {
@@ -284,6 +346,7 @@ class _MainScreenState extends State<MainScreen> {
                           info['elevation'],
                           info['elevation_differences'],
                           info['trip_length'],
+                          info['verified'],
                         );
                       },
                     )
@@ -366,6 +429,7 @@ class Destinations extends StatelessWidget {
   List<String> imageUrl; //TODO: list
   int _id;
   int elevation, elev_difference, trip_length;
+  bool verified;
 
   Destinations(
     this.index,
@@ -383,6 +447,7 @@ class Destinations extends StatelessWidget {
     this.elevation,
     this.elev_difference,
     this.trip_length,
+    this.verified,
   );
 
   @override
@@ -413,13 +478,6 @@ class Destinations extends StatelessWidget {
                   ),
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.all(10.0),
-              //   child: Container(
-              //     alignment: Alignment.topRight,
-              //     child: Icon(Icons.verified_rounded),
-              //   ),
-              // ),
               Container(
                 width: double.infinity,
                 child: FlatButton(
@@ -483,17 +541,24 @@ class Destinations extends StatelessWidget {
                           //     color: Colors.transparent,
                           //   ),
                           // ),
-                          Tooltip(
-                            message:
-                                'Wstawka została zweryfikowana przez Zespół Flip&Smyrdack',
-                            padding: EdgeInsets.all(15.0),
-                            showDuration: Duration(seconds: 3),
-                            child: Icon(
-                              Icons.verified_rounded,
-                              color: Colors.blue,
-                              // color: Color.fromRGBO(65, 211, 189, 1),
-                            ),
-                          ),
+                          verified
+                              ? Tooltip(
+                                  message:
+                                      'Wstawka została zweryfikowana przez Zespół Flip&Smyrdack',
+                                  padding: EdgeInsets.all(15.0),
+                                  showDuration: Duration(seconds: 3),
+                                  child: Icon(
+                                    Icons.verified_rounded,
+                                    color: Colors.blue,
+                                    // color: Color.fromRGBO(65, 211, 189, 1),
+                                  ),
+                                )
+                              : Text(
+                                  '${otherCosts + transportCost}zł',
+                                  style: TextStyle(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
                           Text(
                               "Kiedy: ${DateFormat('EEEE, dd MMM', 'pl_PL').format(date.toDate().toLocal())}"),
                           Tooltip(

@@ -277,24 +277,44 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   primary: true,
                   mainAxisSpacing: 0.0,
                   children: [
-                    CreateColumnOfInfo('Trudność', widget.difficulty, 'Szacowana trudność wycieczki'),
-                    CreateColumnOfInfo("Kiedy",
-                        "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}", 'Data dzienna rozpoczęcia wycieczki'),
+                    CreateColumnOfInfo('Trudność', widget.difficulty,
+                        'Szacowana trudność wycieczki'),
                     CreateColumnOfInfo(
-                        'Chętnych', numOfPersonToString(numberOfPeople!), 'Ilość osób, które potwierdziły swój udział w aplikacji'),
-                    CreateColumnOfInfo('Wyjście', widget.startTime, 'Planowany czas startu (na miejscu)'),
-                    CreateColumnOfInfo('Czas', 'trochę', 'Szacowany czas chodzenia'),
-                    CreateColumnOfInfo('Zejście', widget.endTime, 'Planowany czas końca trasy'),
-                    CreateColumnOfInfo('Przewyższeń',
-                        '${widget.elev_differences.toString()} m', 'Ilość przewyższeń według map wyrażona w metrach'),
+                        "Kiedy",
+                        "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
+                        'Data dzienna rozpoczęcia wycieczki'),
                     CreateColumnOfInfo(
-                        'Wysokosć', '${widget.elevation.toString()} m', 'Wysokość miejsca docelowego wyrażona w metrach'),
+                        'Chętnych',
+                        numOfPersonToString(numberOfPeople!),
+                        'Ilość osób, które potwierdziły swój udział w aplikacji'),
+                    CreateColumnOfInfo('Wyjście', widget.startTime,
+                        'Planowany czas startu (na miejscu)'),
                     CreateColumnOfInfo(
-                        'Długość', '${widget.trip_length.toString()} m', 'Długość trasy według map wyrażona w metrach'),
+                        'Czas', 'trochę', 'Szacowany czas chodzenia'),
+                    CreateColumnOfInfo('Zejście', widget.endTime,
+                        'Planowany czas końca trasy'),
                     CreateColumnOfInfo(
-                        'Transport', '${widget.transportCost} zł', 'Koszty transportu samochodem lub innymi środkami transportu'),
+                        'Przewyższeń',
+                        convertBigToSmall(widget.elev_differences),
+                        // '${widget.elev_differences.toString()} m',
+                        'Ilość przewyższeń według map wyrażona w metrach'),
+                    CreateColumnOfInfo(
+                        'Wysokosć',
+                        convertBigToSmall(widget.elevation),
+                        // '${widget.elevation.toString()} m',
+                        'Wysokość miejsca docelowego wyrażona w metrach'),
+                    CreateColumnOfInfo(
+                        'Długość',
+                        convertBigToSmall(widget.trip_length),
+                        // '${widget.trip_length.toString()} m',
+                        'Długość trasy według map wyrażona w metrach'),
+                    CreateColumnOfInfo(
+                        'Transport',
+                        '${widget.transportCost} zł',
+                        'Koszty transportu samochodem lub innymi środkami transportu'),
                     SizedBox(),
-                    CreateColumnOfInfo('Inne', '${widget.otherCosts} zł', 'Inne koszty typu wstęp do parku'),
+                    CreateColumnOfInfo('Inne', '${widget.otherCosts} zł',
+                        'Inne koszty typu wstęp do parku'),
                   ],
                 ),
               ),
@@ -366,6 +386,11 @@ class SingleInfoText extends StatelessWidget {
       ),
     );
   }
+}
+
+String convertBigToSmall(int meters) {
+  if (meters >= 3000) return '${((meters / 100).round()) / 10} km';
+  return '$meters m';
 }
 
 String numOfPersonToString(int persons) {

@@ -46,7 +46,7 @@ class AuthService {
     );
     return compressedImageFile;
   }
-  
+
   // static Future<void> getUserNamesFromList(List<String> _idList) async {
   //   try {
   //     for (var item in _idList) {
@@ -55,6 +55,10 @@ class AuthService {
   //   } catch (e) {
   //   }
   // }
+
+  static Future<List<int>> getApiVersions() async {
+    return [];
+  }
 
   static Future<bool> addUserToTrip(String _id, String _userId) async {
     try {
@@ -66,6 +70,7 @@ class AuthService {
     }
     return true;
   }
+
   static Future<bool> removeUserFromTrip(String _id, String _userId) async {
     try {
       await _firestore.collection('/trips').doc(_id.toString()).update({

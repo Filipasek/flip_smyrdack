@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class UserData extends ChangeNotifier {
   //Logout
   String? currentUserId, currentUserPhoto, name, mail;
+  int minimumVersion = 0, workingVersion = 0, currentVersion = 0, thisVersion = 0;
   bool? isAdmin, isVerified;
   Future<void> logout() async {
     GoogleSignIn().signOut();
