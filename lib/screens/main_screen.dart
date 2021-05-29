@@ -113,7 +113,7 @@ class _MainScreenState extends State<MainScreen> {
             message: 'Numer wersji',
             // padding: EdgeInsets.all(15.0),
             showDuration: Duration(seconds: 2),
-            child: Text('v11'),
+            child: Text('v12'),
           ),
           Container(
             padding: EdgeInsets.all(5.0),

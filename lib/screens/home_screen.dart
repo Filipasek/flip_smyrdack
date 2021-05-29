@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
-  int apiVersion = 10; //TODO: change when major update been made to api
+  int apiVersion = 12; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
     return Scaffold(
