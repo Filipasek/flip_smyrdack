@@ -1,13 +1,13 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../main.dart';
-// ignore: unused_import
-import 'package:provider/provider.dart';
+import 'package:flip_smyrdack/main.dart';
+// import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
@@ -55,9 +55,99 @@ class AuthService {
   //   } catch (e) {
   //   }
   // }
+  // String generateRandomString(int len) {
+  //   var r = Random();
+  //   const _chars = 'ABCDEFGHKLMNPQRSTUVWXYZ112233445566778899';
+  //   return List.generate(len, (index) => _chars[r.nextInt(_chars.length)])
+  //       .join();
+  // }
 
-  static Future<List<int>> getApiVersions() async {
-    return [];
+  static Future sendVerificationRequest(String _userId, String _name) async {
+    bool good = false;
+    String generateRandomString(int len) {
+      var r = Random();
+      const _chars = 'ABCDEFGHKLMNPQRSTUVWXYZ112233445566778899';
+      return List.generate(len, (index) => _chars[r.nextInt(_chars.length)])
+          .join();
+    }
+
+    try {
+      Map<String, dynamic> userData = {
+        'name': _name,
+        'userId': _userId,
+      };
+      await _firestore.collection('/users').doc(_userId).update({
+        'verificationCode': generateRandomString(6),
+      }).then((value) {
+        good = true;
+      }).onError((error, stackTrace) {
+        return Future.error(
+            error ?? 'Coś poszło nie tak podczas generowania kodu.');
+      });
+
+      await _firestore
+          .collection('/appInfo')
+          .doc('users to be verified')
+          .update({
+        'usersList': FieldValue.arrayUnion([_userId]),
+      }).then((value) {
+        good = true;
+      }).onError((error, stackTrace) {
+        return Future.error(
+            error ?? 'Coś poszło nie tak podczas generowania kodu.');
+      });
+
+      await _firestore.collection('/appInfo').doc('users to be verified').set({
+        _userId: userData,
+      }, SetOptions(merge: true)).then((value) {
+        good = true;
+      }).onError((error, stackTrace) {
+        return Future.error(error ??
+            'Coś poszło nie tak podczas ustawiania powiadomienia dla adminów.');
+      });
+      if (good) return true;
+    } catch (e) {
+      return Future.error(e);
+    }
+    return false;
+  }
+
+  static Future<bool> verifyUser(String _id, String _verCode) async {
+    try {
+      DocumentSnapshot<Map<dynamic, dynamic>> docs =
+          await _firestore.collection('/users').doc(_id.toString()).get();
+      Map result = docs.data()!;
+      String code = result.containsKey('verificationCode')
+          ? result['verificationCode'].toString()
+          : '';
+      if (code == _verCode) {
+        bool good = false;
+        await _firestore.collection('/users').doc(_id.toString()).update({
+          "verified": true,
+        }).then((value) {
+          good = true;
+        }).onError((error, stackTrace) {
+          return Future.error(error ?? 'Coś poszło nie tak');
+        });
+        await _firestore
+            .collection('/appInfo')
+            .doc('users to be verified')
+            .update({
+          'usersList': FieldValue.arrayRemove([_id]),
+        }).then((value) {
+          good = true;
+        }).onError((error, stackTrace) {
+          return Future.error(
+              error ?? 'Coś poszło nie tak podczas generowania kodu.');
+        });
+
+        if (good) return true;
+      } else
+        return Future.error('Kod nie jest poprawny!');
+    } catch (e) {
+      return Future.error(e);
+    }
+    return false;
   }
 
   static Future<bool> addUserToTrip(String _id, String _userId) async {
@@ -83,18 +173,20 @@ class AuthService {
   }
 
   static Future<bool> addTripToDatabase(
-      String name,
-      int transportCost,
-      int otherCosts,
-      String description,
-      DateTime date,
-      TimeOfDay startTime,
-      TimeOfDay endTime,
-      List<File> photos,
-      String difficulty,
-      int elevation,
-      int elev_differences,
-      int trip_length) async {
+    String name,
+    int transportCost,
+    int otherCosts,
+    String description,
+    DateTime date,
+    TimeOfDay startTime,
+    TimeOfDay endTime,
+    List<File> photos,
+    String difficulty,
+    int elevation,
+    int elevDifferences,
+    int tripLength,
+    bool isAdmin,
+  ) async {
     Future<bool> uploadFile(File file, String _id, int index) async {
       // File file = File(filePath);
 
@@ -148,10 +240,10 @@ class AuthService {
             : 'none',
         'difficulty': difficulty,
         'elevation': elevation,
-        'elevation_differences': elev_differences,
-        'trip_length': trip_length,
+        'elevation_differences': elevDifferences,
+        'trip_length': tripLength,
         'showable': true,
-        'verified': true, //TODO: check
+        'verified': isAdmin, //TODO: check
         // 'transportCost': transportCost,
       }, SetOptions(merge: true));
     } on FirebaseException catch (e) {

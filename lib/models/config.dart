@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 /// Creates easily accesible configuration data for things like app theme.
 class ConfigData extends ChangeNotifier {

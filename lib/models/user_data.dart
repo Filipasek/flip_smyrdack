@@ -6,11 +6,15 @@ class UserData extends ChangeNotifier {
   //Logout
   String? currentUserId, currentUserPhoto, name, mail;
   int minimumVersion = 0, workingVersion = 0, currentVersion = 0, thisVersion = 0;
-  bool? isAdmin, isVerified;
+  bool? isAdmin, isVerified, isVerCodeSet;
   Future<void> logout() async {
     GoogleSignIn().signOut();
     FirebaseAuth.instance.signOut();
   }
+
+  //Admin tools
+  dynamic usersToBeVerified;
+  List? usersList;
 
   //User Location
   // Position _userLocation;

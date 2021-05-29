@@ -1,17 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/details_screen.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
+import 'package:flip_smyrdack/screens/users_to_be_verified_screen.dart';
+import 'package:flip_smyrdack/screens/verify_user.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:intl/date_symbol_data_local.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -19,14 +20,21 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  bool showOnlyVerified = true;
   @override
   Widget build(BuildContext context) {
     String? name = Provider.of<UserData>(context, listen: false).name;
     String begginingOfEmergencyText = name != null ? ", tutaj $name" : '';
-    Future firebaseData = FirebaseFirestore.instance
-        .collection('trips')
-        .where("showable", isEqualTo: true)
-        .get();
+    Future firebaseData = showOnlyVerified
+        ? FirebaseFirestore.instance
+            .collection('trips')
+            .where("showable", isEqualTo: true)
+            .where("verified", isEqualTo: true)
+            .get()
+        : FirebaseFirestore.instance
+            .collection('trips')
+            .where("showable", isEqualTo: true)
+            .get();
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -87,7 +95,7 @@ class _MainScreenState extends State<MainScreen> {
               )
             : null,
         elevation: 0.0,
-        leading: Provider.of<UserData>(context).isAdmin!
+        leading: Provider.of<UserData>(context, listen: false).isVerified!
             ? IconButton(
                 tooltip: 'Dodaj wstawkę',
                 onPressed: () => Navigator.of(context).push(
@@ -105,7 +113,7 @@ class _MainScreenState extends State<MainScreen> {
             message: 'Numer wersji',
             // padding: EdgeInsets.all(15.0),
             showDuration: Duration(seconds: 2),
-            child: Text('v7'),
+            child: Text('v11'),
           ),
           Container(
             padding: EdgeInsets.all(5.0),
@@ -114,21 +122,31 @@ class _MainScreenState extends State<MainScreen> {
               child: PopupMenuButton(
                 enableFeedback: true,
                 tooltip: 'Opcje',
-                color: Color.fromRGBO(112, 238, 156, 1),
+                // color: Color.fromRGBO(112, 238, 156, 1),
                 itemBuilder: (context) {
                   List<PopupMenuEntry> list = [
                     PopupMenuItem(
-                      child: Text("Pokazuj tylko zweryfikowane wstawki"),
+                      child: Text(showOnlyVerified
+                          ? "Pokazuj również niezweryfikowane wstawki"
+                          : "Pokazuj tylko zweryfikowane wstawki"),
                       value: 0,
-                      enabled: !Provider.of<UserData>(context, listen: false)
-                          .isVerified!,
                     ),
+                    Provider.of<UserData>(context, listen: false).isAdmin!
+                        ? PopupMenuItem(
+                          enabled: Provider.of<UserData>(context, listen: false).usersList!.length > 0,
+                            child: Text(
+                                "Osoby do zweryfikowania: ${Provider.of<UserData>(context, listen: false).usersList!.length}"),
+                            value: 1,
+                          )
+                        : PopupMenuDivider(
+                            height: 0,
+                          ) as PopupMenuEntry,
                     PopupMenuItem(
                       child: Provider.of<UserData>(context, listen: false)
                               .isVerified!
                           ? Text('Konto zweryfikowane')
                           : Text("Zweryfikuj konto"),
-                      value: 1,
+                      value: 2,
                       enabled: !Provider.of<UserData>(context, listen: false)
                           .isVerified!,
                     ),
@@ -139,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
                           color: Color.fromRGBO(249, 101, 116, 1),
                         ),
                       ),
-                      value: 2,
+                      value: 3,
                       enabled: true,
                     ),
                     // PopupMenuItem(
@@ -163,9 +181,32 @@ class _MainScreenState extends State<MainScreen> {
                 },
                 onSelected: (value) {
                   switch (value) {
+                    case 0:
+                      setState(() {
+                        showOnlyVerified = !showOnlyVerified;
+                      });
+                      break;
+                    case 1:
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return UsersToBeVerifiedScreen();
+                          },
+                        ),
+                      );
+                      break;
                     case 2:
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return VerifyUserScreen();
+                          },
+                        ),
+                      );
+                      break;
+                    case 3:
                       UserData().logout().then((value) {
-                        Navigator.of(context).push(
+                        Navigator.of(context).pushReplacement(
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) {
                               return HomeScreen();
@@ -198,108 +239,111 @@ class _MainScreenState extends State<MainScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: Container(
-        padding: EdgeInsets.all(5.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(100.0),
-          child: PopupMenuButton(
-            enableFeedback: true,
-            tooltip: 'Opcje',
-            itemBuilder: (context) {
-              List<PopupMenuEntry> list = [
-                PopupMenuItem(
-                  child: Text("Zadzwoń do: Smyrdack"),
-                  value: 0,
-                  enabled: true,
-                ),
-                PopupMenuItem(
-                  child: Text("Wyślij SMS-a do: Smyrdack"),
-                  value: 1,
-                  enabled: true,
-                ),
-                PopupMenuDivider(
-                  height: 10,
-                ),
-                PopupMenuItem(
-                  child: Text("Zadzwoń do: Flip"),
-                  value: 2,
-                  enabled: true,
-                ),
-                PopupMenuItem(
-                  child: Text("Wyślij SMS-a do: Flip"),
-                  value: 3,
-                  enabled: true,
-                ),
-                // PopupMenuItem(
-                //   child: Text("Setting Language"),
-                //   value: 1,
-                // ),
-                // PopupMenuDivider(
-                //   height: 10,
-                // ),
-                // CheckedPopupMenuItem(
-                //   child: Text(
-                //     "Nie zweryfikowano",
-                //     style: TextStyle(color: Colors.black),
-                //   ),
-                //   value: 2,
-                //   checked: false,
+      floatingActionButton:
+          Provider.of<UserData>(context, listen: false).isVerified!
+              ? Container(
+                  padding: EdgeInsets.all(5.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100.0),
+                    child: PopupMenuButton(
+                      enableFeedback: true,
+                      tooltip: 'Opcje',
+                      itemBuilder: (context) {
+                        List<PopupMenuEntry> list = [
+                          PopupMenuItem(
+                            child: Text("Zadzwoń do: Smyrdack"),
+                            value: 0,
+                            enabled: true,
+                          ),
+                          PopupMenuItem(
+                            child: Text("Wyślij SMS-a do: Smyrdack"),
+                            value: 1,
+                            enabled: true,
+                          ),
+                          PopupMenuDivider(
+                            height: 10,
+                          ),
+                          PopupMenuItem(
+                            child: Text("Zadzwoń do: Flip"),
+                            value: 2,
+                            enabled: true,
+                          ),
+                          PopupMenuItem(
+                            child: Text("Wyślij SMS-a do: Flip"),
+                            value: 3,
+                            enabled: true,
+                          ),
+                          // PopupMenuItem(
+                          //   child: Text("Setting Language"),
+                          //   value: 1,
+                          // ),
+                          // PopupMenuDivider(
+                          //   height: 10,
+                          // ),
+                          // CheckedPopupMenuItem(
+                          //   child: Text(
+                          //     "Nie zweryfikowano",
+                          //     style: TextStyle(color: Colors.black),
+                          //   ),
+                          //   value: 2,
+                          //   checked: false,
 
-                // ),
-              ];
-              return list;
-            },
-            onSelected: (value) {
-              switch (value) {
-                case 0:
-                  launch(Uri(
-                    scheme: 'tel',
-                    path: '+48518669037',
-                    // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
-                  ).toString());
-                  break;
-                case 1:
-                  launch(Uri(
-                    scheme: 'sms',
-                    path: '+48518669037',
-                    queryParameters: {
-                      'body':
-                          'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
-                    },
-                  ).toString());
-                  break;
-                case 2:
-                  launch(Uri(
-                    scheme: 'tel',
-                    path: '+48692847356',
-                    // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
-                  ).toString());
-                  break;
-                case 3:
-                  launch(Uri(
-                    scheme: 'sms',
-                    path: '+48692847356',
-                    queryParameters: {
-                      'body':
-                          'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
-                    },
-                  ).toString());
-                  break;
-                default:
-              }
-            },
-            child: Container(
-              height: 60.0,
-              width: 60.0,
-              color: Theme.of(context).accentColor,
-              child: Icon(
-                Icons.call_rounded,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
+                          // ),
+                        ];
+                        return list;
+                      },
+                      onSelected: (value) {
+                        switch (value) {
+                          case 0:
+                            launch(Uri(
+                              scheme: 'tel',
+                              path: '+48518669037',
+                              // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
+                            ).toString());
+                            break;
+                          case 1:
+                            launch(Uri(
+                              scheme: 'sms',
+                              path: '+48518669037',
+                              queryParameters: {
+                                'body':
+                                    'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
+                              },
+                            ).toString());
+                            break;
+                          case 2:
+                            launch(Uri(
+                              scheme: 'tel',
+                              path: '+48692847356',
+                              // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
+                            ).toString());
+                            break;
+                          case 3:
+                            launch(Uri(
+                              scheme: 'sms',
+                              path: '+48692847356',
+                              queryParameters: {
+                                'body':
+                                    'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
+                              },
+                            ).toString());
+                            break;
+                          default:
+                        }
+                      },
+                      child: Container(
+                        height: 60.0,
+                        width: 60.0,
+                        color: Theme.of(context).accentColor,
+                        child: Icon(
+                          Icons.call_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : null,
       body: FutureBuilder(
         future: firebaseData,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -310,8 +354,16 @@ class _MainScreenState extends State<MainScreen> {
             return RefreshIndicator(
               onRefresh: () async {
                 setState(() {
-                  firebaseData =
-                      FirebaseFirestore.instance.collection('trips').get();
+                  firebaseData = showOnlyVerified
+                      ? FirebaseFirestore.instance
+                          .collection('trips')
+                          .where("showable", isEqualTo: true)
+                          .where("verified", isEqualTo: true)
+                          .get()
+                      : FirebaseFirestore.instance
+                          .collection('trips')
+                          .where("showable", isEqualTo: true)
+                          .get();
                 });
                 return firebaseData;
               },
@@ -428,7 +480,7 @@ class Destinations extends StatelessWidget {
   List eager;
   List<String> imageUrl; //TODO: list
   int _id;
-  int elevation, elev_difference, trip_length;
+  int elevation, elevDifference, tripLength;
   bool verified;
 
   Destinations(
@@ -445,8 +497,8 @@ class Destinations extends StatelessWidget {
     this.eager,
     this._id,
     this.elevation,
-    this.elev_difference,
-    this.trip_length,
+    this.elevDifference,
+    this.tripLength,
     this.verified,
   );
 
@@ -504,9 +556,9 @@ class Destinations extends StatelessWidget {
                           endTime,
                           otherCosts,
                           startTime,
-                          elev_difference,
+                          elevDifference,
                           elevation,
-                          trip_length,
+                          tripLength,
                           eager,
                           _id,
                         );

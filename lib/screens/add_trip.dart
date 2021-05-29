@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:badges/badges.dart';
+import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AddTripScreen extends StatefulWidget {
   @override
@@ -15,7 +17,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   bool isSent = false, isDone = false;
   String? name, description, difficulty;
   String sendingErrorText = '';
-  int? transportCost, otherCosts, elevation, elev_differences, trip_length;
+  int? transportCost, otherCosts, elevation, elevDifferences, tripLength;
   TimeOfDay? startTime, endTime;
   DateTime? date;
   String? _chosenValue;
@@ -104,11 +106,11 @@ class _AddTripScreenState extends State<AddTripScreen> {
                             CustomTextField('Wysokość (w metrach)', 'int', 3,
                                 setElevation, loading),
                             SizedBox(height: 5.0),
-                            CustomTextField('Przewyższenia (w metrach)', 'int', 3,
-                                setElevationDifferences, loading),
+                            CustomTextField('Przewyższenia (w metrach)', 'int',
+                                3, setElevationDifferences, loading),
                             SizedBox(height: 5.0),
-                            CustomTextField('Długość trasy (w metrach)', 'int', 3,
-                                setTripLength, loading),
+                            CustomTextField('Długość trasy (w metrach)', 'int',
+                                3, setTripLength, loading),
                             SizedBox(height: 5.0),
                             CustomTextField('Koszt transportu (w zł)', 'int', 1,
                                 settransportCost, loading),
@@ -392,8 +394,11 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       _image!,
                                       difficulty!,
                                       elevation!,
-                                      elev_differences!,
-                                      trip_length!,
+                                      elevDifferences!,
+                                      tripLength!,
+                                      Provider.of<UserData>(context,
+                                              listen: false)
+                                          .isAdmin!,
                                     ).then((bool value) {
                                       setState(() {
                                         isSent = value;
@@ -493,11 +498,13 @@ class _AddTripScreenState extends State<AddTripScreen> {
   void setElevation(dynamic data) {
     elevation = int.parse(data);
   }
+
   void setElevationDifferences(dynamic data) {
-    elev_differences = int.parse(data);
+    elevDifferences = int.parse(data);
   }
+
   void setTripLength(dynamic data) {
-    trip_length = int.parse(data);
+    tripLength = int.parse(data);
   }
 
   void setDescription(dynamic data) {

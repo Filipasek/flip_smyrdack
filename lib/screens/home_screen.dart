@@ -8,19 +8,20 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
-  int apiVersion = 7; //TODO: change when major update been made to api
+  int apiVersion = 10; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: FutureBuilder(
-        future: FirebaseFirestore.instance
-            .collection('appInfo')
-            .doc('API version')
-            .get(),
+        future: FirebaseFirestore.instance.collection('appInfo').get(),
         builder: (BuildContext context, AsyncSnapshot sh) {
           if (sh.hasData) {
-            Map versions = sh.data!.data();
+            dynamic data = sh.data!.docs;
+            dynamic versions = data[0];
+            List usersList =
+                data[1]['usersList'] ?? [];
+            dynamic usersToBeVerified = data[1];
             if (apiVersion >= versions['minimum']) {
               return StreamBuilder<User?>(
                 stream: Provider.of<FirebaseAuth>(context, listen: false)
@@ -50,6 +51,9 @@ class HomeScreen extends StatelessWidget {
 
                             Provider.of<UserData>(context, listen: false)
                                 .currentUserId = _user.uid;
+                            Provider.of<UserData>(context, listen: false)
+                                    .isVerCodeSet =
+                                _data.containsKey('verificationCode');
                             Provider.of<UserData>(context, listen: false).name =
                                 _user.displayName;
                             Provider.of<UserData>(context, listen: false).mail =
@@ -61,6 +65,12 @@ class HomeScreen extends StatelessWidget {
                                 .isAdmin = _data['admin'];
                             Provider.of<UserData>(context, listen: false)
                                 .isVerified = _data['verified'];
+                            if (_data['admin']) {
+                              Provider.of<UserData>(context, listen: false)
+                                  .usersList = usersList;
+                              Provider.of<UserData>(context, listen: false)
+                                  .usersToBeVerified = usersToBeVerified;
+                            }
                             return MainScreen();
                           } else if (snapshot.hasError) {
                             return Center(

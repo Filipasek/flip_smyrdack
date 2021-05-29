@@ -4,10 +4,10 @@ import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
+// import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:carousel_slider/carousel_controller.dart';
+// import 'package:intl/date_symbol_data_local.dart';
+// import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +19,8 @@ class DetailsScreen extends StatefulWidget {
       transportCost,
       otherCosts,
       elevation,
-      elev_differences,
-      trip_length,
+      elevDifferences,
+      tripLength,
       _id;
   List eagers;
   List<String> imageUrl; //TODO: list
@@ -36,9 +36,9 @@ class DetailsScreen extends StatefulWidget {
     this.endTime,
     this.otherCosts,
     this.startTime,
-    this.elev_differences,
+    this.elevDifferences,
     this.elevation,
-    this.trip_length,
+    this.tripLength,
     this.eagers,
     this._id,
   );
@@ -295,7 +295,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         'Planowany czas końca trasy'),
                     CreateColumnOfInfo(
                         'Przewyższeń',
-                        convertBigToSmall(widget.elev_differences),
+                        convertBigToSmall(widget.elevDifferences),
                         // '${widget.elev_differences.toString()} m',
                         'Ilość przewyższeń według map wyrażona w metrach'),
                     CreateColumnOfInfo(
@@ -305,7 +305,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         'Wysokość miejsca docelowego wyrażona w metrach'),
                     CreateColumnOfInfo(
                         'Długość',
-                        convertBigToSmall(widget.trip_length),
+                        convertBigToSmall(widget.tripLength),
                         // '${widget.trip_length.toString()} m',
                         'Długość trasy według map wyrażona w metrach'),
                     CreateColumnOfInfo(
