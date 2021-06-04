@@ -129,36 +129,48 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   ),
                 ),
                 Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        child: Text(
-                          'Adres e-mail: ${data['contactData']}',
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.black,
-                          ),
-                        ),
+                  child: Container(
+                    child: Text(
+                      'Adres e-mail: ${data['contactData']}',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.black,
                       ),
-                      IconButton(
-                        onPressed: () {
-                          launch(Uri(
-                            scheme: 'mailto',
-                            path: data['contactData'],
-                            queryParameters: {
-                              'subject':
-                                  'Administracja Flip&Smyrdack w sprawie weryfikacji konta'
-                            },
-                          ).toString());
-                        },
-                        icon: Icon(
-                          Icons.mail_outline,
-                        ),
-                      )
-                    ],
+                    ),
                   ),
                 ),
+
+                // Center(
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Container(
+                //         child: Text(
+                //           'Adres e-mail: ${data['contactData']}',
+                //           style: TextStyle(
+                //             fontSize: 14.0,
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //       ),
+                //       IconButton(
+                //         onPressed: () {
+                //           launch(Uri(
+                //             scheme: 'mailto',
+                //             path: data['contactData'],
+                //             queryParameters: {
+                //               'subject':
+                //                   'Administracja Flip&Smyrdack w sprawie weryfikacji konta'
+                //             },
+                //           ).toString());
+                //         },
+                //         icon: Icon(
+                //           Icons.mail_outline,
+                //         ),
+                //       )
+                //     ],
+                //   ),
+                // ),
                 Center(
                   child: Container(
                     padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
