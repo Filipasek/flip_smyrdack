@@ -3,7 +3,9 @@ import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 // import 'dart:io';
 import 'package:intl/intl.dart';
 // import 'package:intl/date_symbol_data_local.dart';
@@ -11,6 +13,9 @@ import 'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
+// import 'package:flip_smyrdack/ad_helper.dart';
+
+import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
 
 class DetailsScreen extends StatefulWidget {
   String name, startTime, endTime, difficulty, description;
@@ -56,6 +61,16 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  // late BannerAd _ad;
+  String get bannerAdUnitId {
+    if (kDebugMode)
+      return native_admob.MobileAds.bannerAdTestUnitId;
+    else
+      return 'ca-app-pub-9537370157330943/9208297999';
+  }
+
+  // TODO: Add _isAdLoaded
+  bool _isAdLoaded = false;
   Future<bool> _onWillPop() async {
     if (amJustAdded || amJustRemoved) {
       Navigator.of(context).pushReplacement(
@@ -76,6 +91,42 @@ class _DetailsScreenState extends State<DetailsScreen> {
   bool amJustAdded = false;
   bool amJustRemoved = false;
   bool loading = false;
+  @override
+  void initState() {
+    super.initState();
+
+    // TODO: Create a BannerAd instance
+    // _ad = BannerAd(
+    //   adUnitId: AdHelper.bannerAdUnitId,
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(
+    //     onAdLoaded: (_) {
+    //       setState(() {
+    //         _isAdLoaded = true;
+    //       });
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       // Releases an ad resource when it fails to load
+    //       ad.dispose();
+
+    //       print('Ad load failed (code=${error.code} message=${error.message})');
+    //     },
+    //   ),
+    // );
+
+    // // TODO: Load an ad
+    // _ad.load();
+  }
+
+  @override
+  void dispose() {
+    // TODO: Dispose a BannerAd object
+    // _ad.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     numberOfPeople = amJustAdded
@@ -318,12 +369,26 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   ],
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SingleInfoTextBold('Opis:'),
               ),
+              // Container(
+              //   child: AdWidget(ad: _ad),
+              //   width: _ad.size.width.toDouble(),
+              //   height: 72.0,
+              //   alignment: Alignment.center,
+              // ),
+              native_admob.BannerAd(
+                unitId: bannerAdUnitId,
+                size: native_admob.BannerSize.ADAPTIVE,
+                loading: Center(child: Text('Ładowanie reklamy')),
+                // loading: LinearProgressIndicator(),
+                error: Center(child: Text('Nie udało się załadować reklamy')),
+              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 40.0),
+                padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
                 child: Text(
                   widget.description,
                   // maxLines: 2,

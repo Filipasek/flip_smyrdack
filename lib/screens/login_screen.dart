@@ -2,6 +2,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
+// import 'package:flip_smyrdack/ad_helper.dart';
+import 'package:flutter/foundation.dart';
+import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -9,6 +13,48 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // late BannerAd _ad;
+  bool _isAdLoaded = false;
+  String get bannerAdUnitId {
+    if (kDebugMode)
+      return native_admob.MobileAds.bannerAdTestUnitId;
+    else
+      return 'ca-app-pub-9537370157330943/2383089090';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // _ad = BannerAd(
+    //   adUnitId: AdHelper.bannerAdUnitId,
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(
+    //     onAdLoaded: (_) {
+    //       setState(() {
+    //         _isAdLoaded = true;
+    //       });
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       // Releases an ad resource when it fails to load
+    //       ad.dispose();
+
+    //       print('Ad load failed (code=${error.code} message=${error.message})');
+    //     },
+    //   ),
+    // );
+
+    // _ad.load();
+  }
+
+  @override
+  void dispose() {
+    // _ad.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // return GestureDetector(
@@ -43,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          SizedBox(height: 0.0, width: double.infinity),
+          Expanded(child: SizedBox(height: 0.0, width: double.infinity)),
           Container(
             padding: EdgeInsets.only(bottom: 20.0),
             child: FlatButton(
@@ -59,6 +105,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+          ),
+          // Container(
+          //   child: AdWidget(ad: _ad),
+          //   width: _ad.size.width.toDouble(),
+          //   height: 72.0,
+          //   alignment: Alignment.center,
+          // ),
+          native_admob.BannerAd(
+            unitId: bannerAdUnitId,
+            size: native_admob.BannerSize.ADAPTIVE,
+            loading: Center(child: Text('Ładowanie reklamy')),
+            error: Center(child: Text('Nie udało się załadować reklamy')),
           ),
         ],
       ),

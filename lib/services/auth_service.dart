@@ -252,6 +252,17 @@ class AuthService {
     return true;
   }
 
+  static Future<bool> incrementDiamonds(userId, int amount) async {
+    try {
+      await _firestore.collection('/users').doc(userId).set({
+        'diamonds': FieldValue.increment(amount),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      return Future.error(e);
+    }
+    return true;
+  }
+
   static Future addUserToDatabase(
     userId,
     String? name,
@@ -264,12 +275,13 @@ class AuthService {
       'name': name,
       'contactData': contactData,
       'avatar': avatar,
-      'last_login': DateTime.now(),
-      'first_login': DateTime.now(),
+      'last_login': DateTime.now().toUtc(),
+      'first_login': DateTime.now().toUtc(),
       'verified': false,
       'admin': false,
       'phoneNumber': phoneNumber,
       'hasBeenVerifiedByGoogleOrSomethingIdk': isVerified,
+      'diamonds': 0,
     }, SetOptions(merge: false));
   }
 
@@ -358,5 +370,21 @@ class AuthService {
     } on Exception catch (e) {
       print(e);
     }
+  }
+
+  static Future<bool> signInWithPhoneNumber(
+      String smsCode, verId, phoneNumber) async {
+    final AuthCredential credential =
+        PhoneAuthProvider.credential(verificationId: verId, smsCode: smsCode);
+    // UserCredential _authResult = await _auth.signInWithCredential(credential).then((value) => null);
+
+    // _auth.verifyPhoneNumber(phoneNumber: phoneNumber, verificationCompleted: verificationCompleted, verificationFailed: verificationFailed, codeSent: codeSent, codeAutoRetrievalTimeout: codeAutoRetrievalTimeout)
+    // if (_authResult.additionalUserInfo!.isNewUser) {
+    //   //TODO: handle
+    // } else {
+    //   Navigator.pushReplacement(
+    //       context, MaterialPageRoute(builder: (_) => MyApp()));
+    // }
+    return true;
   }
 }

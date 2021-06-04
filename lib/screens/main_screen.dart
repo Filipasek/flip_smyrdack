@@ -4,8 +4,10 @@ import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/details_screen.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
+import 'package:flip_smyrdack/screens/my_account_screen.dart';
 import 'package:flip_smyrdack/screens/users_to_be_verified_screen.dart';
 import 'package:flip_smyrdack/screens/verify_user.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,10 @@ import 'package:intl/intl.dart';
 // import 'package:intl/date_symbol_data_local.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flip_smyrdack/ad_helper.dart';
+
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
 
 class MainScreen extends StatefulWidget {
   @override
@@ -20,6 +26,58 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  static final _kAdIndex = 1;
+  // late BannerAd _ad;
+  bool _isAdLoaded = false;
+
+  int _getDestinationItemIndex(int rawIndex) {
+    if (rawIndex >= _kAdIndex) {
+      return rawIndex - 1;
+    }
+    return rawIndex;
+  }
+
+  String get bannerAdUnitId {
+    //list screen ad
+    if (kDebugMode)
+      return native_admob.MobileAds.bannerAdTestUnitId;
+    else
+      return 'ca-app-pub-9537370157330943/4756889424';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // _ad = BannerAd(
+    //   adUnitId: AdHelper.bannerAdUnitId,
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(
+    //     onAdLoaded: (_) {
+    //       setState(() {
+    //         _isAdLoaded = true;
+    //       });
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       // Releases an ad resource when it fails to load
+    //       ad.dispose();
+
+    //       print('Ad load failed (code=${error.code} message=${error.message})');
+    //     },
+    //   ),
+    // );
+
+    // _ad.load();
+  }
+
+  @override
+  void dispose() {
+    // _ad.dispose();
+
+    super.dispose();
+  }
+
   bool showOnlyVerified = true;
   @override
   Widget build(BuildContext context) {
@@ -113,7 +171,7 @@ class _MainScreenState extends State<MainScreen> {
             message: 'Numer wersji',
             // padding: EdgeInsets.all(15.0),
             showDuration: Duration(seconds: 2),
-            child: Text('v12'),
+            child: Text('v13'),
           ),
           Container(
             padding: EdgeInsets.all(5.0),
@@ -133,7 +191,11 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Provider.of<UserData>(context, listen: false).isAdmin!
                         ? PopupMenuItem(
-                          enabled: Provider.of<UserData>(context, listen: false).usersList!.length > 0,
+                            enabled:
+                                Provider.of<UserData>(context, listen: false)
+                                        .usersList!
+                                        .length >
+                                    0,
                             child: Text(
                                 "Osoby do zweryfikowania: ${Provider.of<UserData>(context, listen: false).usersList!.length}"),
                             value: 1,
@@ -152,21 +214,24 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     PopupMenuItem(
                       child: Text(
+                        "Moje konto",
+                        // style: TextStyle(
+                        //   color: Color.fromRGBO(249, 101, 116, 1),
+                        // ),
+                      ),
+                      value: 3,
+                      enabled: true,
+                    ),
+                    PopupMenuItem(
+                      child: Text(
                         "Wyloguj się",
                         style: TextStyle(
                           color: Color.fromRGBO(249, 101, 116, 1),
                         ),
                       ),
-                      value: 3,
+                      value: 4,
                       enabled: true,
                     ),
-                    // PopupMenuItem(
-                    //   child: Text("Setting Language"),
-                    //   value: 1,
-                    // ),
-                    // PopupMenuDivider(
-                    //   height: 10,
-                    // ),
                     // CheckedPopupMenuItem(
                     //   child: Text(
                     //     "Nie zweryfikowano",
@@ -205,6 +270,15 @@ class _MainScreenState extends State<MainScreen> {
                       );
                       break;
                     case 3:
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return MyAccountScreen();
+                          },
+                        ),
+                      );
+                      break;
+                    case 4:
                       UserData().logout().then((value) {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute<void>(
@@ -369,37 +443,75 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: length > 0
                   ? ListView.builder(
-                      itemCount: length + 1,
+                      itemCount: length + 2,
                       itemBuilder: (context, index) {
-                        if (index == length) return SizedBox(height: 75.0);
-                        dynamic info = data[index];
-                        List<String> photosList = [];
-                        for (int i = 0; i < info['photosCount']; i++) {
-                          photosList = [
-                            ...photosList,
-                            ...[info['photo$i']]
-                          ];
+                        if (index == (length + 1))
+                          return SizedBox(height: 75.0);
+                        if (index == _kAdIndex) {
+                          // return Container(
+                          //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
+                          //   child: AdWidget(ad: _ad),
+                          //   // width: _ad.size.width.toDouble(),
+                          //   height: _ad.size.height.toDouble(),
+                          //   // height: 72.0,
+                          //   width: double.infinity,
+                          //   alignment: Alignment.center,
+                          // );
+                          return native_admob.BannerAd(
+                            unitId: bannerAdUnitId,
+                            size: native_admob.BannerSize.ADAPTIVE,
+                            loading: Center(child: Text('Ładowanie reklamy')),
+                            // loading: Center(child: CircularProgressIndicator()),
+                            error: Center(
+                                child: Text('Nie udało się załadować reklamy')),
+                            // builder: (context, child) {
+                            //   return Container(
+                            //     margin:
+                            //         EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+                            //     decoration: BoxDecoration(
+                            //       borderRadius: BorderRadius.circular(15.0),
+                            //       border: Border.all(
+                            //         color: Colors.grey,
+                            //       ),
+                            //     ),
+                            //     child: ClipRRect(
+                            //       borderRadius: BorderRadius.circular(15.0),
+                            //       child: child,
+                            //     ),
+                            //   );
+                            // }
+                            // unitId: ,
+                          );
+                        } else {
+                          dynamic info = data[_getDestinationItemIndex(index)];
+                          List<String> photosList = [];
+                          for (int i = 0; i < info['photosCount']; i++) {
+                            photosList = [
+                              ...photosList,
+                              ...[info['photo$i']]
+                            ];
+                          }
+                          return Destinations(
+                            index,
+                            info['name'],
+                            info['date'],
+                            info['difficulty'],
+                            info['transportCost'],
+                            photosList,
+                            info['description'],
+                            info['endTime'],
+                            info['otherCosts'],
+                            info['startTime'],
+                            info.data().containsKey('eagers')
+                                ? info['eagers']
+                                : [],
+                            info['createdTimestamp'],
+                            info['elevation'],
+                            info['elevation_differences'],
+                            info['trip_length'],
+                            info['verified'],
+                          );
                         }
-                        return Destinations(
-                          index,
-                          info['name'],
-                          info['date'],
-                          info['difficulty'],
-                          info['transportCost'],
-                          photosList,
-                          info['description'],
-                          info['endTime'],
-                          info['otherCosts'],
-                          info['startTime'],
-                          info.data().containsKey('eagers')
-                              ? info['eagers']
-                              : [],
-                          info['createdTimestamp'],
-                          info['elevation'],
-                          info['elevation_differences'],
-                          info['trip_length'],
-                          info['verified'],
-                        );
                       },
                     )
                   : Center(

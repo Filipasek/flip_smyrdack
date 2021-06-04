@@ -3,10 +3,14 @@ import 'dart:io';
 import 'package:badges/badges.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+// import 'package:flip_smyrdack/ad_helper.dart';
+import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
 
 class AddTripScreen extends StatefulWidget {
   @override
@@ -14,6 +18,15 @@ class AddTripScreen extends StatefulWidget {
 }
 
 class _AddTripScreenState extends State<AddTripScreen> {
+  // late BannerAd _ad;
+  bool _isAdLoaded = false;
+  String get bannerAdUnitId {
+    if (kDebugMode)
+      return native_admob.MobileAds.bannerAdTestUnitId;
+    else
+      return 'ca-app-pub-9537370157330943/1364439321';
+  }
+
   bool isSent = false, isDone = false;
   String? name, description, difficulty;
   String sendingErrorText = '';
@@ -32,6 +45,43 @@ class _AddTripScreenState extends State<AddTripScreen> {
   final picker = ImagePicker();
 
   final df = DateFormat('dd.MM.yyyy');
+
+  @override
+  void initState() {
+    super.initState();
+
+    // TODO: Create a BannerAd instance
+    // _ad = BannerAd(
+    //   adUnitId: AdHelper.bannerAdUnitId,
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(
+    //     onAdLoaded: (_) {
+    //       setState(() {
+    //         _isAdLoaded = true;
+    //       });
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       // Releases an ad resource when it fails to load
+    //       ad.dispose();
+
+    //       print('Ad load failed (code=${error.code} message=${error.message})');
+    //     },
+    //   ),
+    // );
+
+    // // TODO: Load an ad
+    // _ad.load();
+  }
+
+  @override
+  void dispose() {
+    // TODO: Dispose a BannerAd object
+    // _ad.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,6 +140,22 @@ class _AddTripScreenState extends State<AddTripScreen> {
           : SingleChildScrollView(
               child: Column(
                 children: <Widget>[
+                  native_admob.BannerAd(
+                    unitId: bannerAdUnitId,
+                    size: native_admob.BannerSize.ADAPTIVE,
+                    loading: Center(child: Text('Ładowanie reklamy')),
+                    error:
+                        Center(child: Text('Nie udało się załadować reklamy')),
+                  ),
+                  // Container(
+                  //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
+                  //   child: AdWidget(ad: _ad),
+                  //   // width: _ad.size.width.toDouble(),
+                  //   height: _ad.size.height.toDouble(),
+                  //   // height: 72.0,
+                  //   width: double.infinity,
+                  //   alignment: Alignment.center,
+                  // ),
                   Form(
                     key: _formKey,
                     child: Container(
@@ -103,6 +169,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                             CustomTextField(
                                 'Nazwa miejsca', 'text', 3, setName, loading),
                             SizedBox(height: 5.0),
+
                             CustomTextField('Wysokość (w metrach)', 'int', 3,
                                 setElevation, loading),
                             SizedBox(height: 5.0),

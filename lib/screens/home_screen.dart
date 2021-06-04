@@ -6,9 +6,15 @@ import 'package:flip_smyrdack/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomeScreen extends StatelessWidget {
-  int apiVersion = 12; //TODO: change when major update been made to api
+  // Future<InitializationStatus> _initGoogleMobileAds() {
+  //   // TODO: Initialize Google Mobile Ads SDK
+  //   return MobileAds.instance.initialize();
+  // }
+
+  int apiVersion = 13; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,8 +25,7 @@ class HomeScreen extends StatelessWidget {
           if (sh.hasData) {
             dynamic data = sh.data!.docs;
             dynamic versions = data[0];
-            List usersList =
-                data[1]['usersList'] ?? [];
+            List usersList = data[1]['usersList'] ?? [];
             dynamic usersToBeVerified = data[1];
             if (apiVersion >= versions['minimum']) {
               return StreamBuilder<User?>(
@@ -41,11 +46,11 @@ class HomeScreen extends StatelessWidget {
                             Map _data = snapshot.data!.data();
 
                             Provider.of<UserData>(context, listen: false)
-                                .currentVersion = versions['current'];
+                                .currentVersion = versions['current'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
-                                .minimumVersion = versions['minimum'];
+                                .minimumVersion = versions['minimum'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
-                                .workingVersion = versions['working'];
+                                .workingVersion = versions['working'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
                                 .thisVersion = apiVersion;
 
@@ -55,16 +60,19 @@ class HomeScreen extends StatelessWidget {
                                     .isVerCodeSet =
                                 _data.containsKey('verificationCode');
                             Provider.of<UserData>(context, listen: false).name =
-                                _user.displayName;
+                                _user.displayName ?? 'Brak';
                             Provider.of<UserData>(context, listen: false).mail =
                                 _user.email;
                             Provider.of<UserData>(context, listen: false)
-                                .currentUserPhoto = _user.photoURL;
+                                    .isPhoneVerified =
+                                !(_data['phoneNumber'] == 'none');
+                            Provider.of<UserData>(context, listen: false)
+                                .currentUserPhoto = _user.photoURL ?? 'https://techpowerusa.com/wp-content/uploads/2017/06/default-user.png';
 
                             Provider.of<UserData>(context, listen: false)
-                                .isAdmin = _data['admin'];
+                                .isAdmin = _data['admin'] ?? false;
                             Provider.of<UserData>(context, listen: false)
-                                .isVerified = _data['verified'];
+                                .isVerified = _data['verified'] ?? false;
                             if (_data['admin']) {
                               Provider.of<UserData>(context, listen: false)
                                   .usersList = usersList;
