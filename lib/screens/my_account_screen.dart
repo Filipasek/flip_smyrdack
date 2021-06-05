@@ -17,6 +17,7 @@ class MyAccountScreen extends StatefulWidget {
 }
 
 class _MyAccountScreenState extends State<MyAccountScreen> {
+
   int diamonds = 0;
   String get bannerAdUnitId {
     if (kDebugMode)
@@ -83,6 +84,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
@@ -97,6 +103,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
             .get(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
+            
             dynamic data = snapshot.data!.data();
             diamonds = data['diamonds'] ?? 0;
             return Column(
@@ -108,7 +115,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(100.0),
                       child: Image.network(
-                        data['avatar'],
+                        data['avatar'] ?? 'https://techpowerusa.com/wp-content/uploads/2017/06/default-user.png',
                         height: 120.0,
                         fit: BoxFit.cover,
                       ),
@@ -130,6 +137,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 ),
                 Center(
                   child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
                     child: Text(
                       'Adres e-mail: ${data['contactData']}',
                       style: TextStyle(
@@ -199,7 +207,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   child: Container(
                     padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
                     child: Text(
-                      'Pierwsze logowanie (UTC): ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['first_login'].toDate().toLocal())}',
+                      'Pierwsze logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['first_login'].toDate().toLocal())}',
                       style: TextStyle(
                         fontSize: 14.0,
                         color: Colors.black,
@@ -211,7 +219,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   child: Container(
                     padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
                     child: Text(
-                      'Ostatnie nowe logowanie (UTC): ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['last_login'].toDate())}',
+                      'Ostatnie nowe logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['last_login'].toDate())}',
                       style: TextStyle(
                         fontSize: 14.0,
                         color: Colors.black,
@@ -224,7 +232,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                     padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
                     child: Text(
                       // 'Ilość uzbieranych diamentów: ${data['diamonds'] ?? '[BŁĄD]'}',
-                      'Ilość uzbieranych diamentów: $diamonds',
+                      'Ilość wykopanych diamentów: $diamonds 💎',
                       style: TextStyle(
                         fontSize: 14.0,
                         color: Colors.black,
@@ -234,7 +242,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 ),
                 RaisedButton(
                   child: Text(
-                    'Dodaj trochę diamentów :)',
+                    'Weno wykop trochę diamentów :)',
                     style: TextStyle(
                       color: Colors.white,
                     ),

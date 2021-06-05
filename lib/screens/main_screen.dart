@@ -9,13 +9,16 @@ import 'package:flip_smyrdack/screens/users_to_be_verified_screen.dart';
 import 'package:flip_smyrdack/screens/verify_user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 // import 'package:intl/date_symbol_data_local.dart';
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flip_smyrdack/ad_helper.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
@@ -26,6 +29,31 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  bool isReviewAvailable = false;
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  bool updateReady = false;
+  Future<void> checkForUpdate() async {
+    await InAppUpdate.checkForUpdate().then((info) {
+      if (info.updateAvailability == UpdateAvailability.updateAvailable)
+        setState(() {
+          updateReady = true;
+        });
+    }).catchError((e) {
+      showSnack(e.toString());
+    });
+    setState(() async {
+      isReviewAvailable = await _inAppReview.isAvailable();
+    });
+  }
+
+  void showSnack(String text) {
+    if (_scaffoldKey.currentContext != null) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!)
+          .showSnackBar(SnackBar(content: Text(text)));
+    }
+  }
+
+  final InAppReview _inAppReview = InAppReview.instance;
   static final _kAdIndex = 1;
   // late BannerAd _ad;
   bool _isAdLoaded = false;
@@ -47,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
+    checkForUpdate();
     super.initState();
 
     // _ad = BannerAd(
@@ -96,28 +125,35 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        bottom: Provider.of<UserData>(context, listen: false).thisVersion <
-                Provider.of<UserData>(context, listen: false).currentVersion
+        // bottom: Provider.of<UserData>(context, listen: false).thisVersion <
+        //         Provider.of<UserData>(context, listen: false).currentVersion
+        bottom: updateReady
             ? PreferredSize(
                 preferredSize: Size.fromHeight(30.0),
                 child: Tooltip(
                   padding: EdgeInsets.all(15.0),
                   showDuration: Duration(seconds: 7),
-                  message: Provider.of<UserData>(context, listen: false)
-                              .thisVersion <
-                          Provider.of<UserData>(context, listen: false)
-                              .workingVersion
+                  // message: Provider.of<UserData>(context, listen: false)
+                  //             .thisVersion <
+                  //         Provider.of<UserData>(context, listen: false)
+                  //             .workingVersion
+                  message: true
                       ? 'Aplikacja wymaga pilnej aktualizacji. Zostały dodane nowe funkcje bądź zaktualizowano sposób działania bazy danych i ta wersja aplikacji może nie działać w pełni prawidłowo, bądź nie działać w ogóle. Sprawdź w sklepie z aplikacjami czy nie ma aktualizacji.'
                       : 'Aplikacja bądź baza danych dostała drobną aktualizację, która nie powinna wpłynąć na sposób jej działania i wszystkie funkcje powinny dalej działać, ale wszystkie nowo dodane nie będą dostępne aż do aktualizacji, Sprawdź w sklepie z aplikacjami czy nie ma dostępnej nowej wersji.',
                   child: Center(
-                    child: Container(
+                    child: FlatButton(
+                      onPressed: () async {
+                        InAppUpdate.performImmediateUpdate()
+                            .catchError((e) => showSnack(e.toString()));
+                      },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Provider.of<UserData>(context, listen: false)
-                                      .thisVersion <
-                                  Provider.of<UserData>(context, listen: false)
-                                      .workingVersion
+                          // Provider.of<UserData>(context, listen: false)
+                          //             .thisVersion <
+                          //         Provider.of<UserData>(context, listen: false)
+                          //             .workingVersion
+                          true
                               ? Icon(
                                   Icons.gpp_maybe_outlined,
                                   // : Icons.model_training_outlined,
@@ -132,11 +168,12 @@ class _MainScreenState extends State<MainScreen> {
                                 ),
                           SizedBox(width: 10.0),
                           Text(
-                            Provider.of<UserData>(context, listen: false)
-                                        .thisVersion <
-                                    Provider.of<UserData>(context,
-                                            listen: false)
-                                        .workingVersion
+                            // Provider.of<UserData>(context, listen: false)
+                            //             .thisVersion <
+                            //         Provider.of<UserData>(context,
+                            //                 listen: false)
+                            //             .workingVersion
+                            false
                                 ? 'Pilnie zaktualizuj aplikację!'
                                 : 'Dostępna nowa wersja aplikacji!',
                             textAlign: TextAlign.center,
@@ -171,7 +208,7 @@ class _MainScreenState extends State<MainScreen> {
             message: 'Numer wersji',
             // padding: EdgeInsets.all(15.0),
             showDuration: Duration(seconds: 2),
-            child: Text('v16'),
+            child: Text('v17'),
           ),
           Container(
             padding: EdgeInsets.all(5.0),
@@ -313,115 +350,141 @@ class _MainScreenState extends State<MainScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton:
-          Provider.of<UserData>(context, listen: false).isVerified!
-              ? Container(
-                  padding: EdgeInsets.all(5.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100.0),
-                    child: PopupMenuButton(
-                      enableFeedback: true,
-                      tooltip: 'Opcje',
-                      itemBuilder: (context) {
-                        List<PopupMenuEntry> list = [
-                          PopupMenuItem(
-                            child: Text("Zadzwoń do: Smyrdack"),
-                            value: 0,
-                            enabled: true,
-                          ),
-                          PopupMenuItem(
-                            child: Text("Wyślij SMS-a do: Smyrdack"),
-                            value: 1,
-                            enabled: true,
-                          ),
-                          PopupMenuDivider(
-                            height: 10,
-                          ),
-                          PopupMenuItem(
-                            child: Text("Zadzwoń do: Flip"),
-                            value: 2,
-                            enabled: true,
-                          ),
-                          PopupMenuItem(
-                            child: Text("Wyślij SMS-a do: Flip"),
-                            value: 3,
-                            enabled: true,
-                          ),
-                          // PopupMenuItem(
-                          //   child: Text("Setting Language"),
-                          //   value: 1,
-                          // ),
-                          // PopupMenuDivider(
-                          //   height: 10,
-                          // ),
-                          // CheckedPopupMenuItem(
-                          //   child: Text(
-                          //     "Nie zweryfikowano",
-                          //     style: TextStyle(color: Colors.black),
-                          //   ),
-                          //   value: 2,
-                          //   checked: false,
-
-                          // ),
-                        ];
-                        return list;
-                      },
-                      onSelected: (value) {
-                        switch (value) {
-                          case 0:
-                            launch(Uri(
-                              scheme: 'tel',
-                              path: '+48518669037',
-                              // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
-                            ).toString());
-                            break;
-                          case 1:
-                            launch(Uri(
-                              scheme: 'sms',
-                              path: '+48518669037',
-                              queryParameters: {
-                                'body':
-                                    'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
-                              },
-                            ).toString());
-                            break;
-                          case 2:
-                            launch(Uri(
-                              scheme: 'tel',
-                              path: '+48692847356',
-                              // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
-                            ).toString());
-                            break;
-                          case 3:
-                            launch(Uri(
-                              scheme: 'sms',
-                              path: '+48692847356',
-                              queryParameters: {
-                                'body':
-                                    'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
-                              },
-                            ).toString());
-                            break;
-                          default:
-                        }
-                      },
-                      child: Container(
-                        height: 60.0,
-                        width: 60.0,
-                        color: Theme.of(context).accentColor,
-                        child: Icon(
-                          Icons.call_rounded,
-                          color: Colors.white,
-                        ),
+      floatingActionButton: Provider.of<UserData>(context, listen: false)
+              .isVerified!
+          ? Container(
+              padding: EdgeInsets.all(5.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100.0),
+                child: PopupMenuButton(
+                  enableFeedback: true,
+                  tooltip: 'Opcje',
+                  itemBuilder: (context) {
+                    List<PopupMenuEntry> list = [
+                      PopupMenuItem(
+                        child: Text("Zadzwoń do: Smyrdack"),
+                        value: 0,
+                        enabled: true,
                       ),
+                      PopupMenuItem(
+                        child: Text("Wyślij SMS-a do: Smyrdack"),
+                        value: 1,
+                        enabled: true,
+                      ),
+                      PopupMenuDivider(
+                        height: 10,
+                      ),
+                      PopupMenuItem(
+                        child: Text("Zadzwoń do: Flip"),
+                        value: 2,
+                        enabled: true,
+                      ),
+                      PopupMenuItem(
+                        child: Text("Wyślij SMS-a do: Flip"),
+                        value: 3,
+                        enabled: true,
+                      ),
+                      // PopupMenuItem(
+                      //   child: Text("Setting Language"),
+                      //   value: 1,
+                      // ),
+                      // PopupMenuDivider(
+                      //   height: 10,
+                      // ),
+                      // CheckedPopupMenuItem(
+                      //   child: Text(
+                      //     "Nie zweryfikowano",
+                      //     style: TextStyle(color: Colors.black),
+                      //   ),
+                      //   value: 2,
+                      //   checked: false,
+
+                      // ),
+                    ];
+                    return list;
+                  },
+                  onSelected: (value) async {
+                    switch (value) {
+                      case 0:
+                        const number = '+48518669037';
+                        bool? res =
+                            await FlutterPhoneDirectCaller.callNumber(number);
+                        if (!res!)
+                          launch(Uri(
+                            scheme: 'tel',
+                            path: number,
+                            // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
+                          ).toString());
+                        break;
+                      case 1:
+                        launch(Uri(
+                          scheme: 'sms',
+                          path: '+48518669037',
+                          queryParameters: {
+                            'body':
+                                'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
+                          },
+                        ).toString());
+                        break;
+                      case 2:
+                        const number = '+48692847356';
+                        bool? res =
+                            await FlutterPhoneDirectCaller.callNumber(number);
+                        if (!res!)
+                          launch(Uri(
+                            scheme: 'tel',
+                            path: number,
+                            // queryParameters: {'body': 'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'},
+                          ).toString());
+                        break;
+                      case 3:
+                        launch(Uri(
+                          scheme: 'sms',
+                          path: '+48692847356',
+                          queryParameters: {
+                            'body':
+                                'Panie Przewodniku$begginingOfEmergencyText. Potrzebuję pilnego kontaktu.'
+                          },
+                        ).toString());
+                        break;
+                      default:
+                    }
+                  },
+                  child: Container(
+                    height: 60.0,
+                    width: 60.0,
+                    color: Theme.of(context).accentColor,
+                    child: Icon(
+                      Icons.call_rounded,
+                      color: Colors.white,
                     ),
                   ),
-                )
-              : null,
+                ),
+              ),
+            )
+          : null,
       body: FutureBuilder(
         future: firebaseData,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
+            if (Provider.of<UserData>(context, listen: false).isVerified! &&
+                isReviewAvailable) {
+              Future.delayed(const Duration(seconds: 3), () {
+                _inAppReview.requestReview();
+              });
+            }
+            // WidgetsBinding.instance!.addPostFrameCallback((_) async {
+            //   try {
+            //     final isAvailable = await _inAppReview.isAvailable();
+            //     print('HHH');
+            //     if (isAvailable)
+            //       Future.delayed(const Duration(seconds: 3), () {
+            //         _inAppReview.requestReview();
+            //       });
+            //   } catch (e) {
+            //     print(e);
+            //   }
+            // });
             List data = snapshot.data.docs;
             int length = data.length;
 
@@ -457,30 +520,38 @@ class _MainScreenState extends State<MainScreen> {
                           //   width: double.infinity,
                           //   alignment: Alignment.center,
                           // );
-                          return native_admob.BannerAd(
-                            unitId: bannerAdUnitId,
-                            size: native_admob.BannerSize.ADAPTIVE,
-                            loading: Center(child: Text('Ładowanie reklamy')),
-                            // loading: Center(child: CircularProgressIndicator()),
-                            error: Center(
-                                child: Text('Nie udało się załadować reklamy')),
-                            // builder: (context, child) {
-                            //   return Container(
-                            //     margin:
-                            //         EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
-                            //     decoration: BoxDecoration(
-                            //       borderRadius: BorderRadius.circular(15.0),
-                            //       border: Border.all(
-                            //         color: Colors.grey,
-                            //       ),
-                            //     ),
-                            //     child: ClipRRect(
-                            //       borderRadius: BorderRadius.circular(15.0),
-                            //       child: child,
-                            //     ),
-                            //   );
-                            // }
-                            // unitId: ,
+                          return InkWell(
+                            onTap: () => print('tapped'),
+                            child: native_admob.BannerAd(
+                              unitId: bannerAdUnitId,
+                              size: native_admob.BannerSize.ADAPTIVE,
+                              loading: Center(child: Text('Ładowanie reklamy')),
+                              // loading: Center(child: CircularProgressIndicator()),
+                              error: Center(
+                                  child:
+                                      Text('Nie udało się załadować reklamy')),
+                              // builder: (context, child) {
+                              //   return GestureDetector(
+                              //     onTap: () => print('tappp'),
+                              //     child: child,
+                              //   );
+                              // return Container(
+                              //   margin:
+                              //       EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+                              //   decoration: BoxDecoration(
+                              //     borderRadius: BorderRadius.circular(15.0),
+                              //     border: Border.all(
+                              //       color: Colors.grey,
+                              //     ),
+                              //   ),
+                              //   child: ClipRRect(
+                              //     borderRadius: BorderRadius.circular(15.0),
+                              //     child: child,
+                              //   ),
+                              // );
+                              // }
+                              // unitId: ,
+                            ),
                           );
                         } else {
                           dynamic info = data[_getDestinationItemIndex(index)];
