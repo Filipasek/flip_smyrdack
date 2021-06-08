@@ -1,11 +1,13 @@
+import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 import 'package:flutter/foundation.dart';
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isAdLoaded = false;
   String get bannerAdUnitId {
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/2383089090';
   }
@@ -112,12 +114,14 @@ class _LoginScreenState extends State<LoginScreen> {
           //   height: 72.0,
           //   alignment: Alignment.center,
           // ),
-          native_admob.BannerAd(
-            unitId: bannerAdUnitId,
-            size: native_admob.BannerSize.ADAPTIVE,
-            loading: Center(child: Text('Ładowanie reklamy')),
-            error: Center(child: Text('Nie udało się załadować reklamy')),
-          ),
+          Provider.of<UserData>(context, listen: false).showAds ?? true
+              ? BannerAd(
+                  unitId: bannerAdUnitId,
+                  size: BannerSize.ADAPTIVE,
+                  loading: Center(child: Text('Ładowanie reklamy')),
+                  error: Center(child: Text('Brak reklamy. Na nasz koszt :)')),
+                )
+              : SizedBox(),
         ],
       ),
     );

@@ -15,7 +15,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class DetailsScreen extends StatefulWidget {
   String name, startTime, endTime, difficulty, description;
@@ -64,7 +64,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   // late BannerAd _ad;
   String get bannerAdUnitId {
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/9208297999';
   }
@@ -380,13 +380,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
               //   height: 72.0,
               //   alignment: Alignment.center,
               // ),
-              native_admob.BannerAd(
+              Provider.of<UserData>(context, listen: false).showAds! ? BannerAd(
                 unitId: bannerAdUnitId,
-                size: native_admob.BannerSize.ADAPTIVE,
+                size: BannerSize.ADAPTIVE,
                 loading: Center(child: Text('Ładowanie reklamy')),
                 // loading: LinearProgressIndicator(),
-                error: Center(child: Text('Nie udało się załadować reklamy')),
-              ),
+                error: Center(child: Text('Brak reklamy. Na nasz koszt :)')),
+              ) : SizedBox(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
                 child: Text(

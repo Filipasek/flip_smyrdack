@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class AddTripScreen extends StatefulWidget {
   @override
@@ -22,7 +22,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   bool _isAdLoaded = false;
   String get bannerAdUnitId {
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/1364439321';
   }
@@ -140,13 +140,13 @@ class _AddTripScreenState extends State<AddTripScreen> {
           : SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  native_admob.BannerAd(
+                  Provider.of<UserData>(context, listen: false).showAds! ? BannerAd(
                     unitId: bannerAdUnitId,
-                    size: native_admob.BannerSize.ADAPTIVE,
+                    size: BannerSize.ADAPTIVE,
                     loading: Center(child: Text('Ładowanie reklamy')),
                     error:
-                        Center(child: Text('Nie udało się załadować reklamy')),
-                  ),
+                        Center(child: Text('Brak reklamy. Na nasz koszt :)')),
+                  ) : SizedBox(),
                   // Container(
                   //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
                   //   child: AdWidget(ad: _ad),

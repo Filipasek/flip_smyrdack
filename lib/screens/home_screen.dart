@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/login_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
@@ -14,9 +15,17 @@ class HomeScreen extends StatelessWidget {
   //   return MobileAds.instance.initialize();
   // }
 
-  int apiVersion = 17; //TODO: change when major update been made to api
+  int apiVersion = 19; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Theme.of(context).primaryColor,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: FutureBuilder(
@@ -25,8 +34,11 @@ class HomeScreen extends StatelessWidget {
           if (sh.hasData) {
             dynamic data = sh.data!.docs;
             dynamic versions = data[0];
-            List usersList = data[1]['usersList'] ?? [];
+            dynamic settings = data[1];
+            List usersList = data[2]['usersList'] ?? [];
             dynamic usersToBeVerified = data[1];
+            Provider.of<UserData>(context, listen: false).showAds =
+                settings['showAds'] ?? true;
             if (apiVersion >= versions['minimum']) {
               return StreamBuilder<User?>(
                 stream: Provider.of<FirebaseAuth>(context, listen: false)
@@ -46,16 +58,21 @@ class HomeScreen extends StatelessWidget {
                             Map _data = snapshot.data!.data();
 
                             Provider.of<UserData>(context, listen: false)
-                                .currentVersion = versions['current'] ?? apiVersion;
+                                    .currentVersion =
+                                versions['current'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
-                                .minimumVersion = versions['minimum'] ?? apiVersion;
+                                    .minimumVersion =
+                                versions['minimum'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
-                                .workingVersion = versions['working'] ?? apiVersion;
+                                    .workingVersion =
+                                versions['working'] ?? apiVersion;
                             Provider.of<UserData>(context, listen: false)
                                 .thisVersion = apiVersion;
 
                             Provider.of<UserData>(context, listen: false)
                                 .currentUserId = _user.uid;
+                            FirebaseCrashlytics.instance
+                                .setUserIdentifier(_user.uid.toString());
                             Provider.of<UserData>(context, listen: false)
                                     .isVerCodeSet =
                                 _data.containsKey('verificationCode');
@@ -67,7 +84,9 @@ class HomeScreen extends StatelessWidget {
                                     .isPhoneVerified =
                                 !(_data['phoneNumber'] == 'none');
                             Provider.of<UserData>(context, listen: false)
-                                .currentUserPhoto = _user.photoURL ?? 'https://techpowerusa.com/wp-content/uploads/2017/06/default-user.png';
+                                .currentUserPhoto = _user
+                                    .photoURL ??
+                                'https://techpowerusa.com/wp-content/uploads/2017/06/default-user.png';
 
                             Provider.of<UserData>(context, listen: false)
                                 .isAdmin = _data['admin'] ?? false;

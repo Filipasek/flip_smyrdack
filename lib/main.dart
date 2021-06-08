@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/config.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
@@ -20,32 +23,20 @@ String get bannerAdUnitId {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MobileAds.initialize(
-    // nativeAdUnitId: nativeAdUnitId,
-    bannerAdUnitId: bannerAdUnitId,
-    // interstitialAdUnitId: interstitialAdUnitId,
-    // rewardedAdUnitId: rewardedAdUnitId,
-    // appOpenAdUnitId: appOpenAdUnitId,
-    // rewardedInterstitialAdUnitId: rewardedInterstitialAdUnitId,
-  );
-  // final initFuture = MobileAds.instance.initialize();
-  // final adState = AdState(initFuture);
-  await Firebase.initializeApp(
-      // options: FirebaseOptions(
-      //   apiKey: '64526134-67dc-4e9e-a93a-7eea9de7d95e',
-      //   appId: 'acf8a433-1539-4f7b-9422-1c876982b833',
-      //   messagingSenderId: 'ca75f581-5dfc-43af-b1f6-41ed391a2aad',
-      //   projectId: 'bf984c50-1a0f-4d03-a51d-752d56fc3aa7',
-      // ),
-      );
-  initializeDateFormatting('pl_PL');
-  runApp(MyApp());
-  // runApp(
-  //   Provider.value(
-  //     value: adState,
-  //     builder: (context, child) => MyApp(),
-  //   ),
-  // );
+  await Firebase.initializeApp();
+  runZonedGuarded<Future<void>>(() async {
+    await MobileAds.initialize(
+      bannerAdUnitId: bannerAdUnitId,
+    );
+
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+    await FirebaseCrashlytics.instance
+        .setCrashlyticsCollectionEnabled(!kDebugMode || true);
+    await FirebaseCrashlytics.instance.setUserIdentifier("unidentified");
+    
+    initializeDateFormatting('pl_PL');
+    runApp(MyApp());
+  }, FirebaseCrashlytics.instance.recordError);
 }
 
 class MyApp extends StatelessWidget {

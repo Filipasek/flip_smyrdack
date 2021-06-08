@@ -21,7 +21,7 @@ import 'package:flip_smyrdack/ad_helper.dart';
 import 'package:in_app_review/in_app_review.dart';
 
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -68,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
   String get bannerAdUnitId {
     //list screen ad
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/4756889424';
   }
@@ -208,7 +208,7 @@ class _MainScreenState extends State<MainScreen> {
             message: 'Numer wersji',
             // padding: EdgeInsets.all(15.0),
             showDuration: Duration(seconds: 2),
-            child: Text('v17'),
+            child: Text('v19'),
           ),
           Container(
             padding: EdgeInsets.all(5.0),
@@ -251,7 +251,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     PopupMenuItem(
                       child: Text(
-                        "Moje konto",
+                        "Mój Profil",
                         // style: TextStyle(
                         //   color: Color.fromRGBO(249, 101, 116, 1),
                         // ),
@@ -522,36 +522,40 @@ class _MainScreenState extends State<MainScreen> {
                           // );
                           return InkWell(
                             onTap: () => print('tapped'),
-                            child: native_admob.BannerAd(
-                              unitId: bannerAdUnitId,
-                              size: native_admob.BannerSize.ADAPTIVE,
-                              loading: Center(child: Text('Ładowanie reklamy')),
-                              // loading: Center(child: CircularProgressIndicator()),
-                              error: Center(
-                                  child:
-                                      Text('Nie udało się załadować reklamy')),
-                              // builder: (context, child) {
-                              //   return GestureDetector(
-                              //     onTap: () => print('tappp'),
-                              //     child: child,
-                              //   );
-                              // return Container(
-                              //   margin:
-                              //       EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
-                              //   decoration: BoxDecoration(
-                              //     borderRadius: BorderRadius.circular(15.0),
-                              //     border: Border.all(
-                              //       color: Colors.grey,
-                              //     ),
-                              //   ),
-                              //   child: ClipRRect(
-                              //     borderRadius: BorderRadius.circular(15.0),
-                              //     child: child,
-                              //   ),
-                              // );
-                              // }
-                              // unitId: ,
-                            ),
+                            child: Provider.of<UserData>(context, listen: false)
+                                    .showAds!
+                                ? BannerAd(
+                                    unitId: bannerAdUnitId,
+                                    size: BannerSize.ADAPTIVE,
+                                    loading: Center(
+                                        child: Text('Ładowanie reklamy')),
+                                    // loading: Center(child: CircularProgressIndicator()),
+                                    error: Center(
+                                        child: Text(
+                                            'Nie udało się załadować reklamy')),
+                                    // builder: (context, child) {
+                                    //   return GestureDetector(
+                                    //     onTap: () => print('tappp'),
+                                    //     child: child,
+                                    //   );
+                                    // return Container(
+                                    //   margin:
+                                    //       EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+                                    //   decoration: BoxDecoration(
+                                    //     borderRadius: BorderRadius.circular(15.0),
+                                    //     border: Border.all(
+                                    //       color: Colors.grey,
+                                    //     ),
+                                    //   ),
+                                    //   child: ClipRRect(
+                                    //     borderRadius: BorderRadius.circular(15.0),
+                                    //     child: child,
+                                    //   ),
+                                    // );
+                                    // }
+                                    // unitId: ,
+                                  )
+                                : SizedBox(),
                           );
                         } else {
                           dynamic info = data[_getDestinationItemIndex(index)];

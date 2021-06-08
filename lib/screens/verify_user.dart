@@ -10,7 +10,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 import 'package:flutter/foundation.dart';
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class VerifyUserScreen extends StatefulWidget {
   @override
@@ -21,7 +21,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
   // late BannerAd _ad;
   String get bannerAdUnitId {
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/6785314634';
   }
@@ -247,12 +247,15 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                 //   height: 72.0,
                 //   alignment: Alignment.center,
                 // ),
-                native_admob.BannerAd(
-                  unitId: bannerAdUnitId,
-                  size: native_admob.BannerSize.ADAPTIVE,
-                  loading: Center(child: Text('Ładowanie reklamy')),
-                  error: Center(child: Text('Nie udało się załadować reklamy')),
-                ),
+                Provider.of<UserData>(context, listen: false).showAds!
+                    ? BannerAd(
+                        unitId: bannerAdUnitId,
+                        size: BannerSize.ADAPTIVE,
+                        loading: Center(child: Text('Ładowanie reklamy')),
+                        error: Center(
+                            child: Text('Brak reklamy. Na nasz koszt :)')),
+                      )
+                    : SizedBox(),
               ],
             )
           : Column(

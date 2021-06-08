@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 import 'package:flutter/foundation.dart';
-import 'package:native_admob_flutter/native_admob_flutter.dart' as native_admob;
+import 'package:native_admob_flutter/native_admob_flutter.dart';
 
 class UsersToBeVerifiedScreen extends StatefulWidget {
   @override
@@ -17,7 +17,7 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
   static final _kAdIndex = 1;
   String get bannerAdUnitId {
     if (kDebugMode)
-      return native_admob.MobileAds.bannerAdTestUnitId;
+      return MobileAds.bannerAdTestUnitId;
     else
       return 'ca-app-pub-9537370157330943/3269575605';
   }
@@ -84,12 +84,15 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
             //   height: 72.0,
             //   alignment: Alignment.center,
             // );
-            return native_admob.BannerAd(
-              unitId: bannerAdUnitId,
-              size: native_admob.BannerSize.ADAPTIVE,
-              loading: Center(child: Text('Ładowanie reklamy')),
-              error: Center(child: Text('Nie udało się załadować reklamy')),
-            );
+            return Provider.of<UserData>(context, listen: false).showAds!
+                ? BannerAd(
+                    unitId: bannerAdUnitId,
+                    size: BannerSize.ADAPTIVE,
+                    loading: Center(child: Text('Ładowanie reklamy')),
+                    error:
+                        Center(child: Text('Brak reklamy. Na nasz koszt :)')),
+                  )
+                : SizedBox();
           } else {
             String name = Provider.of<UserData>(context, listen: false)
                     .usersToBeVerified[
