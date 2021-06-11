@@ -8,8 +8,8 @@ class UserData extends ChangeNotifier {
   int minimumVersion = 0, workingVersion = 0, currentVersion = 0, thisVersion = 0;
   bool? isAdmin, isVerified, isVerCodeSet, isPhoneVerified, showAds;
   Future<void> logout() async {
-    GoogleSignIn().signOut();
-    FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   //Admin tools

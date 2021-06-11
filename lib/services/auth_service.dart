@@ -81,7 +81,9 @@ class AuthService {
         'verificationCode': generateRandomString(6),
       }).then((value) {
         good = true;
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+            reason: 'Sending verification request', fatal: true);
         return Future.error(
             error ?? 'Coś poszło nie tak podczas generowania kodu.');
       });
@@ -93,7 +95,9 @@ class AuthService {
         'usersList': FieldValue.arrayUnion([_userId]),
       }).then((value) {
         good = true;
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+            reason: 'Sending verification request', fatal: true);
         return Future.error(
             error ?? 'Coś poszło nie tak podczas generowania kodu.');
       });
@@ -102,12 +106,16 @@ class AuthService {
         _userId: userData,
       }, SetOptions(merge: true)).then((value) {
         good = true;
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+            reason: 'Sending verification request', fatal: true);
         return Future.error(error ??
             'Coś poszło nie tak podczas ustawiania powiadomienia dla adminów.');
       });
       if (good) return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stacktrace,
+          reason: 'Sending verification request', fatal: true);
       return Future.error(e);
     }
     return false;
@@ -127,7 +135,9 @@ class AuthService {
           "verified": true,
         }).then((value) {
           good = true;
-        }).onError((error, stackTrace) {
+        }).onError((error, stackTrace) async {
+          await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+              reason: 'Verifying user', fatal: true);
           return Future.error(error ?? 'Coś poszło nie tak');
         });
         await _firestore
@@ -137,7 +147,9 @@ class AuthService {
           'usersList': FieldValue.arrayRemove([_id]),
         }).then((value) {
           good = true;
-        }).onError((error, stackTrace) {
+        }).onError((error, stackTrace) async {
+          await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+              reason: 'Verifying user', fatal: true);
           return Future.error(
               error ?? 'Coś poszło nie tak podczas generowania kodu.');
         });
@@ -145,7 +157,9 @@ class AuthService {
         if (good) return true;
       } else
         return Future.error('Kod nie jest poprawny!');
-    } catch (e) {
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Verifying user', fatal: true);
       return Future.error(e);
     }
     return false;
@@ -156,7 +170,9 @@ class AuthService {
       await _firestore.collection('/trips').doc(_id.toString()).update({
         "eagers": FieldValue.arrayUnion([_userId]),
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Adding user to trip', fatal: false);
       return Future.error(e);
     }
     return true;
@@ -167,7 +183,9 @@ class AuthService {
       await _firestore.collection('/trips').doc(_id.toString()).update({
         "eagers": FieldValue.arrayRemove([_userId]),
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Removing user from trip', fatal: false);
       return Future.error(e);
     }
     return true;
@@ -195,7 +213,9 @@ class AuthService {
         await FirebaseStorage.instance
             .ref('photos/${_id}_$index.${file.path.split(".").last}')
             .putFile((await compressImage('${_id}_$index', file))!);
-      } on FirebaseException catch (e) {
+      } on FirebaseException catch (e, stackTrace) {
+        await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+            reason: 'Uploading images', fatal: true);
         // e.g, e.code == 'canceled'
         return false;
       }
@@ -247,7 +267,9 @@ class AuthService {
         'verified': isAdmin, //TODO: check
         // 'transportCost': transportCost,
       }, SetOptions(merge: true));
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Adding trip', fatal: true);
       return false;
     }
     return true;
@@ -259,8 +281,8 @@ class AuthService {
         'accountDeleted': true,
       }, SetOptions(merge: true));
       await _auth.currentUser!.delete();
-    } catch (e) {
-      await FirebaseCrashlytics.instance.recordError(e, 'stacktrace' as StackTrace?,
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
           reason: 'Deleting an account', fatal: true);
       return Future.error(e);
     }
@@ -272,7 +294,9 @@ class AuthService {
       await _firestore.collection('/users').doc(userId).set({
         'diamonds': FieldValue.increment(amount),
       }, SetOptions(merge: true));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Adding diamonds', fatal: false);
       return Future.error(e);
     }
     return true;
@@ -297,7 +321,10 @@ class AuthService {
       'phoneNumber': phoneNumber,
       'hasBeenVerifiedByGoogleOrSomethingIdk': isVerified,
       'diamonds': 0,
-    }, SetOptions(merge: false));
+    }, SetOptions(merge: false)).onError((error, stackTrace) async {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Adding user to database', fatal: true);
+    });
   }
 
   static Future updateUserInDatabase(
@@ -315,6 +342,9 @@ class AuthService {
       'last_login': DateTime.now(),
       'phoneNumber': phoneNumber,
       'hasBeenVerifiedByGoogleOrSomethingIdk': isVerified,
+    }).onError((error, stackTrace) async {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Updating user in database', fatal: true);
     });
   }
 
@@ -362,7 +392,10 @@ class AuthService {
 
   static void logout(context) async {
     // await Provider.of<UserData>(context, listen: false).logout();
-    _auth.signOut();
+    _auth.signOut().onError((error, stackTrace) async {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'On signing out', fatal: true);
+    });
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => MyApp()));
 
@@ -382,7 +415,9 @@ class AuthService {
       // Navigator.pop(context);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => MyApp()));
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Signing in', fatal: true);
       print(e);
     }
   }

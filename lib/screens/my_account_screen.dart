@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_smyrdack/main.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/screens/home_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:ndialog/ndialog.dart';
 
 class MyAccountScreen extends StatefulWidget {
+  bool adsEnabled;
+  MyAccountScreen({required this.adsEnabled});
   // String userId;
   // MyAccountScreen(this.userId);
   @override
@@ -41,67 +44,68 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
   @override
   void initState() {
-    rewardedAd = RewardedAd(
-      unitId: rewardedAdUnitId,
-    );
+    if (widget.adsEnabled) {
+      rewardedAd = RewardedAd(
+        unitId: rewardedAdUnitId,
+      );
+      rewardedAd.load();
 
-    rewardedAd.load();
-
-    rewardedAd.onEvent.listen((e) async {
-      final event = e.keys.first;
-      switch (event) {
-        case RewardedAdEvent.loading:
-          setState(() {
-            rewardedAdReady = false;
-          });
-          break;
-        case RewardedAdEvent.loaded:
-          setState(() {
-            rewardedAdReady = true;
-          });
-          break;
-        case RewardedAdEvent.loadFailed:
-          final errorCode = e.values.first;
-          FirebaseCrashlytics.instance.recordError(
-            errorCode, 'stacktrace' as StackTrace?,
-            reason: 'Loading a rewarded ad',
-            // Pass in 'fatal' argument
-            // fatal: true
-          );
-          rewardedAdErrorText = errorCode.toString();
-          print('load failed $errorCode');
-          break;
-        // case RewardedAdEvent.opened:
-        //   print('ad opened');
-        //   break;
-        case RewardedAdEvent.closed:
-          print('ad closed');
-          rewardedAd.load();
-          break;
-        case RewardedAdEvent.earnedReward:
-          await AuthService.incrementDiamonds(
-              Provider.of<UserData>(context, listen: false).currentUserId, 5);
-          setState(() {
-            diamonds += 5;
-          });
-          final reward = e.values.first;
-          print('earned reward: $reward');
-          break;
-        case RewardedAdEvent.showFailed:
-          final errorCode = e.values.first;
-          FirebaseCrashlytics.instance.recordError(
-            errorCode, 'stacktrace' as StackTrace?,
-            reason: 'Loading a rewarded ad',
-            // Pass in 'fatal' argument
-            // fatal: true
-          );
-          rewardedAdErrorText = errorCode.toString();
-          print('show failed $errorCode');
-          break;
-        default:
-          break;
-      }
-    });
+      rewardedAd.onEvent.listen((e) async {
+        final event = e.keys.first;
+        switch (event) {
+          case RewardedAdEvent.loading:
+            setState(() {
+              rewardedAdReady = false;
+            });
+            break;
+          case RewardedAdEvent.loaded:
+            setState(() {
+              rewardedAdReady = true;
+            });
+            break;
+          case RewardedAdEvent.loadFailed:
+            final errorCode = e.values.first;
+            FirebaseCrashlytics.instance.recordError(
+              errorCode, StackTrace.current,
+              reason: 'Loading a rewarded ad',
+              // Pass in 'fatal' argument
+              // fatal: true
+            );
+            rewardedAdErrorText = errorCode.toString();
+            print('load failed $errorCode');
+            break;
+          // case RewardedAdEvent.opened:
+          //   print('ad opened');
+          //   break;
+          case RewardedAdEvent.closed:
+            print('ad closed');
+            rewardedAd.load();
+            break;
+          case RewardedAdEvent.earnedReward:
+            await AuthService.incrementDiamonds(
+                Provider.of<UserData>(context, listen: false).currentUserId, 5);
+            setState(() {
+              diamonds += 5;
+            });
+            final reward = e.values.first;
+            print('earned reward: $reward');
+            break;
+          case RewardedAdEvent.showFailed:
+            final errorCode = e.values.first;
+            FirebaseCrashlytics.instance.recordError(
+              errorCode, StackTrace.current,
+              reason: 'Loading a rewarded ad',
+              // Pass in 'fatal' argument
+              // fatal: true
+            );
+            rewardedAdErrorText = errorCode.toString();
+            print('show failed $errorCode');
+            break;
+          default:
+            break;
+        }
+      });
+    }
     super.initState();
   }
 
@@ -137,19 +141,38 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                             ),
                           ),
                           onPressed: () {
+                            Navigator.of(context).pop();
                             AuthService.deleteMyAccount(Provider.of<UserData>(
                                         context,
                                         listen: false)
                                     .currentUserId!)
                                 .then((value) {
-                              if (value)
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) {
-                                      return App();
-                                    },
-                                  ),
-                                );
+                              if (value) {
+                                UserData().logout().then((value) {
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute<void>(
+                                      builder: (BuildContext context) {
+                                        return HomeScreen();
+                                      },
+                                    ),
+                                  );
+                                }).onError((error, stackTrace) {
+                                  setState(() {
+                                    rewardedAdErrorText = error.toString();
+                                  });
+                                });
+                              }
+                              // Navigator.of(context).pushReplacement(
+                              //   MaterialPageRoute<void>(
+                              //     builder: (BuildContext context) {
+                              //       return App();
+                              //     },
+                              //   ),
+                              // );
+                            }).onError((error, stackTrace) {
+                              setState(() {
+                                rewardedAdErrorText = error.toString();
+                              });
                             });
                           }),
                       FlatButton(
@@ -318,7 +341,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                     ),
                   ),
                 ),
-                Provider.of<UserData>(context, listen: false).showAds!
+                widget.adsEnabled
                     ? RaisedButton(
                         child: Text(
                           'Weno wykop trochę diamentów :)',
@@ -349,7 +372,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 //   onLongPress: () => rewardedAd.load(force: true),
                 //   onPressed: () async {
                 //     await FirebaseCrashlytics.instance.recordError(
-                //       'error', 'stackTrace' as StackTrace?,
+                //       'error', StackTrace.current,
                 //       reason: 'a non fatal error',
                 //       // Pass in 'fatal' argument
                 //       // fatal: true
@@ -371,7 +394,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       )
                     : SizedBox(),
                 Expanded(child: SizedBox()),
-                Provider.of<UserData>(context, listen: false).showAds!
+                widget.adsEnabled
                     ? BannerAd(
                         unitId: bannerAdUnitId,
                         size: BannerSize.ADAPTIVE,

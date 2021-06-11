@@ -41,8 +41,9 @@ class _MainScreenState extends State<MainScreen> {
     }).catchError((e) {
       showSnack(e.toString());
     });
-    setState(() async {
-      isReviewAvailable = await _inAppReview.isAvailable();
+    bool isRevReady = await _inAppReview.isAvailable();
+    setState(() {
+      isReviewAvailable = isRevReady;
     });
   }
 
@@ -204,12 +205,12 @@ class _MainScreenState extends State<MainScreen> {
               )
             : null,
         actions: [
-          Tooltip(
-            message: 'Numer wersji',
-            // padding: EdgeInsets.all(15.0),
-            showDuration: Duration(seconds: 2),
-            child: Text('v19'),
-          ),
+          // Tooltip(
+          //   message: 'Numer wersji',
+          //   // padding: EdgeInsets.all(15.0),
+          //   showDuration: Duration(seconds: 2),
+          //   child: Text('beta'),
+          // ),
           Container(
             padding: EdgeInsets.all(5.0),
             child: ClipRRect(
@@ -310,7 +311,11 @@ class _MainScreenState extends State<MainScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
-                            return MyAccountScreen();
+                            return MyAccountScreen(
+                              adsEnabled:
+                                  Provider.of<UserData>(context, listen: false)
+                                      .showAds!,
+                            );
                           },
                         ),
                       );

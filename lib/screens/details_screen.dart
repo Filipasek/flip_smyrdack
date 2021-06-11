@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/screens/eagers_screen.dart';
 import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
@@ -12,6 +13,7 @@ import 'package:intl/intl.dart';
 // import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:ndialog/ndialog.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 
@@ -334,10 +336,28 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         "Kiedy",
                         "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
                         'Data dzienna rozpoczęcia wycieczki'),
-                    CreateColumnOfInfo(
-                        'Chętnych',
-                        numOfPersonToString(numberOfPeople!),
-                        'Ilość osób, które potwierdziły swój udział w aplikacji'),
+                    Provider.of<UserData>(context, listen: false).isVerified ??
+                            false
+                        ? FlatButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EagersListScreen(
+                                    widget.eagers,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CreateColumnOfInfo(
+                                'Chętnych',
+                                numOfPersonToString(numberOfPeople!),
+                                'Ilość osób, które potwierdziły swój udział w aplikacji'),
+                          )
+                        : CreateColumnOfInfo(
+                            'Chętnych',
+                            numOfPersonToString(numberOfPeople!),
+                            'Ilość osób, które potwierdziły swój udział w aplikacji'),
                     CreateColumnOfInfo('Wyjście', widget.startTime,
                         'Planowany czas startu (na miejscu)'),
                     CreateColumnOfInfo(
@@ -380,13 +400,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
               //   height: 72.0,
               //   alignment: Alignment.center,
               // ),
-              Provider.of<UserData>(context, listen: false).showAds! ? BannerAd(
-                unitId: bannerAdUnitId,
-                size: BannerSize.ADAPTIVE,
-                loading: Center(child: Text('Ładowanie reklamy')),
-                // loading: LinearProgressIndicator(),
-                error: Center(child: Text('Brak reklamy. Na nasz koszt :)')),
-              ) : SizedBox(),
+              Provider.of<UserData>(context, listen: false).showAds!
+                  ? BannerAd(
+                      unitId: bannerAdUnitId,
+                      size: BannerSize.ADAPTIVE,
+                      loading: Center(child: Text('Ładowanie reklamy')),
+                      // loading: LinearProgressIndicator(),
+                      error:
+                          Center(child: Text('Brak reklamy. Na nasz koszt :)')),
+                    )
+                  : SizedBox(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
                 child: Text(

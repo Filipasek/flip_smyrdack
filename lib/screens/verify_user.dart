@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
@@ -136,6 +137,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                     errorAnimationController: errorController,
                     controller: textEditingController,
                     onCompleted: (value) {
+                      value = value.toUpperCase();
                       if (value.length == 6) {
                         setState(() {
                           verifying = true;
@@ -150,7 +152,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (_) => HomeScreen()));
-                        }).onError((error, stackTrace) {
+                        }).onError((error, stackTrace) async {
+                          await FirebaseCrashlytics.instance.recordError(
+                              error, stackTrace,
+                              reason: 'Verifying user', fatal: true);
                           setState(() {
                             errorText = error.toString();
                             verifying = false;
@@ -159,6 +164,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                       }
                     },
                     onChanged: (value) {
+                      value = value.toUpperCase();
                       print(value);
                       setState(() {
                         currentText = value;
@@ -369,6 +375,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                           errorAnimationController: errorController2,
                           controller: textEditingController2,
                           onCompleted: (value) async {
+                            value = value.toUpperCase();
                             if (value.length == 6) {
                               setState(() {
                                 sent = false;
@@ -379,7 +386,9 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                               // await sendCodeToPhoneNumber('+48$value');
                             }
                           },
+
                           onChanged: (value) {
+                            value = value.toUpperCase();
                             print(value);
                             setState(() {
                               currentText = value;

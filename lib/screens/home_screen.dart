@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
   //   return MobileAds.instance.initialize();
   // }
 
-  int apiVersion = 19; //TODO: change when major update been made to api
+  int apiVersion = 21; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
             dynamic versions = data[0];
             dynamic settings = data[1];
             List usersList = data[2]['usersList'] ?? [];
-            dynamic usersToBeVerified = data[1];
+            dynamic usersToBeVerified = data[2];
             Provider.of<UserData>(context, listen: false).showAds =
                 settings['showAds'] ?? true;
             if (apiVersion >= versions['minimum']) {
@@ -76,10 +76,10 @@ class HomeScreen extends StatelessWidget {
                             Provider.of<UserData>(context, listen: false)
                                     .isVerCodeSet =
                                 _data.containsKey('verificationCode');
-                            Provider.of<UserData>(context, listen: false).name =
-                                _user.displayName ?? 'Brak';
-                            Provider.of<UserData>(context, listen: false).mail =
-                                _user.email;
+                            Provider.of<UserData>(context, listen: false)
+                                .name = _user.displayName ?? 'Brak';
+                            Provider.of<UserData>(context, listen: false)
+                                .mail = _user.email;
                             Provider.of<UserData>(context, listen: false)
                                     .isPhoneVerified =
                                 !(_data['phoneNumber'] == 'none');
@@ -157,7 +157,8 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.dangerous_rounded,
-                          size: 70.0, color: Color.fromRGBO(249, 101, 116, 1)),
+                          size: 70.0,
+                          color: Color.fromRGBO(249, 101, 116, 1)),
                       SizedBox(height: 20.0),
                       Text(
                         'Wymagana pilna aktualizacja aplikacji!',

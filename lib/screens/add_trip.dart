@@ -19,7 +19,6 @@ class AddTripScreen extends StatefulWidget {
 
 class _AddTripScreenState extends State<AddTripScreen> {
   // late BannerAd _ad;
-  bool _isAdLoaded = false;
   String get bannerAdUnitId {
     if (kDebugMode)
       return MobileAds.bannerAdTestUnitId;
@@ -33,7 +32,6 @@ class _AddTripScreenState extends State<AddTripScreen> {
   int? transportCost, otherCosts, elevation, elevDifferences, tripLength;
   TimeOfDay? startTime, endTime;
   DateTime? date;
-  String? _chosenValue;
   bool error = false, loading = false;
   String errorText = '';
   final _formKey = GlobalKey<FormState>();
@@ -140,13 +138,15 @@ class _AddTripScreenState extends State<AddTripScreen> {
           : SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  Provider.of<UserData>(context, listen: false).showAds! ? BannerAd(
-                    unitId: bannerAdUnitId,
-                    size: BannerSize.ADAPTIVE,
-                    loading: Center(child: Text('Ładowanie reklamy')),
-                    error:
-                        Center(child: Text('Brak reklamy. Na nasz koszt :)')),
-                  ) : SizedBox(),
+                  Provider.of<UserData>(context, listen: false).showAds!
+                      ? BannerAd(
+                          unitId: bannerAdUnitId,
+                          size: BannerSize.ADAPTIVE,
+                          loading: Center(child: Text('Ładowanie reklamy')),
+                          error: Center(
+                              child: Text('Brak reklamy. Na nasz koszt :)')),
+                        )
+                      : SizedBox(),
                   // Container(
                   //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
                   //   child: AdWidget(ad: _ad),
@@ -504,6 +504,9 @@ class _AddTripScreenState extends State<AddTripScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTimeStart,
+      cancelText: "Anuluj",
+      confirmText: "Wybierz",
+      helpText: 'Wybierz planowaną godzinę rozpoczęcia',
     );
     if (picked != null && picked != selectedTimeStart)
       setState(() {
@@ -515,6 +518,9 @@ class _AddTripScreenState extends State<AddTripScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTimeEnd,
+      cancelText: "Anuluj",
+      confirmText: "Wybierz",
+      helpText: 'Wybierz planowaną godzinę zakończenia',
     );
     if (picked != null && picked != selectedTimeEnd)
       setState(() {
@@ -528,6 +534,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
       initialDate: selectedDate, // Refer step 1
       firstDate: DateTime.now(),
       lastDate: DateTime.utc(DateTime.now().year + 2),
+      cancelText: "Anuluj",
+      confirmText: "Wybierz",
+      helpText: 'Wybierz datę wyprawy',
+      // locale: Locale('pl', 'en'),
     );
     if (picked != null && picked != selectedDate)
       setState(() {

@@ -97,10 +97,15 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
             String name = Provider.of<UserData>(context, listen: false)
                     .usersToBeVerified[
                 usersList[_getDestinationItemIndex(index)].toString()]['name'];
+            // print(Provider.of<UserData>(context, listen: false)
+            //     .usersToBeVerified!);
+            // print('-----');
+            // String name = "Filipo";
             String userId =
                 Provider.of<UserData>(context, listen: false).usersToBeVerified[
                         usersList[_getDestinationItemIndex(index)].toString()]
                     ['userId'];
+            // String userId = '1WSldr9OfeRJUtA2uLvXrUlOTyS2';
             return FlatButton.icon(
               onPressed: () {
                 Navigator.of(context).push(

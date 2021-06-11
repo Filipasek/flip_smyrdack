@@ -31,9 +31,9 @@ void main() async {
 
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
     await FirebaseCrashlytics.instance
-        .setCrashlyticsCollectionEnabled(!kDebugMode || true);
+        .setCrashlyticsCollectionEnabled(!kDebugMode);
     await FirebaseCrashlytics.instance.setUserIdentifier("unidentified");
-    
+
     initializeDateFormatting('pl_PL');
     runApp(MyApp());
   }, FirebaseCrashlytics.instance.recordError);
@@ -42,41 +42,48 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<FirebaseAuth>.value(
-          value: FirebaseAuth.instance,
-        ),
-        // Provider<PushNotificationService>(
-        //   create: (_) => PushNotificationService(),
-        // ),
-        ChangeNotifierProvider<UserData>(create: (_) => UserData()),
-        ChangeNotifierProvider<ConfigData>(create: (_) => ConfigData()),
-        // ChangeNotifierProvider<UIData>(create: (_) => UIData()),
+    return Localizations(
+      locale: const Locale('pl', 'en'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flip&Smyrdack',
-        themeMode: ThemeMode.system,
-        theme: ThemeData(
-          fontFamily: 'Comfortaa',
-          primaryColor: Colors.white,
-          accentColor: Color.fromRGBO(255, 182, 185, 1),
-          textTheme: TextTheme(
-            bodyText2: TextStyle(color: Colors.grey),
-            headline5: TextStyle(color: Colors.black),
+      child: MultiProvider(
+        providers: [
+          Provider<FirebaseAuth>.value(
+            value: FirebaseAuth.instance,
           ),
+          // Provider<PushNotificationService>(
+          //   create: (_) => PushNotificationService(),
+          // ),
+          ChangeNotifierProvider<UserData>(create: (_) => UserData()),
+          ChangeNotifierProvider<ConfigData>(create: (_) => ConfigData()),
+          // ChangeNotifierProvider<UIData>(create: (_) => UIData()),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flip&Smyrdack',
+          themeMode: ThemeMode.system,
+          theme: ThemeData(
+            fontFamily: 'Comfortaa',
+            primaryColor: Colors.white,
+            accentColor: Color.fromRGBO(255, 182, 185, 1),
+            textTheme: TextTheme(
+              bodyText2: TextStyle(color: Colors.grey),
+              headline5: TextStyle(color: Colors.black),
+            ),
+          ),
+          // darkTheme: ThemeData(
+          //   fontFamily: 'Comfortaa',
+          //   primaryColor: Color.fromRGBO(40, 44, 55, 1),
+          //   accentColor: Color.fromRGBO(255, 182, 185, 1),
+          //   textTheme: TextTheme(
+          //     bodyText2: TextStyle(color: Colors.grey),
+          //     headline5: TextStyle(color: Colors.white),
+          //   ),
+          // ),
+          home: App(),
         ),
-        // darkTheme: ThemeData(
-        //   fontFamily: 'Comfortaa',
-        //   primaryColor: Color.fromRGBO(40, 44, 55, 1),
-        //   accentColor: Color.fromRGBO(255, 182, 185, 1),
-        //   textTheme: TextTheme(
-        //     bodyText2: TextStyle(color: Colors.grey),
-        //     headline5: TextStyle(color: Colors.white),
-        //   ),
-        // ),
-        home: App(),
       ),
     );
   }
