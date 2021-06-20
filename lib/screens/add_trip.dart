@@ -160,128 +160,208 @@ class _AddTripScreenState extends State<AddTripScreen> {
                     key: _formKey,
                     child: Container(
                       margin: EdgeInsets.only(bottom: 20.0, top: 20.0),
-                      child: Theme(
-                        data: ThemeData(
-                          primaryColor: Theme.of(context).accentColor,
-                        ),
-                        child: Column(
-                          children: [
-                            CustomTextField(
-                                'Nazwa miejsca', 'text', 3, setName, loading),
-                            SizedBox(height: 5.0),
+                      child: Column(
+                        children: [
+                          CustomTextField(
+                              'Nazwa miejsca',
+                              'text',
+                              3,
+                              setName,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
 
-                            CustomTextField('Wysokość (w metrach)', 'int', 3,
-                                setElevation, loading),
-                            SizedBox(height: 5.0),
-                            CustomTextField('Przewyższenia (w metrach)', 'int',
-                                3, setElevationDifferences, loading),
-                            SizedBox(height: 5.0),
-                            CustomTextField('Długość trasy (w metrach)', 'int',
-                                3, setTripLength, loading),
-                            SizedBox(height: 5.0),
-                            CustomTextField('Koszt transportu (w zł)', 'int', 1,
-                                settransportCost, loading),
-                            SizedBox(height: 5.0),
-                            CustomTextField('Inne koszty (w zł)', 'int', 1,
-                                setOtherCosts, loading),
-                            SizedBox(height: 5.0),
-                            // CustomTextField('Trudność', 'string', 3, setDifficulty),
-                            Container(
-                              padding:
-                                  EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 15.0),
-                              width: double.infinity,
-                              child: DropdownButtonFormField<String>(
-                                value: difficulty,
-                                hint: Text('Wybierz trudność'),
-                                items: <String>[
-                                  'Banalne',
-                                  'Średnie',
-                                  'Trudne',
-                                  'O holibka...'
-                                ].map((String value) {
-                                  return new DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: loading
-                                    ? null
-                                    : (String? value) {
-                                        setState(() {
-                                          difficulty = value!;
-                                        });
-                                      },
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Wpisz dane";
-                                  }
-                                },
-                              ),
-                            ),
-                            SizedBox(height: 5.0),
-                            CustomTextField(
-                                'Opis', 'text', 50, setDescription, loading),
-                            SizedBox(height: 5.0),
-                            Container(
-                              margin: EdgeInsets.only(
-                                  bottom: 5.0, left: 15.0, right: 15.0),
-                              width: double.infinity,
-                              height: 50.0,
-                              child: RaisedButton(
-                                color: Color.fromRGBO(255, 182, 185, 1),
-                                onPressed:
-                                    loading ? null : () => _selectDate(context),
-                                child: Text(
-                                  "Data: " +
-                                      "${df.format(selectedDate.toLocal())}"
-                                          .split(' ')[0],
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    color: Colors.white,
+                          CustomTextField(
+                              'Wysokość (w metrach)',
+                              'int',
+                              3,
+                              setElevation,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          CustomTextField(
+                              'Przewyższenia (w metrach)',
+                              'int',
+                              3,
+                              setElevationDifferences,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          CustomTextField(
+                              'Długość trasy (w metrach)',
+                              'int',
+                              3,
+                              setTripLength,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          CustomTextField(
+                              'Koszt transportu (w zł)',
+                              'int',
+                              1,
+                              settransportCost,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          CustomTextField(
+                              'Inne koszty (w zł)',
+                              'int',
+                              1,
+                              setOtherCosts,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          // CustomTextField('Trudność', 'string', 3, setDifficulty),
+                          Container(
+                            padding: EdgeInsets.only(
+                                bottom: 5.0, left: 15.0, right: 15.0),
+                            width: double.infinity,
+                            child: DropdownButtonFormField<String>(
+                              dropdownColor: Theme.of(context).primaryColor,
+                              focusColor:
+                                  Theme.of(context).textTheme.headline5!.color!,
+                              decoration: InputDecoration(
+                                helperStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color!,
+                                ),
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color!,
+                                ),
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color!,
+                                ),
+                                // labelText: widget.nazwa,
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .headline5!
+                                        .color!,
+                                    width: 2.0,
                                   ),
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
+                              value: difficulty,
+                              hint: Text(
+                                'Wybierz trudność',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color!,
+                                ),
+                              ),
+                              items: <String>[
+                                'Banalne',
+                                'Średnie',
+                                'Trudne',
+                                'O holibka...'
+                              ].map((String value) {
+                                return new DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: loading
+                                  ? null
+                                  : (String? value) {
+                                      setState(() {
+                                        difficulty = value!;
+                                      });
+                                    },
+                              validator: (String? value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Wpisz dane";
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 5.0),
+                          CustomTextField(
+                              'Opis',
+                              'text',
+                              50,
+                              setDescription,
+                              loading,
+                              Theme.of(context).textTheme.headline5!.color!),
+                          SizedBox(height: 5.0),
+                          Container(
+                            margin: EdgeInsets.only(
+                                bottom: 5.0, left: 15.0, right: 15.0),
+                            width: double.infinity,
+                            height: 50.0,
+                            child: RaisedButton(
+                              color: Theme.of(context).accentColor,
+                              onPressed:
+                                  loading ? null : () => _selectDate(context),
+                              child: Text(
+                                "Data: " +
+                                    "${df.format(selectedDate.toLocal())}"
+                                        .split(' ')[0],
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                            Container(
-                              margin: EdgeInsets.only(
-                                  bottom: 5.0, left: 15.0, right: 15.0),
-                              width: double.infinity,
-                              height: 50.0,
-                              child: RaisedButton(
-                                color: Color.fromRGBO(255, 182, 185, 1),
-                                onPressed: loading
-                                    ? null
-                                    : () => _selectTimeStart(context),
-                                child: Text(
-                                  "Rozpoczęcie: ${selectedTimeStart.hour}:${selectedTimeStart.minute}",
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    color: Colors.white,
-                                  ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                                bottom: 5.0, left: 15.0, right: 15.0),
+                            width: double.infinity,
+                            height: 50.0,
+                            child: RaisedButton(
+                              color: Theme.of(context).accentColor,
+                              onPressed: loading
+                                  ? null
+                                  : () => _selectTimeStart(context),
+                              child: Text(
+                                "Rozpoczęcie: ${selectedTimeStart.hour}:${selectedTimeStart.minute}",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                            Container(
-                              margin: EdgeInsets.only(
-                                  bottom: 5.0, left: 15.0, right: 15.0),
-                              width: double.infinity,
-                              height: 50.0,
-                              child: RaisedButton(
-                                color: Color.fromRGBO(255, 182, 185, 1),
-                                onPressed: loading
-                                    ? null
-                                    : () => _selectTimeEnd(context),
-                                child: Text(
-                                  "Zakończenie: ${selectedTimeEnd.hour}:${selectedTimeEnd.minute}",
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    color: Colors.white,
-                                  ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                                bottom: 5.0, left: 15.0, right: 15.0),
+                            width: double.infinity,
+                            height: 50.0,
+                            child: RaisedButton(
+                              color: Theme.of(context).accentColor,
+                              onPressed: loading
+                                  ? null
+                                  : () => _selectTimeEnd(context),
+                              child: Text(
+                                "Zakończenie: ${selectedTimeEnd.hour}:${selectedTimeEnd.minute}",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -293,7 +373,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                               borderRadius: BorderRadius.circular(15.0),
                               border: Border.all(
                                 width: 3.0,
-                                color: Color.fromRGBO(255, 182, 185, 1),
+                                color: Theme.of(context).accentColor,
                               ),
                             ),
                             width: double.infinity,
@@ -304,15 +384,15 @@ class _AddTripScreenState extends State<AddTripScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(11.0),
                               ),
-                              splashColor: Color.fromRGBO(255, 182, 185, 1)
+                              splashColor: Theme.of(context).accentColor
                                   .withOpacity(0.6),
-                              highlightColor: Color.fromRGBO(255, 182, 185, 1)
+                              highlightColor: Theme.of(context).accentColor
                                   .withOpacity(0.2),
                               onPressed: loading ? null : getImage,
                               child: Center(
                                 child: Icon(
                                   Icons.add_a_photo_outlined,
-                                  color: Color.fromRGBO(255, 182, 185, 1),
+                                  color: Theme.of(context).accentColor,
                                 ),
                               ),
                             ),
@@ -339,7 +419,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                         border: Border.all(
                                           width: 3.0,
                                           color:
-                                              Color.fromRGBO(255, 182, 185, 1),
+                                              Theme.of(context).accentColor,
                                         ),
                                       ),
                                       width: 150.0,
@@ -351,10 +431,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                               BorderRadius.circular(11.0),
                                         ),
                                         splashColor:
-                                            Color.fromRGBO(255, 182, 185, 1)
+                                            Theme.of(context).accentColor
                                                 .withOpacity(0.6),
                                         highlightColor:
-                                            Color.fromRGBO(255, 182, 185, 1)
+                                            Theme.of(context).accentColor
                                                 .withOpacity(0.2),
                                         onPressed: loading ? null : getImage,
                                         child: Center(
@@ -373,7 +453,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                     right: 20.0, top: 10.0),
                                 child: Badge(
                                   padding: EdgeInsets.all(0.0),
-                                  badgeColor: Color.fromRGBO(255, 182, 185, 1),
+                                  badgeColor: Theme.of(context).accentColor,
                                   // elevation: 0,
                                   badgeContent: Container(
                                     height: 30.0,
@@ -620,12 +700,14 @@ class CustomTextField extends StatefulWidget {
   String type;
   int length;
   bool loading;
+  Color textColor;
   CustomTextField(
     this.nazwa,
     this.type,
     this.length,
     this.callback,
     this.loading,
+    this.textColor,
   );
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
@@ -640,7 +722,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
         enabled: !widget.loading,
         keyboardType:
             widget.type == 'int' ? TextInputType.number : TextInputType.text,
-        style: TextStyle(color: Theme.of(context).textTheme.headline5!.color),
+        style: TextStyle(
+          // color: Theme.of(context).textTheme.headline5!.color,
+          color: widget.textColor,
+        ),
         showCursor: true,
         autocorrect: true,
         autofocus: false,
@@ -648,12 +733,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
         cursorColor: Theme.of(context).accentColor,
         decoration: InputDecoration(
           labelStyle: TextStyle(
-            color: Theme.of(context).textTheme.headline5!.color,
+            // color: Theme.of(context).textTheme.headline5!.color,
+            // color: Theme.of(context).accentColor,
+            color: widget.textColor,
           ),
           labelText: widget.nazwa,
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-              // color: Theme.of(context).textTheme.headline5!.color,
+              // color: Theme.of(context).textTheme.headline5!.color!,
+              color: widget.textColor,
               width: 2.0,
             ),
           ),

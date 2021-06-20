@@ -57,33 +57,10 @@ class MyApp extends StatelessWidget {
           //   create: (_) => PushNotificationService(),
           // ),
           ChangeNotifierProvider<UserData>(create: (_) => UserData()),
-          ChangeNotifierProvider<ConfigData>(create: (_) => ConfigData()),
+          // ChangeNotifierProvider<ConfigData>(create: (_) => ConfigData()),
           // ChangeNotifierProvider<UIData>(create: (_) => UIData()),
         ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Flip&Smyrdack',
-          themeMode: ThemeMode.system,
-          theme: ThemeData(
-            fontFamily: 'Comfortaa',
-            primaryColor: Colors.white,
-            accentColor: Color.fromRGBO(255, 182, 185, 1),
-            textTheme: TextTheme(
-              bodyText2: TextStyle(color: Colors.grey),
-              headline5: TextStyle(color: Colors.black),
-            ),
-          ),
-          // darkTheme: ThemeData(
-          //   fontFamily: 'Comfortaa',
-          //   primaryColor: Color.fromRGBO(40, 44, 55, 1),
-          //   accentColor: Color.fromRGBO(255, 182, 185, 1),
-          //   textTheme: TextTheme(
-          //     bodyText2: TextStyle(color: Colors.grey),
-          //     headline5: TextStyle(color: Colors.white),
-          //   ),
-          // ),
-          home: App(),
-        ),
+        child: App(),
       ),
     );
   }
@@ -98,16 +75,66 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     // Provider.of<ConfigData>(context, listen: false).readConfigs();
-
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Theme.of(context).primaryColor,
-        systemNavigationBarIconBrightness: Brightness.dark,
+    // FlutterStatusbarManager.setColor(Theme.of(context).primaryColor,
+    //     animated: true);
+    // FlutterStatusbarManager.setNavigationBarColor(
+    //     Theme.of(context).primaryColor,
+    //     animated: true);
+    // FlutterStatusbarManager.setNavigationBarStyle(NavigationBarStyle.DARK);
+    // FlutterStatusbarManager.setStyle(StatusBarStyle.DARK_CONTENT);
+    // SystemChrome.setSystemUIOverlayStyle(
+    //   SystemUiOverlayStyle(
+    //       // statusBarColor: Colors.transparent,
+    //       // statusBarIconBrightness: Brightness.light,
+    //       // systemNavigationBarColor: Colors.transparent,
+    //       // systemNavigationBarIconBrightness: Brightness.light,
+    //       // statusBarBrightness: Brightness.light,
+    //       ),
+    // );
+    // return AnnotatedRegion<SystemUiOverlayStyle>(
+    //   value: SystemUiOverlayStyle.light,
+    //   child: HomeScreen(),
+    // );
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flip&Smyrdack',
+      themeMode: ThemeMode.system,
+      theme: ThemeData(
+        fontFamily: 'Comfortaa',
+        primaryColor: Colors.white,
+        accentColor: Color.fromRGBO(255, 182, 185, 1),
+        textTheme: TextTheme(
+          bodyText2: TextStyle(color: Colors.grey),
+          headline5: TextStyle(color: Colors.black),
+        ),
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          color: Colors.white,
+          brightness: Brightness.light,
+        ),
       ),
+      darkTheme: ThemeData(
+        fontFamily: 'Comfortaa',
+        primaryColor: Color.fromRGBO(40, 44, 55, 1),
+        accentColor: Color.fromRGBO(234, 112, 112, 1),
+        textTheme: TextTheme(
+          bodyText2: TextStyle(color: Colors.grey),
+          headline5: TextStyle(color: Colors.white),
+        ),
+        
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          color: Color.fromRGBO(40, 44, 55, 1),
+          brightness: Brightness.dark,
+        ),
+      ),
+      home: HomeScreen(),
+      // home: AnnotatedRegion<SystemUiOverlayStyle>(
+      //   value: SystemUiOverlayStyle.dark,
+      //   child: HomeScreen(),
+      // ),
     );
-    return HomeScreen();
+    // return HomeScreen();
     // return Scaffold();
   }
 }

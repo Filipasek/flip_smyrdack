@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
@@ -9,6 +10,7 @@ import 'package:flip_smyrdack/screens/users_to_be_verified_screen.dart';
 import 'package:flip_smyrdack/screens/verify_user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_update/in_app_update.dart';
@@ -126,6 +128,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        // brightness: Brightness.light,
         // bottom: Provider.of<UserData>(context, listen: false).thisVersion <
         //         Provider.of<UserData>(context, listen: false).currentVersion
         bottom: updateReady
@@ -211,135 +214,189 @@ class _MainScreenState extends State<MainScreen> {
           //   showDuration: Duration(seconds: 2),
           //   child: Text('beta'),
           // ),
-          Container(
-            padding: EdgeInsets.all(5.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(100.0),
-              child: PopupMenuButton(
-                enableFeedback: true,
-                tooltip: 'Opcje',
-                // color: Color.fromRGBO(112, 238, 156, 1),
-                itemBuilder: (context) {
-                  List<PopupMenuEntry> list = [
-                    PopupMenuItem(
-                      child: Text(showOnlyVerified
-                          ? "Pokazuj również niezweryfikowane wstawki"
-                          : "Pokazuj tylko zweryfikowane wstawki"),
-                      value: 0,
-                    ),
-                    Provider.of<UserData>(context, listen: false).isAdmin!
-                        ? PopupMenuItem(
-                            enabled:
-                                Provider.of<UserData>(context, listen: false)
-                                        .usersList!
-                                        .length >
-                                    0,
-                            child: Text(
-                                "Osoby do zweryfikowania: ${Provider.of<UserData>(context, listen: false).usersList!.length}"),
-                            value: 1,
-                          )
-                        : PopupMenuDivider(
-                            height: 0,
-                          ) as PopupMenuEntry,
-                    PopupMenuItem(
-                      child: Provider.of<UserData>(context, listen: false)
-                              .isVerified!
-                          ? Text('Konto zweryfikowane')
-                          : Text("Zweryfikuj konto"),
-                      value: 2,
-                      enabled: !Provider.of<UserData>(context, listen: false)
-                          .isVerified!,
-                    ),
-                    PopupMenuItem(
-                      child: Text(
-                        "Mój Profil",
-                        // style: TextStyle(
-                        //   color: Color.fromRGBO(249, 101, 116, 1),
-                        // ),
+          Badge(
+            badgeContent: Text(
+              Provider.of<UserData>(context, listen: false)
+                  .usersList!
+                  .length
+                  .toString(),
+              style: TextStyle(
+                  color: Theme.of(context).textTheme.headline5!.color),
+            ),
+            position: BadgePosition.topStart(),
+            showBadge: (Provider.of<UserData>(context, listen: false)
+                        .usersList!
+                        .length >
+                    0) &&
+                Provider.of<UserData>(context, listen: false).isAdmin!,
+            child: Container(
+              padding: EdgeInsets.all(5.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100.0),
+                child: PopupMenuButton(
+                  enableFeedback: true,
+                  tooltip: 'Opcje',
+                  color: Theme.of(context).primaryColor,
+                  // color: Color.fromRGBO(112, 238, 156, 1),
+                  itemBuilder: (context) {
+                    List<PopupMenuEntry> list = [
+                      PopupMenuItem(
+                        child: Text(
+                          showOnlyVerified
+                              ? "Pokazuj również niezweryfikowane wstawki"
+                              : "Pokazuj tylko zweryfikowane wstawki",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
+                        value: 0,
                       ),
-                      value: 3,
-                      enabled: true,
-                    ),
-                    PopupMenuItem(
-                      child: Text(
-                        "Wyloguj się",
-                        style: TextStyle(
-                          color: Color.fromRGBO(249, 101, 116, 1),
-                        ),
-                      ),
-                      value: 4,
-                      enabled: true,
-                    ),
-                    // CheckedPopupMenuItem(
-                    //   child: Text(
-                    //     "Nie zweryfikowano",
-                    //     style: TextStyle(color: Colors.black),
-                    //   ),
-                    //   value: 2,
-                    //   checked: false,
-
-                    // ),
-                  ];
-                  return list;
-                },
-                onSelected: (value) {
-                  switch (value) {
-                    case 0:
-                      setState(() {
-                        showOnlyVerified = !showOnlyVerified;
-                      });
-                      break;
-                    case 1:
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return UsersToBeVerifiedScreen();
-                          },
-                        ),
-                      );
-                      break;
-                    case 2:
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return VerifyUserScreen();
-                          },
-                        ),
-                      );
-                      break;
-                    case 3:
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return MyAccountScreen(
-                              adsEnabled:
+                      Provider.of<UserData>(context, listen: false).isAdmin!
+                          ? PopupMenuItem(
+                              enabled:
                                   Provider.of<UserData>(context, listen: false)
-                                      .showAds!,
-                            );
-                          },
+                                          .usersList!
+                                          .length >
+                                      0,
+                              child: Text(
+                                "Osoby do zweryfikowania: ${Provider.of<UserData>(context, listen: false).usersList!.length}",
+                                style: TextStyle(
+                                  color: Provider.of<UserData>(context,
+                                                  listen: false)
+                                              .usersList!
+                                              .length >
+                                          0
+                                      ? Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodyText2!
+                                          .color,
+                                ),
+                              ),
+                              value: 1,
+                            )
+                          : PopupMenuDivider(
+                              height: 0,
+                            ) as PopupMenuEntry,
+                      PopupMenuItem(
+                        child: Provider.of<UserData>(context, listen: false)
+                                .isVerified!
+                            ? Text(
+                                'Konto zweryfikowane',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyText2!
+                                      .color,
+                                ),
+                              )
+                            : Text(
+                                "Zweryfikuj konto",
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color,
+                                ),
+                              ),
+                        value: 2,
+                        enabled: !Provider.of<UserData>(context, listen: false)
+                            .isVerified!,
+                      ),
+                      PopupMenuItem(
+                        child: Text(
+                          "Mój Profil",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
                         ),
-                      );
-                      break;
-                    case 4:
-                      UserData().logout().then((value) {
-                        Navigator.of(context).pushReplacement(
+                        value: 3,
+                        enabled: true,
+                      ),
+                      PopupMenuItem(
+                        child: Text(
+                          "Wyloguj się",
+                          style: TextStyle(
+                            color: Color.fromRGBO(249, 101, 116, 1),
+                          ),
+                        ),
+                        value: 4,
+                        enabled: true,
+                      ),
+                      // CheckedPopupMenuItem(
+                      //   child: Text(
+                      //     "Nie zweryfikowano",
+                      //     style: TextStyle(color: Colors.black),
+                      //   ),
+                      //   value: 2,
+                      //   checked: false,
+
+                      // ),
+                    ];
+                    return list;
+                  },
+                  onSelected: (value) {
+                    switch (value) {
+                      case 0:
+                        setState(() {
+                          showOnlyVerified = !showOnlyVerified;
+                        });
+                        break;
+                      case 1:
+                        Navigator.of(context).push(
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) {
-                              return HomeScreen();
+                              return UsersToBeVerifiedScreen();
                             },
                           ),
                         );
-                      });
-                      break;
-                    default:
-                  }
-                },
-                child: Image.network(
-                  Provider.of<UserData>(context).currentUserPhoto!,
+                        break;
+                      case 2:
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return VerifyUserScreen();
+                            },
+                          ),
+                        );
+                        break;
+                      case 3:
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return MyAccountScreen(
+                                adsEnabled: Provider.of<UserData>(context,
+                                        listen: false)
+                                    .showAds!,
+                              );
+                            },
+                          ),
+                        );
+                        break;
+                      case 4:
+                        UserData().logout().then((value) {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) {
+                                return HomeScreen();
+                              },
+                            ),
+                          );
+                        });
+                        break;
+                      default:
+                    }
+                  },
+                  child: Image.network(
+                    Provider.of<UserData>(context).currentUserPhoto!,
+                  ),
+                  // icon: Icon(
+                  //   Icons.settings,
+                  // ),
                 ),
-                // icon: Icon(
-                //   Icons.settings,
-                // ),
               ),
             ),
           ),
@@ -364,15 +421,26 @@ class _MainScreenState extends State<MainScreen> {
                 child: PopupMenuButton(
                   enableFeedback: true,
                   tooltip: 'Opcje',
+                  color: Theme.of(context).primaryColor,
                   itemBuilder: (context) {
                     List<PopupMenuEntry> list = [
                       PopupMenuItem(
-                        child: Text("Zadzwoń do: Smyrdack"),
+                        child: Text(
+                          "Zadzwoń do: Smyrdack",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
                         value: 0,
                         enabled: true,
                       ),
                       PopupMenuItem(
-                        child: Text("Wyślij SMS-a do: Smyrdack"),
+                        child: Text(
+                          "Wyślij SMS-a do: Smyrdack",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
                         value: 1,
                         enabled: true,
                       ),
@@ -380,12 +448,22 @@ class _MainScreenState extends State<MainScreen> {
                         height: 10,
                       ),
                       PopupMenuItem(
-                        child: Text("Zadzwoń do: Flip"),
+                        child: Text(
+                          "Zadzwoń do: Flip",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
                         value: 2,
                         enabled: true,
                       ),
                       PopupMenuItem(
-                        child: Text("Wyślij SMS-a do: Flip"),
+                        child: Text(
+                          "Wyślij SMS-a do: Flip",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
                         value: 3,
                         enabled: true,
                       ),

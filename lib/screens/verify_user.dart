@@ -110,6 +110,7 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: PinCodeTextField(
+                    keyboardType: TextInputType.visiblePassword,
                     hapticFeedbackTypes: HapticFeedbackTypes.heavy,
                     length: 6,
                     enabled: !verifying && sentRequest,
@@ -236,11 +237,20 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             'Wysłano prośbę o kod, oczekuj\nkontaktu w wiadomości prywatnej',
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.headline5!.color,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 3,
                           ),
                         )
-                      : Text('Wyślij prośbę o kod'),
+                      : Text(
+                          'Wyślij prośbę o kod',
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
                   icon: sentRequest
                       ? Icon(Icons.done_rounded,
                           color: Color.fromRGBO(132, 207, 150, 1))

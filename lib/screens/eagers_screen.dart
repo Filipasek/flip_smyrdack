@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/user_screen.dart';
+import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EagersListScreen extends StatefulWidget {
+  String tripId;
   List eagers;
-  EagersListScreen(this.eagers);
+  EagersListScreen(this.eagers, this.tripId);
 
   @override
   _EagersListScreenState createState() => _EagersListScreenState();
@@ -54,7 +57,7 @@ class _EagersListScreenState extends State<EagersListScreen> {
                       // icon: Icon(
                       //   Icons.portrait_outlined,
                       //   size: 35.0,
-                      //   color: Color.fromRGBO(255, 182, 185, 1),
+                      //   color: Theme.of(context).accentColor,
                       // ),
                       child: Text(
                         data.containsKey('realName')
@@ -63,10 +66,15 @@ class _EagersListScreenState extends State<EagersListScreen> {
                         // 'nice',
                         style: TextStyle(
                           fontSize: 25.0,
+                          color: Theme.of(context).textTheme.headline5!.color,
                         ),
                       ),
                     );
                   } else {
+                    AuthService.removeUserFromTrip(
+                      widget.tripId,
+                      widget.eagers[index],
+                    );
                     return SizedBox();
                   }
                 } else if (snapshot.hasError) {
@@ -91,6 +99,7 @@ class _EagersListScreenState extends State<EagersListScreen> {
                 }
               },
             );
+            
           },
         ),
       ),

@@ -231,7 +231,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       style: TextStyle(
                         fontSize: 32.0,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -243,7 +243,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Adres e-mail: ${data['contactData']}',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -287,7 +287,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Uprawnienia admina: ${data['admin'] ? 'Tak' : 'Nie'}',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -299,7 +299,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Konto zweryfikowane: ${data['verified'] ? 'Tak' : 'Nie'}',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -311,7 +311,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Pierwsze logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['first_login'].toDate().toLocal())}',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -323,7 +323,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Ostatnie nowe logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['last_login'].toDate())}',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -336,7 +336,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       'Ilość wykopanych diamentów: $diamonds 💎',
                       style: TextStyle(
                         fontSize: 14.0,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),

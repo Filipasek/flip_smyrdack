@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserScreen extends StatefulWidget {
@@ -51,7 +52,68 @@ class _UserScreenState extends State<UserScreen> {
                       style: TextStyle(
                         fontSize: 32.0,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.headline5!.color,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
+                    child: Text(
+                      'Uprawnienia admina: ${data['admin'] ? 'Tak' : 'Nie'}',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).textTheme.headline5!.color,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
+                    child: Text(
+                      'Konto zweryfikowane: ${data['verified'] ? 'Tak' : 'Nie'}',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).textTheme.headline5!.color,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
+                    child: Text(
+                      'Pierwsze logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['first_login'].toDate().toLocal())}',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).textTheme.headline5!.color,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
+                    child: Text(
+                      'Ostatnie nowe logowanie: ${DateFormat('dd MMM, HH:mm', 'pl_PL').format(data['last_login'].toDate())}',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).textTheme.headline5!.color,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 5.0),
+                    child: Text(
+                      // 'Ilość uzbieranych diamentów: ${data['diamonds'] ?? '[BŁĄD]'}',
+                      'Ilość wykopanych diamentów: ${data.containsKey('verificationCode') ? data['diamonds'] ?? 'błąd' : 'brak'} 💎',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).textTheme.headline5!.color,
                       ),
                     ),
                   ),
@@ -65,7 +127,7 @@ class _UserScreenState extends State<UserScreen> {
                           'Adres e-mail: ${data['contactData']}',
                           style: TextStyle(
                             fontSize: 14.0,
-                            color: Colors.black,
+                            color: Theme.of(context).textTheme.headline5!.color,
                           ),
                         ),
                       ),
@@ -82,6 +144,7 @@ class _UserScreenState extends State<UserScreen> {
                         },
                         icon: Icon(
                           Icons.mail_outline,
+                          color: Theme.of(context).textTheme.headline5!.color,
                         ),
                       )
                     ],
@@ -93,10 +156,10 @@ class _UserScreenState extends State<UserScreen> {
                     children: [
                       Container(
                         child: Text(
-                          'Kod weryfikacyjny: ${data['verificationCode']}',
+                          'Kod weryfikacyjny: ${data.containsKey('verificationCode') ? data['verificationCode'] : 'brak'}',
                           style: TextStyle(
                             fontSize: 14.0,
-                            color: Colors.black,
+                            color: Theme.of(context).textTheme.headline5!.color,
                           ),
                         ),
                       ),
@@ -107,6 +170,7 @@ class _UserScreenState extends State<UserScreen> {
                         },
                         icon: Icon(
                           Icons.content_copy_rounded,
+                          color: Theme.of(context).textTheme.headline5!.color,
                         ),
                       )
                     ],

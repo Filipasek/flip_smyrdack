@@ -18,6 +18,7 @@ class _FullscreenImageScreenState extends State<FullscreenImageScreen> {
         onTap: () =>
             Navigator.of(context).pop(),
         child: PhotoView(
+          enableRotation: true,
           imageProvider: NetworkImage(widget.fileTag),
           heroAttributes: PhotoViewHeroAttributes(tag: widget.fileTag),
         ),

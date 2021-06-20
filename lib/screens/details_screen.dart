@@ -215,6 +215,52 @@ class _DetailsScreenState extends State<DetailsScreen> {
           elevation: 0.0,
           title: Text(widget.name),
         ),
+        floatingActionButton: Provider.of<UserData>(context, listen: false)
+                .isAdmin!
+            ? Container(
+                padding: EdgeInsets.all(5.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100.0),
+                  child: PopupMenuButton(
+                    enableFeedback: true,
+                    tooltip: 'Opcje',
+                    color: Theme.of(context).primaryColor,
+                    itemBuilder: (context) {
+                      List<PopupMenuEntry> list = [
+                        PopupMenuItem(
+                          child: Text(
+                            "Ukryj wyprawę dla wszystkich",
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.headline5!.color,
+                            ),
+                          ),
+                          value: 3,
+                          enabled: true,
+                        ),
+                      ];
+                      return list;
+                    },
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 0:
+                          break;
+                        default:
+                      }
+                    },
+                    child: Container(
+                      height: 60.0,
+                      width: 60.0,
+                      color: Theme.of(context).accentColor,
+                      child: Icon(
+                        Icons.settings_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -275,8 +321,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               });
                             },
                       label: amJustRemoved
-                          ? Text('Zrezygnowano z udziału')
-                          : Text('Zrezygnuj z udziału'),
+                          ? Text(
+                              'Zrezygnowano z udziału',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2!
+                                    .color,
+                              ),
+                            )
+                          : Text(
+                              'Zrezygnuj z udziału',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .headline5!
+                                    .color,
+                              ),
+                            ),
                       icon: amJustRemoved
                           ? Icon(Icons.close,
                               color: Color.fromRGBO(249, 101, 116, 1))
@@ -309,8 +371,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               });
                             },
                       label: amJustAdded
-                          ? Text('Potwierdzono udział')
-                          : Text('Potwiedź udział'),
+                          ? Text(
+                              'Potwierdzono udział',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2!
+                                    .color,
+                              ),
+                            )
+                          : Text(
+                              'Potwiedź udział',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .headline5!
+                                    .color,
+                              ),
+                            ),
                       icon: amJustAdded
                           ? Icon(Icons.done_rounded,
                               color: Color.fromRGBO(132, 207, 150, 1))
@@ -345,6 +423,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 MaterialPageRoute(
                                   builder: (_) => EagersListScreen(
                                     widget.eagers,
+                                    widget._id.toString(),
                                   ),
                                 ),
                               );
@@ -386,6 +465,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     SizedBox(),
                     CreateColumnOfInfo('Inne', '${widget.otherCosts} zł',
                         'Inne koszty typu wstęp do parku'),
+
                   ],
                 ),
               ),
@@ -424,6 +504,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   ),
                 ),
               ),
+              SizedBox(height: 50.0),
             ],
           ),
         ),

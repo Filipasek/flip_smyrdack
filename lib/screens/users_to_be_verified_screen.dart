@@ -120,12 +120,13 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
               icon: Icon(
                 Icons.face,
                 size: 35.0,
-                color: Color.fromRGBO(255, 182, 185, 1),
+                color: Theme.of(context).accentColor,
               ),
               label: Text(
                 name,
                 style: TextStyle(
                   fontSize: 25.0,
+                  color: Theme.of(context).textTheme.headline5!.color,
                 ),
               ),
             );
