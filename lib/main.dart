@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 
 String get bannerAdUnitId {
   /// Always test with test ads
-  if (kDebugMode)
+  if (kDebugMode && !kIsWeb)
     return MobileAds.bannerAdTestUnitId;
   else
     return 'ca-app-pub-9537370157330943/6534905339';
@@ -24,19 +24,24 @@ String get bannerAdUnitId {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runZonedGuarded<Future<void>>(() async {
-    await MobileAds.initialize(
-      bannerAdUnitId: bannerAdUnitId,
-    );
-
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-    await FirebaseCrashlytics.instance
-        .setCrashlyticsCollectionEnabled(!kDebugMode);
-    await FirebaseCrashlytics.instance.setUserIdentifier("unidentified");
-
+  if (kIsWeb) {
     initializeDateFormatting('pl_PL');
     runApp(MyApp());
-  }, FirebaseCrashlytics.instance.recordError);
+  } else {
+    runZonedGuarded<Future<void>>(() async {
+      MobileAds.initialize(
+        bannerAdUnitId: bannerAdUnitId,
+      );
+
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+      await FirebaseCrashlytics.instance
+          .setCrashlyticsCollectionEnabled(!kDebugMode);
+      await FirebaseCrashlytics.instance.setUserIdentifier("unidentified");
+
+      initializeDateFormatting('pl_PL');
+      runApp(MyApp());
+    }, FirebaseCrashlytics.instance.recordError);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -121,7 +126,6 @@ class _AppState extends State<App> {
           bodyText2: TextStyle(color: Colors.grey),
           headline5: TextStyle(color: Colors.white),
         ),
-        
         appBarTheme: AppBarTheme(
           elevation: 0,
           color: Color.fromRGBO(40, 44, 55, 1),

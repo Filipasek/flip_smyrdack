@@ -4,10 +4,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/login_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -49,7 +51,7 @@ class HomeScreen extends StatelessWidget {
               List usersList = data[2]['usersList'] ?? [];
               dynamic usersToBeVerified = data[2];
               Provider.of<UserData>(context, listen: false).showAds =
-                  settings['showAds'] ?? true;
+                  !kIsWeb && (settings['showAds'] ?? true);
               if (apiVersion >= versions['minimum']) {
                 return StreamBuilder<User?>(
                   stream: Provider.of<FirebaseAuth>(context, listen: false)
@@ -82,8 +84,9 @@ class HomeScreen extends StatelessWidget {
 
                               Provider.of<UserData>(context, listen: false)
                                   .currentUserId = _user.uid;
-                              FirebaseCrashlytics.instance
-                                  .setUserIdentifier(_user.uid.toString());
+                              if (!kIsWeb)
+                                FirebaseCrashlytics.instance
+                                    .setUserIdentifier(_user.uid.toString());
                               Provider.of<UserData>(context, listen: false)
                                       .isVerCodeSet =
                                   _data.containsKey('verificationCode');
@@ -177,10 +180,8 @@ class HomeScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24.0,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context)
-                                            .textTheme
-                                            .headline5!
-                                            .color!,
+                            color:
+                                Theme.of(context).textTheme.headline5!.color!,
                           ),
                         ),
                         SizedBox(height: 10.0),
