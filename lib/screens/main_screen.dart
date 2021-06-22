@@ -183,7 +183,10 @@ class _MainScreenState extends State<MainScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16.0,
-                              color: Colors.black,
+                              color: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                             ),
                           ),
                         ],
@@ -329,7 +332,10 @@ class _MainScreenState extends State<MainScreen> {
                       // CheckedPopupMenuItem(
                       //   child: Text(
                       //     "Nie zweryfikowano",
-                      //     style: TextStyle(color: Colors.black),
+                      //     style: TextStyle(color: Theme.of(context)
+                                            // .textTheme
+                                            // .headline5!
+                                            // .color!),
                       //   ),
                       //   value: 2,
                       //   checked: false,
@@ -477,7 +483,10 @@ class _MainScreenState extends State<MainScreen> {
                       // CheckedPopupMenuItem(
                       //   child: Text(
                       //     "Nie zweryfikowano",
-                      //     style: TextStyle(color: Colors.black),
+                      //     style: TextStyle(color: Theme.of(context)
+                                            // .textTheme
+                                            // .headline5!
+                                            // .color!),
                       //   ),
                       //   value: 2,
                       //   checked: false,
@@ -681,7 +690,10 @@ class _MainScreenState extends State<MainScreen> {
                             Icon(
                               Icons.hiking_rounded,
                               size: 100.0,
-                              color: Colors.black,
+                              color: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                             ),
                             SizedBox(height: 15.0),
                             Text(
@@ -689,7 +701,10 @@ class _MainScreenState extends State<MainScreen> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 24.0,
-                                color: Colors.black,
+                                color: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                               ),
                             ),
                             SizedBox(height: 20.0),
@@ -804,7 +819,10 @@ class Destinations extends StatelessWidget {
                 width: double.infinity,
                 child: FlatButton(
                   disabledColor: Theme.of(context).accentColor,
-                  disabledTextColor: Colors.black,
+                  disabledTextColor: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                   textColor: Theme.of(context).textTheme.headline5!.color,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),

@@ -35,6 +35,7 @@ class HomeScreen extends StatelessWidget {
         systemNavigationBarColor: Theme.of(context).primaryColor,
         systemNavigationBarIconBrightness:
             Theme.of(context).appBarTheme.brightness,
+        statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
@@ -176,7 +177,10 @@ class HomeScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24.0,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                           ),
                         ),
                         SizedBox(height: 10.0),

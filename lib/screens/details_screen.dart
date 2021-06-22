@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/eagers_screen.dart';
 import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
@@ -217,49 +218,74 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
         floatingActionButton: Provider.of<UserData>(context, listen: false)
                 .isAdmin!
-            ? Container(
-                padding: EdgeInsets.all(5.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100.0),
-                  child: PopupMenuButton(
-                    enableFeedback: true,
-                    tooltip: 'Opcje',
-                    color: Theme.of(context).primaryColor,
-                    itemBuilder: (context) {
-                      List<PopupMenuEntry> list = [
-                        PopupMenuItem(
-                          child: Text(
-                            "Ukryj wyprawę dla wszystkich",
-                            style: TextStyle(
-                              color:
-                                  Theme.of(context).textTheme.headline5!.color,
-                            ),
-                          ),
-                          value: 3,
-                          enabled: true,
-                        ),
-                      ];
-                      return list;
-                    },
-                    onSelected: (value) async {
-                      switch (value) {
-                        case 0:
-                          break;
-                        default:
-                      }
-                    },
-                    child: Container(
-                      height: 60.0,
-                      width: 60.0,
-                      color: Theme.of(context).accentColor,
-                      child: Icon(
-                        Icons.settings_rounded,
-                        color: Colors.white,
+            ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddTripScreen(
+                        name: widget.name,
+                        difficulty: widget.difficulty,
+                        transportCost: widget.transportCost,
+                        tripLength: widget.tripLength,
+                        elevation: widget.elevation,
+                        elevDifferences: widget.elevDifferences,
+                        tripId: widget._id.toString(),
+                        otherCosts: widget.otherCosts,
+                        description: widget.description,
+                        date: widget.date.toDate(),
+                        image: widget.imageUrl,
+                        startTime: stringToTimeOfDay(widget.startTime),
+                        endTime: stringToTimeOfDay(widget.endTime),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
+                child: Icon(Icons.mode_edit_rounded),
               )
+            // ? Container(
+            //     padding: EdgeInsets.all(5.0),
+            //     child: ClipRRect(
+            //       borderRadius: BorderRadius.circular(100.0),
+            //       child: PopupMenuButton(
+            //         enableFeedback: true,
+            //         tooltip: 'Opcje',
+            //         color: Theme.of(context).primaryColor,
+            //         itemBuilder: (context) {
+            //           List<PopupMenuEntry> list = [
+            //             PopupMenuItem(
+            //               child: Text(
+            //                 "Ukryj wyprawę dla wszystkich",
+            //                 style: TextStyle(
+            //                   color:
+            //                       Theme.of(context).textTheme.headline5!.color,
+            //                 ),
+            //               ),
+            //               value: 3,
+            //               enabled: true,
+            //             ),
+            //           ];
+            //           return list;
+            //         },
+            //         onSelected: (value) async {
+            //           switch (value) {
+            //             case 0:
+            //               break;
+            //             default:
+            //           }
+            //         },
+            //         child: Container(
+            //           height: 60.0,
+            //           width: 60.0,
+            //           color: Theme.of(context).accentColor,
+            //           child: Icon(
+            //             Icons.settings_rounded,
+            //             color: Colors.white,
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   )
             : null,
         body: SingleChildScrollView(
           child: Column(
@@ -465,7 +491,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     SizedBox(),
                     CreateColumnOfInfo('Inne', '${widget.otherCosts} zł',
                         'Inne koszty typu wstęp do parku'),
-
                   ],
                 ),
               ),
@@ -560,6 +585,12 @@ class SingleInfoText extends StatelessWidget {
 String convertBigToSmall(int meters) {
   if (meters >= 3000) return '${((meters / 100).round()) / 10} km';
   return '$meters m';
+}
+
+TimeOfDay stringToTimeOfDay(String s) {
+  int hour = int.parse(s.split(":")[0]);
+  int minute = int.parse(s.split(":")[1]);
+  return TimeOfDay(hour: hour, minute: minute);
 }
 
 String numOfPersonToString(int persons) {

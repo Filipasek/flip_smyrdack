@@ -258,7 +258,10 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 //           'Adres e-mail: ${data['contactData']}',
                 //           style: TextStyle(
                 //             fontSize: 14.0,
-                //             color: Colors.black,
+                //             color: Theme.of(context)
+                                            // .textTheme
+                                            // .headline5!
+                                            // .color!,
                 //           ),
                 //         ),
                 //       ),

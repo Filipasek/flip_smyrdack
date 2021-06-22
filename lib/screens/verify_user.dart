@@ -129,7 +129,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                       fieldWidth: 40,
                       activeFillColor: Colors.white,
                       inactiveFillColor: Colors.white,
-                      disabledColor: Colors.black,
+                      disabledColor: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                       inactiveColor: Colors.grey,
                     ),
                     animationDuration: Duration(milliseconds: 300),
@@ -307,7 +310,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                       fieldWidth: 30,
                       activeFillColor: Colors.white,
                       inactiveFillColor: Colors.white,
-                      disabledColor: Colors.black,
+                      disabledColor: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                       inactiveColor: Colors.grey,
                     ),
                     keyboardType: TextInputType.number,
@@ -375,7 +381,10 @@ class _VerifyUserScreenState extends State<VerifyUserScreen> {
                             fieldWidth: 40,
                             activeFillColor: Colors.white,
                             inactiveFillColor: Colors.white,
-                            disabledColor: Colors.black,
+                            disabledColor: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color!,
                             inactiveColor: Colors.grey,
                           ),
                           keyboardType: TextInputType.number,

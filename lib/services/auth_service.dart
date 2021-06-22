@@ -165,6 +165,19 @@ class AuthService {
     return false;
   }
 
+  static Future<bool> hideTrip(String _id) async {
+    try {
+      await _firestore.collection('/trips').doc(_id.toString()).update({
+        "showable": false,
+      });
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Hiding a trip', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
   static Future<bool> addUserToTrip(String _id, String _userId) async {
     try {
       await _firestore.collection('/trips').doc(_id.toString()).update({
@@ -192,6 +205,7 @@ class AuthService {
   }
 
   static Future<bool> addTripToDatabase(
+    int _id,
     String name,
     int transportCost,
     int otherCosts,
@@ -221,8 +235,6 @@ class AuthService {
       }
       return true;
     }
-
-    int _id = DateTime.now().microsecondsSinceEpoch;
 
     for (int i = 0; i < photos.length; i++) {
       if (!(await uploadFile(photos[i], _id.toString(), i))) return false;
