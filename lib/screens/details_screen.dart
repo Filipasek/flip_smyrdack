@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/eagers_screen.dart';
@@ -132,6 +133,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance
+          .setCustomKey("screen name", 'Details Screen');
+
     numberOfPeople = amJustAdded
         ? widget.eagers.length + 1
         : amJustRemoved
@@ -216,8 +221,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           elevation: 0.0,
           title: Text(widget.name),
         ),
-        floatingActionButton: Provider.of<UserData>(context, listen: false)
-                .isAdmin!
+        floatingActionButton: !kIsWeb &&
+                (Provider.of<UserData>(context, listen: false).isAdmin ?? false)
             ? FloatingActionButton(
                 onPressed: () {
                   Navigator.push(
@@ -287,250 +292,262 @@ class _DetailsScreenState extends State<DetailsScreen> {
             //     ),
             //   )
             : null,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Container(
-              //   child: Hero(
-              //     tag: 'image${widget.index}',
-              //     child: ClipRRect(
-              //       borderRadius:
-              //           BorderRadius.vertical(bottom: Radius.circular(15.0)),
-              //       child: Image(
-              //         image: NetworkImage(widget.imageUrl),
-              //         // height: 300.0,
-              //         width: double.infinity,
-              //         fit: BoxFit.fitWidth,
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              CarouselSlider(
-                options: CarouselOptions(
-                  aspectRatio: 2.0,
-                  enlargeCenterPage: true,
-                  enableInfiniteScroll: false,
-                  initialPage: 0,
-                  autoPlay: true,
-                  height: 220.0,
-                  // reverse: true,
-                  viewportFraction: 0.99,
-                ),
-                items: imageSliders,
-              ),
-              widget.eagers.contains(
-                      Provider.of<UserData>(context, listen: false)
-                          .currentUserId)
-                  ? FlatButton.icon(
-                      onPressed: loading || amJustRemoved
-                          ? null
-                          : () async {
-                              setState(() {
-                                loading = true;
-                              });
-                              await AuthService.removeUserFromTrip(
-                                      widget._id.toString(),
-                                      Provider.of<UserData>(context,
-                                              listen: false)
-                                          .currentUserId!)
-                                  .then((value) {
-                                if (value) {
-                                  setState(() {
-                                    amJustRemoved = true;
-                                    loading = false;
-                                  });
-                                }
-                              }).onError((error, stackTrace) {
-                                setState(() {
-                                  loading = false;
-                                });
-                              });
-                            },
-                      label: amJustRemoved
-                          ? Text(
-                              'Zrezygnowano z udziału',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2!
-                                    .color,
-                              ),
-                            )
-                          : Text(
-                              'Zrezygnuj z udziału',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .headline5!
-                                    .color,
-                              ),
-                            ),
-                      icon: amJustRemoved
-                          ? Icon(Icons.close,
-                              color: Color.fromRGBO(249, 101, 116, 1))
-                          : Icon(Icons.remove_done_rounded,
-                              color: Color.fromRGBO(249, 101, 116, 1)),
-                    )
-                  : FlatButton.icon(
-                      onPressed: loading || amJustAdded
-                          ? null
-                          : () async {
-                              setState(() {
-                                loading = true;
-                              });
-                              await AuthService.addUserToTrip(
-                                      widget._id.toString(),
-                                      Provider.of<UserData>(context,
-                                              listen: false)
-                                          .currentUserId!)
-                                  .then((value) {
-                                if (value) {
-                                  setState(() {
-                                    amJustAdded = true;
-                                    loading = false;
-                                  });
-                                }
-                              }).onError((error, stackTrace) {
-                                setState(() {
-                                  loading = false;
-                                });
-                              });
-                            },
-                      label: amJustAdded
-                          ? Text(
-                              'Potwierdzono udział',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2!
-                                    .color,
-                              ),
-                            )
-                          : Text(
-                              'Potwiedź udział',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .headline5!
-                                    .color,
-                              ),
-                            ),
-                      icon: amJustAdded
-                          ? Icon(Icons.done_rounded,
-                              color: Color.fromRGBO(132, 207, 150, 1))
-                          : Icon(Icons.add_task_rounded,
-                              color: Color.fromRGBO(132, 207, 150, 1)),
+        body: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 700.0),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Container(
+                  //   child: Hero(
+                  //     tag: 'image${widget.index}',
+                  //     child: ClipRRect(
+                  //       borderRadius:
+                  //           BorderRadius.vertical(bottom: Radius.circular(15.0)),
+                  //       child: Image(
+                  //         image: NetworkImage(widget.imageUrl),
+                  //         // height: 300.0,
+                  //         width: double.infinity,
+                  //         fit: BoxFit.fitWidth,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      aspectRatio: 2.0,
+                      enlargeCenterPage: true,
+                      enableInfiniteScroll: false,
+                      initialPage: 0,
+                      autoPlay: true,
+                      height: 220.0,
+                      // reverse: true,
+                      viewportFraction: 0.99,
                     ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: SingleInfoTextBold('Informacje podstawowe:'),
-              ),
-              Container(
-                height: 260.0,
-                child: GridView.count(
-                  childAspectRatio: 2,
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 3,
-                  primary: true,
-                  mainAxisSpacing: 0.0,
-                  children: [
-                    CreateColumnOfInfo('Trudność', widget.difficulty,
-                        'Szacowana trudność wycieczki'),
-                    CreateColumnOfInfo(
-                        "Kiedy",
-                        "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
-                        'Data dzienna rozpoczęcia wycieczki'),
-                    Provider.of<UserData>(context, listen: false).isVerified ??
-                            false
-                        ? FlatButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EagersListScreen(
-                                    widget.eagers,
-                                    widget._id.toString(),
+                    items: imageSliders,
+                  ),
+                  widget.eagers.contains(
+                          Provider.of<UserData>(context, listen: false)
+                              .currentUserId)
+                      ? FlatButton.icon(
+                          onPressed: loading || amJustRemoved
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    loading = true;
+                                  });
+                                  await AuthService.removeUserFromTrip(
+                                          widget._id.toString(),
+                                          Provider.of<UserData>(context,
+                                                  listen: false)
+                                              .currentUserId!)
+                                      .then((value) {
+                                    if (value) {
+                                      setState(() {
+                                        amJustRemoved = true;
+                                        loading = false;
+                                      });
+                                    }
+                                  }).onError((error, stackTrace) {
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                  });
+                                },
+                          label: amJustRemoved
+                              ? Text(
+                                  'Zrezygnowano z udziału',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText2!
+                                        .color,
+                                  ),
+                                )
+                              : Text(
+                                  'Zrezygnuj z udziału',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .headline5!
+                                        .color,
                                   ),
                                 ),
-                              );
-                            },
-                            child: CreateColumnOfInfo(
+                          icon: amJustRemoved
+                              ? Icon(Icons.close,
+                                  color: Color.fromRGBO(249, 101, 116, 1))
+                              : Icon(Icons.remove_done_rounded,
+                                  color: Color.fromRGBO(249, 101, 116, 1)),
+                        )
+                      : FlatButton.icon(
+                          onPressed: loading || amJustAdded
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    loading = true;
+                                  });
+                                  await AuthService.addUserToTrip(
+                                          widget._id.toString(),
+                                          Provider.of<UserData>(context,
+                                                  listen: false)
+                                              .currentUserId!)
+                                      .then((value) {
+                                    if (value) {
+                                      setState(() {
+                                        amJustAdded = true;
+                                        loading = false;
+                                      });
+                                    }
+                                  }).onError((error, stackTrace) {
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                  });
+                                },
+                          label: amJustAdded
+                              ? Text(
+                                  'Potwierdzono udział',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText2!
+                                        .color,
+                                  ),
+                                )
+                              : Text(
+                                  'Potwiedź udział',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .headline5!
+                                        .color,
+                                  ),
+                                ),
+                          icon: amJustAdded
+                              ? Icon(Icons.done_rounded,
+                                  color: Color.fromRGBO(132, 207, 150, 1))
+                              : Icon(Icons.add_task_rounded,
+                                  color: Color.fromRGBO(132, 207, 150, 1)),
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: SingleInfoTextBold('Informacje podstawowe:'),
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.width > 700
+                        ? 500
+                        : ((((MediaQuery.of(context).size.width) / 6) * 4) +
+                            4),
+                    child: GridView.count(
+                      childAspectRatio: 2,
+                      physics: NeverScrollableScrollPhysics(),
+                      crossAxisCount: 3,
+                      primary: true,
+                      mainAxisSpacing: 0.0,
+                      children: [
+                        CreateColumnOfInfo('Trudność', widget.difficulty,
+                            'Szacowana trudność wycieczki'),
+                        CreateColumnOfInfo(
+                            "Kiedy",
+                            "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
+                            'Data dzienna rozpoczęcia wycieczki'),
+                        Provider.of<UserData>(context, listen: false)
+                                    .isVerified ??
+                                false
+                            ? FlatButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => EagersListScreen(
+                                        widget.eagers,
+                                        widget._id.toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: CreateColumnOfInfo(
+                                    'Chętnych',
+                                    numOfPersonToString(numberOfPeople!),
+                                    'Ilość osób, które potwierdziły swój udział w aplikacji'),
+                              )
+                            : CreateColumnOfInfo(
                                 'Chętnych',
                                 numOfPersonToString(numberOfPeople!),
                                 'Ilość osób, które potwierdziły swój udział w aplikacji'),
-                          )
-                        : CreateColumnOfInfo(
-                            'Chętnych',
-                            numOfPersonToString(numberOfPeople!),
-                            'Ilość osób, które potwierdziły swój udział w aplikacji'),
-                    CreateColumnOfInfo('Wyjście', widget.startTime,
-                        'Planowany czas startu (na miejscu)'),
-                    CreateColumnOfInfo(
-                        'Czas', 'trochę', 'Szacowany czas chodzenia'),
-                    CreateColumnOfInfo('Zejście', widget.endTime,
-                        'Planowany czas końca trasy'),
-                    CreateColumnOfInfo(
-                        'Przewyższeń',
-                        convertBigToSmall(widget.elevDifferences),
-                        // '${widget.elev_differences.toString()} m',
-                        'Ilość przewyższeń według map wyrażona w metrach'),
-                    CreateColumnOfInfo(
-                        'Wysokosć',
-                        convertBigToSmall(widget.elevation),
-                        // '${widget.elevation.toString()} m',
-                        'Wysokość miejsca docelowego wyrażona w metrach'),
-                    CreateColumnOfInfo(
-                        'Długość',
-                        convertBigToSmall(widget.tripLength),
-                        // '${widget.trip_length.toString()} m',
-                        'Długość trasy według map wyrażona w metrach'),
-                    CreateColumnOfInfo(
-                        'Transport',
-                        '${widget.transportCost} zł',
-                        'Koszty transportu samochodem lub innymi środkami transportu'),
-                    SizedBox(),
-                    CreateColumnOfInfo('Inne', '${widget.otherCosts} zł',
-                        'Inne koszty typu wstęp do parku'),
-                  ],
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: SingleInfoTextBold('Opis:'),
-              ),
-              // Container(
-              //   child: AdWidget(ad: _ad),
-              //   width: _ad.size.width.toDouble(),
-              //   height: 72.0,
-              //   alignment: Alignment.center,
-              // ),
-              Provider.of<UserData>(context, listen: false).showAds!
-                  ? BannerAd(
-                      unitId: bannerAdUnitId,
-                      size: BannerSize.ADAPTIVE,
-                      loading: Center(child: Text('Ładowanie reklamy')),
-                      // loading: LinearProgressIndicator(),
-                      error:
-                          Center(child: Text('Brak reklamy. Na nasz koszt :)')),
-                    )
-                  : SizedBox(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
-                child: Text(
-                  widget.description,
-                  // maxLines: 2,
-                  textAlign: TextAlign.justify,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.headline5!.color,
-                    // fontWeight: FontWeight.bold,
-
-                    fontSize: 16.0,
+                        CreateColumnOfInfo('Wyjście', widget.startTime,
+                            'Planowany czas startu (na miejscu)'),
+                        CreateColumnOfInfo(
+                            'Czas', 'trochę', 'Szacowany czas chodzenia'),
+                        CreateColumnOfInfo('Zejście', widget.endTime,
+                            'Planowany czas końca trasy'),
+                        CreateColumnOfInfo(
+                            'Przewyższeń',
+                            convertBigToSmall(widget.elevDifferences),
+                            // '${widget.elev_differences.toString()} m',
+                            'Ilość przewyższeń według map wyrażona w metrach'),
+                        CreateColumnOfInfo(
+                            'Wysokosć',
+                            convertBigToSmall(widget.elevation),
+                            // '${widget.elevation.toString()} m',
+                            'Wysokość miejsca docelowego wyrażona w metrach'),
+                        CreateColumnOfInfo(
+                            'Długość',
+                            convertBigToSmall(widget.tripLength),
+                            // '${widget.trip_length.toString()} m',
+                            'Długość trasy według map wyrażona w metrach'),
+                        CreateColumnOfInfo(
+                            'Transport',
+                            '${widget.transportCost} zł',
+                            'Koszty transportu samochodem lub innymi środkami transportu'),
+                        SizedBox(),
+                        CreateColumnOfInfo('Inne', '${widget.otherCosts} zł',
+                            'Inne koszty typu wstęp do parku'),
+                      ],
+                    ),
                   ),
-                ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
+                    child: SingleInfoTextBold('Opis:'),
+                  ),
+                  // Container(
+                  //   child: AdWidget(ad: _ad),
+                  //   width: _ad.size.width.toDouble(),
+                  //   height: 72.0,
+                  //   alignment: Alignment.center,
+                  // ),
+                  !kIsWeb &&
+                          (Provider.of<UserData>(context, listen: false)
+                                  .showAds ??
+                              false)
+                      ? BannerAd(
+                          unitId: bannerAdUnitId,
+                          size: BannerSize.ADAPTIVE,
+                          loading: Center(child: Text('Ładowanie reklamy')),
+                          // loading: LinearProgressIndicator(),
+                          error: Center(
+                              child: Text('Brak reklamy. Na nasz koszt :)')),
+                        )
+                      : SizedBox(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
+                    child: Text(
+                      widget.description,
+                      // maxLines: 2,
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.headline5!.color,
+                        // fontWeight: FontWeight.bold,
+
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 50.0),
+                ],
               ),
-              SizedBox(height: 50.0),
-            ],
+            ),
           ),
         ),
       ),

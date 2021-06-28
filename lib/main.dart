@@ -22,6 +22,8 @@ String get bannerAdUnitId {
 }
 
 void main() async {
+  if (!kIsWeb)
+    FirebaseCrashlytics.instance.setCustomKey("screen name", 'main()');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   if (kIsWeb) {
@@ -47,6 +49,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'MyApp');
     return Localizations(
       locale: const Locale('pl', 'en'),
       delegates: <LocalizationsDelegate<dynamic>>[
@@ -79,6 +83,8 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'App');
     // Provider.of<ConfigData>(context, listen: false).readConfigs();
     // FlutterStatusbarManager.setColor(Theme.of(context).primaryColor,
     //     animated: true);
@@ -132,7 +138,10 @@ class _AppState extends State<App> {
           brightness: Brightness.dark,
         ),
       ),
-      home: HomeScreen(),
+      home: Container(
+        padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        child: HomeScreen(),
+      ),
       // home: AnnotatedRegion<SystemUiOverlayStyle>(
       //   value: SystemUiOverlayStyle.dark,
       //   child: HomeScreen(),

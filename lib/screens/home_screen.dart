@@ -21,6 +21,8 @@ class HomeScreen extends StatelessWidget {
   int apiVersion = 22; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Home Screen');
     // SystemChrome.setSystemUIOverlayStyle(
     //   SystemUiOverlayStyle(
     //     systemNavigationBarColor: Theme.of(context).primaryColor,
@@ -49,7 +51,7 @@ class HomeScreen extends StatelessWidget {
               dynamic versions = data[0];
               dynamic settings = data[1];
               List usersList = data[2]['usersList'] ?? [];
-              dynamic usersToBeVerified = data[2];
+              dynamic usersToBeVerified = data[2] ?? [];
               Provider.of<UserData>(context, listen: false).showAds =
                   !kIsWeb && (settings['showAds'] ?? true);
               if (apiVersion >= versions['minimum']) {
@@ -93,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                               Provider.of<UserData>(context, listen: false)
                                   .name = _user.displayName ?? 'Brak';
                               Provider.of<UserData>(context, listen: false)
-                                  .mail = _user.email;
+                                  .mail = _user.email ?? 'Brak';
                               Provider.of<UserData>(context, listen: false)
                                       .isPhoneVerified =
                                   !(_data['phoneNumber'] == 'none');

@@ -116,6 +116,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'My Account');
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(

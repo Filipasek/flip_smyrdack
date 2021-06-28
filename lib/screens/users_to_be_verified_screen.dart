@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/user_screen.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,9 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
 
   @override
   Widget build(BuildContext context) {
+if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Users To Be Verified');
+
     List usersList = Provider.of<UserData>(context, listen: false).usersList!;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,

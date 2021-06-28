@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  
   // late BannerAd _ad;
   bool _isAdLoaded = false;
   String get bannerAdUnitId {
@@ -59,6 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Login Screen');
     // return GestureDetector(
     //   onTap: () {
     //     FocusScopeNode currentFocus = FocusScope.of(context);

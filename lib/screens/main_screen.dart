@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
@@ -35,15 +36,16 @@ class _MainScreenState extends State<MainScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   bool updateReady = false;
   Future<void> checkForUpdate() async {
-    await InAppUpdate.checkForUpdate().then((info) {
-      if (info.updateAvailability == UpdateAvailability.updateAvailable)
-        setState(() {
-          updateReady = true;
-        });
-    }).catchError((e) {
-      showSnack(e.toString());
-    });
-    bool isRevReady = await _inAppReview.isAvailable();
+    if (kIsWeb)
+      await InAppUpdate.checkForUpdate().then((info) {
+        if (info.updateAvailability == UpdateAvailability.updateAvailable)
+          setState(() {
+            updateReady = true;
+          });
+      }).catchError((e) {
+        showSnack(e.toString());
+      });
+    bool isRevReady = kIsWeb ? false : await _inAppReview.isAvailable();
     setState(() {
       isReviewAvailable = isRevReady;
     });
@@ -113,6 +115,9 @@ class _MainScreenState extends State<MainScreen> {
   bool showOnlyVerified = true;
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Main Screen');
+
     String? name = Provider.of<UserData>(context, listen: false).name;
     String begginingOfEmergencyText = name != null ? ", tutaj $name" : '';
     Future firebaseData = showOnlyVerified
@@ -183,10 +188,8 @@ class _MainScreenState extends State<MainScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16.0,
-                              color: Theme.of(context)
-                                            .textTheme
-                                            .headline5!
-                                            .color!,
+                              color:
+                                  Theme.of(context).textTheme.headline5!.color!,
                             ),
                           ),
                         ],
@@ -197,7 +200,11 @@ class _MainScreenState extends State<MainScreen> {
               )
             : null,
         elevation: 0.0,
-        leading: Provider.of<UserData>(context, listen: false).isVerified!
+        leading: (Provider.of<UserData>(context, listen: false).isVerified ??
+                    false) &&
+                (!kIsWeb ||
+                    (Provider.of<UserData>(context, listen: false).isAdmin ??
+                        false))
             ? IconButton(
                 tooltip: 'Dodaj wstawkę',
                 onPressed: () => Navigator.of(context).push(
@@ -219,19 +226,19 @@ class _MainScreenState extends State<MainScreen> {
           // ),
           Badge(
             badgeContent: Text(
-              Provider.of<UserData>(context, listen: false)
-                  .usersList!
+              (Provider.of<UserData>(context, listen: false).usersList ?? [])
                   .length
                   .toString(),
               style: TextStyle(
-                  color: Theme.of(context).textTheme.headline5!.color),
+                color: Colors.white,
+              ),
             ),
             position: BadgePosition.topStart(),
-            showBadge: (Provider.of<UserData>(context, listen: false)
-                        .usersList!
-                        .length >
-                    0) &&
-                Provider.of<UserData>(context, listen: false).isAdmin!,
+            showBadge:
+                ((Provider.of<UserData>(context, listen: false).usersList ?? [])
+                            .length >
+                        0) &&
+                    Provider.of<UserData>(context, listen: false).isAdmin!,
             child: Container(
               padding: EdgeInsets.all(5.0),
               child: ClipRRect(
@@ -257,8 +264,9 @@ class _MainScreenState extends State<MainScreen> {
                       Provider.of<UserData>(context, listen: false).isAdmin!
                           ? PopupMenuItem(
                               enabled:
-                                  Provider.of<UserData>(context, listen: false)
-                                          .usersList!
+                                  (Provider.of<UserData>(context, listen: false)
+                                                  .usersList ??
+                                              [])
                                           .length >
                                       0,
                               child: Text(
@@ -333,9 +341,9 @@ class _MainScreenState extends State<MainScreen> {
                       //   child: Text(
                       //     "Nie zweryfikowano",
                       //     style: TextStyle(color: Theme.of(context)
-                                            // .textTheme
-                                            // .headline5!
-                                            // .color!),
+                      // .textTheme
+                      // .headline5!
+                      // .color!),
                       //   ),
                       //   value: 2,
                       //   checked: false,
@@ -484,9 +492,9 @@ class _MainScreenState extends State<MainScreen> {
                       //   child: Text(
                       //     "Nie zweryfikowano",
                       //     style: TextStyle(color: Theme.of(context)
-                                            // .textTheme
-                                            // .headline5!
-                                            // .color!),
+                      // .textTheme
+                      // .headline5!
+                      // .color!),
                       //   ),
                       //   value: 2,
                       //   checked: false,
@@ -499,9 +507,12 @@ class _MainScreenState extends State<MainScreen> {
                     switch (value) {
                       case 0:
                         const number = '+48518669037';
-                        bool? res =
-                            await FlutterPhoneDirectCaller.callNumber(number);
-                        if (!res!)
+                        bool res = kIsWeb
+                            ? false
+                            : await FlutterPhoneDirectCaller.callNumber(number)
+                                    .onError((error, stackTrace) => false) ??
+                                false;
+                        if (!res)
                           launch(Uri(
                             scheme: 'tel',
                             path: number,
@@ -520,9 +531,12 @@ class _MainScreenState extends State<MainScreen> {
                         break;
                       case 2:
                         const number = '+48692847356';
-                        bool? res =
-                            await FlutterPhoneDirectCaller.callNumber(number);
-                        if (!res!)
+                        bool res = kIsWeb
+                            ? false
+                            : await FlutterPhoneDirectCaller.callNumber(number)
+                                    .onError((error, stackTrace) => false) ??
+                                false;
+                        if (!res)
                           launch(Uri(
                             scheme: 'tel',
                             path: number,
@@ -555,198 +569,206 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
           : null,
-      body: FutureBuilder(
-        future: firebaseData,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            if (Provider.of<UserData>(context, listen: false).isVerified! &&
-                isReviewAvailable) {
-              Future.delayed(const Duration(seconds: 3), () {
-                _inAppReview.requestReview();
-              });
-            }
-            // WidgetsBinding.instance!.addPostFrameCallback((_) async {
-            //   try {
-            //     final isAvailable = await _inAppReview.isAvailable();
-            //     print('HHH');
-            //     if (isAvailable)
-            //       Future.delayed(const Duration(seconds: 3), () {
-            //         _inAppReview.requestReview();
-            //       });
-            //   } catch (e) {
-            //     print(e);
-            //   }
-            // });
-            List data = snapshot.data.docs;
-            int length = data.length;
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 700.0),
+          // padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          child: FutureBuilder(
+            future: firebaseData,
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                if (Provider.of<UserData>(context, listen: false).isVerified! &&
+                    isReviewAvailable) {
+                  Future.delayed(const Duration(seconds: 3), () {
+                    _inAppReview.requestReview();
+                  });
+                }
+                // WidgetsBinding.instance!.addPostFrameCallback((_) async {
+                //   try {
+                //     final isAvailable = await _inAppReview.isAvailable();
+                //     print('HHH');
+                //     if (isAvailable)
+                //       Future.delayed(const Duration(seconds: 3), () {
+                //         _inAppReview.requestReview();
+                //       });
+                //   } catch (e) {
+                //     print(e);
+                //   }
+                // });
+                List data = snapshot.data.docs;
+                int length = data.length;
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                setState(() {
-                  firebaseData = showOnlyVerified
-                      ? FirebaseFirestore.instance
-                          .collection('trips')
-                          .where("showable", isEqualTo: true)
-                          .where("verified", isEqualTo: true)
-                          .get()
-                      : FirebaseFirestore.instance
-                          .collection('trips')
-                          .where("showable", isEqualTo: true)
-                          .get();
-                });
-                return firebaseData;
-              },
-              child: length > 0
-                  ? ListView.builder(
-                      itemCount: length + 2,
-                      itemBuilder: (context, index) {
-                        if (index == (length + 1))
-                          return SizedBox(height: 75.0);
-                        if (index == _kAdIndex) {
-                          // return Container(
-                          //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
-                          //   child: AdWidget(ad: _ad),
-                          //   // width: _ad.size.width.toDouble(),
-                          //   height: _ad.size.height.toDouble(),
-                          //   // height: 72.0,
-                          //   width: double.infinity,
-                          //   alignment: Alignment.center,
-                          // );
-                          return InkWell(
-                            onTap: () => print('tapped'),
-                            child: Provider.of<UserData>(context, listen: false)
-                                    .showAds!
-                                ? BannerAd(
-                                    unitId: bannerAdUnitId,
-                                    size: BannerSize.ADAPTIVE,
-                                    loading: Center(
-                                        child: Text('Ładowanie reklamy')),
-                                    // loading: Center(child: CircularProgressIndicator()),
-                                    error: Center(
-                                        child: Text(
-                                            'Nie udało się załadować reklamy')),
-                                    // builder: (context, child) {
-                                    //   return GestureDetector(
-                                    //     onTap: () => print('tappp'),
-                                    //     child: child,
-                                    //   );
-                                    // return Container(
-                                    //   margin:
-                                    //       EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
-                                    //   decoration: BoxDecoration(
-                                    //     borderRadius: BorderRadius.circular(15.0),
-                                    //     border: Border.all(
-                                    //       color: Colors.grey,
-                                    //     ),
-                                    //   ),
-                                    //   child: ClipRRect(
-                                    //     borderRadius: BorderRadius.circular(15.0),
-                                    //     child: child,
-                                    //   ),
-                                    // );
-                                    // }
-                                    // unitId: ,
-                                  )
-                                : SizedBox(),
-                          );
-                        } else {
-                          dynamic info = data[_getDestinationItemIndex(index)];
-                          List<String> photosList = [];
-                          for (int i = 0; i < info['photosCount']; i++) {
-                            photosList = [
-                              ...photosList,
-                              ...[info['photo$i']]
-                            ];
-                          }
-                          return Destinations(
-                            index,
-                            info['name'],
-                            info['date'],
-                            info['difficulty'],
-                            info['transportCost'],
-                            photosList,
-                            info['description'],
-                            info['endTime'],
-                            info['otherCosts'],
-                            info['startTime'],
-                            info.data().containsKey('eagers')
-                                ? info['eagers']
-                                : [],
-                            info['createdTimestamp'],
-                            info['elevation'],
-                            info['elevation_differences'],
-                            info['trip_length'],
-                            info['verified'],
-                          );
-                        }
-                      },
-                    )
-                  : Center(
-                      child: Container(
-                        margin: EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.hiking_rounded,
-                              size: 100.0,
-                              color: Theme.of(context)
-                                            .textTheme
-                                            .headline5!
-                                            .color!,
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {
+                      firebaseData = showOnlyVerified
+                          ? FirebaseFirestore.instance
+                              .collection('trips')
+                              .where("showable", isEqualTo: true)
+                              .where("verified", isEqualTo: true)
+                              .get()
+                          : FirebaseFirestore.instance
+                              .collection('trips')
+                              .where("showable", isEqualTo: true)
+                              .get();
+                    });
+                    return firebaseData;
+                  },
+                  child: length > 0
+                      ? ListView.builder(
+                          itemCount: length + 2,
+                          itemBuilder: (context, index) {
+                            if (index == (length + 1))
+                              return SizedBox(height: 75.0);
+                            if (index == _kAdIndex) {
+                              // return Container(
+                              //   // margin: EdgeInsets.symmetric(horizontal: 15.0),
+                              //   child: AdWidget(ad: _ad),
+                              //   // width: _ad.size.width.toDouble(),
+                              //   height: _ad.size.height.toDouble(),
+                              //   // height: 72.0,
+                              //   width: double.infinity,
+                              //   alignment: Alignment.center,
+                              // );
+                              return InkWell(
+                                onTap: () => print('tapped'),
+                                child: Provider.of<UserData>(context,
+                                            listen: false)
+                                        .showAds!
+                                    ? BannerAd(
+                                        unitId: bannerAdUnitId,
+                                        size: BannerSize.ADAPTIVE,
+                                        loading: Center(
+                                            child: Text('Ładowanie reklamy')),
+                                        // loading: Center(child: CircularProgressIndicator()),
+                                        error: Center(
+                                            child: Text(
+                                                'Nie udało się załadować reklamy')),
+                                        // builder: (context, child) {
+                                        //   return GestureDetector(
+                                        //     onTap: () => print('tappp'),
+                                        //     child: child,
+                                        //   );
+                                        // return Container(
+                                        //   margin:
+                                        //       EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+                                        //   decoration: BoxDecoration(
+                                        //     borderRadius: BorderRadius.circular(15.0),
+                                        //     border: Border.all(
+                                        //       color: Colors.grey,
+                                        //     ),
+                                        //   ),
+                                        //   child: ClipRRect(
+                                        //     borderRadius: BorderRadius.circular(15.0),
+                                        //     child: child,
+                                        //   ),
+                                        // );
+                                        // }
+                                        // unitId: ,
+                                      )
+                                    : SizedBox(),
+                              );
+                            } else {
+                              dynamic info =
+                                  data[_getDestinationItemIndex(index)];
+                              List<String> photosList = [];
+                              for (int i = 0; i < info['photosCount']; i++) {
+                                photosList = [
+                                  ...photosList,
+                                  ...[info['photo$i']]
+                                ];
+                              }
+                              return Destinations(
+                                index,
+                                info['name'],
+                                info['date'],
+                                info['difficulty'],
+                                info['transportCost'],
+                                photosList,
+                                info['description'],
+                                info['endTime'],
+                                info['otherCosts'],
+                                info['startTime'],
+                                info.data().containsKey('eagers')
+                                    ? info['eagers']
+                                    : [],
+                                info['createdTimestamp'],
+                                info['elevation'],
+                                info['elevation_differences'],
+                                info['trip_length'],
+                                info['verified'],
+                              );
+                            }
+                          },
+                        )
+                      : Center(
+                          child: Container(
+                            margin: EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.hiking_rounded,
+                                  size: 100.0,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color!,
+                                ),
+                                SizedBox(height: 15.0),
+                                Text(
+                                  'Nie ma żadnych nadchodzących wypraw',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 24.0,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .headline5!
+                                        .color!,
+                                  ),
+                                ),
+                                SizedBox(height: 20.0),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      firebaseData = FirebaseFirestore.instance
+                                          .collection('trips')
+                                          .get();
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh_rounded,
+                                    size: 30.0,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 15.0),
-                            Text(
-                              'Nie ma żadnych nadchodzących wypraw',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 24.0,
-                                color: Theme.of(context)
-                                            .textTheme
-                                            .headline5!
-                                            .color!,
-                              ),
-                            ),
-                            SizedBox(height: 20.0),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  firebaseData = FirebaseFirestore.instance
-                                      .collection('trips')
-                                      .get();
-                                });
-                              },
-                              icon: Icon(
-                                Icons.refresh_rounded,
-                                size: 30.0,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Coś poszło nie tak, błąd:',
+                        ),
+                        Text(
+                          snapshot.error.toString(),
+                        ),
+                      ],
                     ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Coś poszło nie tak, błąd:',
-                    ),
-                    Text(
-                      snapshot.error.toString(),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
+                  ),
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ),
       ),
     );
   }
@@ -819,10 +841,8 @@ class Destinations extends StatelessWidget {
                 width: double.infinity,
                 child: FlatButton(
                   disabledColor: Theme.of(context).accentColor,
-                  disabledTextColor: Theme.of(context)
-                                            .textTheme
-                                            .headline5!
-                                            .color!,
+                  disabledTextColor:
+                      Theme.of(context).textTheme.headline5!.color!,
                   textColor: Theme.of(context).textTheme.headline5!.color,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
