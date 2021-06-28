@@ -68,8 +68,10 @@ class _UsersToBeVerifiedScreenState extends State<UsersToBeVerifiedScreen> {
 
   @override
   Widget build(BuildContext context) {
-if (!kIsWeb)
-      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Users To Be Verified');
+    String error = '';
+    if (!kIsWeb)
+      FirebaseCrashlytics.instance
+          .setCustomKey("screen name", 'Users To Be Verified');
 
     List usersList = Provider.of<UserData>(context, listen: false).usersList!;
     return Scaffold(
@@ -98,31 +100,72 @@ if (!kIsWeb)
                   )
                 : SizedBox();
           } else {
-            String name = Provider.of<UserData>(context, listen: false)
-                    .usersToBeVerified[
-                usersList[_getDestinationItemIndex(index)].toString()]['name'];
+            String userId = '';
+            String name = '';
+            try {
+              name = Provider.of<UserData>(context, listen: false)
+                          .usersToBeVerified[
+                      usersList[_getDestinationItemIndex(index)].toString()]
+                  ['name'];
+              userId = Provider.of<UserData>(context, listen: false)
+                          .usersToBeVerified[
+                      usersList[_getDestinationItemIndex(index)].toString()]
+                  ['userId'];
+            } catch (e) {
+              name = 'błąd';
+              userId = 'błąd';
+              error = e.toString();
+              // if (mounted) {
+              //   WidgetsBinding.instance!.addPostFrameCallback((_) {
+              //     ScaffoldMessenger.of(context).showSnackBar(
+                      //   SnackBar(
+                      //     backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+                      //     behavior: SnackBarBehavior.floating,
+                      //     content: Text(
+                      //       error,
+                      //     ),
+                      //     duration: Duration(
+                      //         seconds: ((error.length) / 6).round() + 5),
+                      //   ),
+                      // );
+              //     // Add Your Code here.
+              //   });
+              // }
+            }
+
             // print(Provider.of<UserData>(context, listen: false)
             //     .usersToBeVerified!);
             // print('-----');
             // String name = "Filipo";
-            String userId =
-                Provider.of<UserData>(context, listen: false).usersToBeVerified[
-                        usersList[_getDestinationItemIndex(index)].toString()]
-                    ['userId'];
+
             // String userId = '1WSldr9OfeRJUtA2uLvXrUlOTyS2';
             return FlatButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return UserScreen(userId);
+              onPressed: error != ''
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+                          behavior: SnackBarBehavior.floating,
+                          content: Text(
+                            error,
+                          ),
+                          duration: Duration(
+                              seconds: ((error.length) / 6).round() + 5),
+                        ),
+                      );
+                    }
+                  : () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return UserScreen(userId);
+                          },
+                        ),
+                      );
                     },
-                  ),
-                );
-              },
               height: 60.0,
               icon: Icon(
-                Icons.face,
+                error != '' ? Icons.person_off_rounded : Icons.person_rounded,
                 size: 35.0,
                 color: Theme.of(context).accentColor,
               ),
@@ -130,7 +173,9 @@ if (!kIsWeb)
                 name,
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: Theme.of(context).textTheme.headline5!.color,
+                  color: error != ''
+                      ? Color.fromRGBO(249, 101, 116, 1)
+                      : Theme.of(context).textTheme.headline5!.color,
                 ),
               ),
             );

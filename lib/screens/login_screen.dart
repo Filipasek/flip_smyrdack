@@ -16,7 +16,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  
   // late BannerAd _ad;
   bool _isAdLoaded = false;
   String get bannerAdUnitId {

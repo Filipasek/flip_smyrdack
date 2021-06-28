@@ -7,9 +7,10 @@ class UserData extends ChangeNotifier {
   String? currentUserId, currentUserPhoto, name, mail;
   int minimumVersion = 0, workingVersion = 0, currentVersion = 0, thisVersion = 0;
   bool? isAdmin, isVerified, isVerCodeSet, isPhoneVerified, showAds;
-  Future<void> logout() async {
+  Future<bool> logout() async {
     await GoogleSignIn().signOut();
     await FirebaseAuth.instance.signOut();
+    return true;
   }
 
   //Admin tools

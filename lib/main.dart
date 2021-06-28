@@ -22,10 +22,11 @@ String get bannerAdUnitId {
 }
 
 void main() async {
-  if (!kIsWeb)
-    FirebaseCrashlytics.instance.setCustomKey("screen name", 'main()');
+  
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  if (!kIsWeb)
+    FirebaseCrashlytics.instance.setCustomKey("screen name", 'main()');
   if (kIsWeb) {
     initializeDateFormatting('pl_PL');
     runApp(MyApp());
@@ -107,6 +108,7 @@ class _AppState extends State<App> {
     //   child: HomeScreen(),
     // );
     return MaterialApp(
+      color: Colors.white,
       debugShowCheckedModeBanner: false,
       title: 'Flip&Smyrdack',
       themeMode: ThemeMode.system,

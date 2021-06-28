@@ -178,6 +178,19 @@ class AuthService {
     return true;
   }
 
+  static Future<bool> changeRealName(String _id, String _name) async {
+    try {
+      await _firestore.collection('/users').doc(_id.toString()).set({
+        "realName": _name,
+      }, SetOptions(merge: true));
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Adding new name to $_name', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
   static Future<bool> addUserToTrip(String _id, String _userId) async {
     try {
       await _firestore.collection('/trips').doc(_id.toString()).update({

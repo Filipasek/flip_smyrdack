@@ -532,7 +532,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       : SizedBox(),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 40.0),
-                    child: Text(
+                    child: SelectableText(
                       widget.description,
                       // maxLines: 2,
                       textAlign: TextAlign.justify,

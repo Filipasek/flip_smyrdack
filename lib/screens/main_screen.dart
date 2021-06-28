@@ -33,7 +33,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   bool isReviewAvailable = false;
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   bool updateReady = false;
   Future<void> checkForUpdate() async {
     if (kIsWeb)
@@ -43,19 +42,13 @@ class _MainScreenState extends State<MainScreen> {
             updateReady = true;
           });
       }).catchError((e) {
-        showSnack(e.toString());
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       });
     bool isRevReady = kIsWeb ? false : await _inAppReview.isAvailable();
     setState(() {
       isReviewAvailable = isRevReady;
     });
-  }
-
-  void showSnack(String text) {
-    if (_scaffoldKey.currentContext != null) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!)
-          .showSnackBar(SnackBar(content: Text(text)));
-    }
   }
 
   final InAppReview _inAppReview = InAppReview.instance;
@@ -152,8 +145,10 @@ class _MainScreenState extends State<MainScreen> {
                   child: Center(
                     child: FlatButton(
                       onPressed: () async {
-                        InAppUpdate.performImmediateUpdate()
-                            .catchError((e) => showSnack(e.toString()));
+                        InAppUpdate.performImmediateUpdate().catchError((e) =>
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+                                    SnackBar(content: Text(e.toString()))));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -188,8 +183,11 @@ class _MainScreenState extends State<MainScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16.0,
-                              color:
-                                  Theme.of(context).textTheme.headline5!.color!,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color ??
+                                  Colors.red,
                             ),
                           ),
                         ],
@@ -238,7 +236,8 @@ class _MainScreenState extends State<MainScreen> {
                 ((Provider.of<UserData>(context, listen: false).usersList ?? [])
                             .length >
                         0) &&
-                    Provider.of<UserData>(context, listen: false).isAdmin!,
+                    (Provider.of<UserData>(context, listen: false).isAdmin ??
+                        false),
             child: Container(
               padding: EdgeInsets.all(5.0),
               child: ClipRRect(
@@ -261,7 +260,8 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         value: 0,
                       ),
-                      Provider.of<UserData>(context, listen: false).isAdmin!
+                      (Provider.of<UserData>(context, listen: false).isAdmin ??
+                              false)
                           ? PopupMenuItem(
                               enabled:
                                   (Provider.of<UserData>(context, listen: false)
@@ -270,11 +270,12 @@ class _MainScreenState extends State<MainScreen> {
                                           .length >
                                       0,
                               child: Text(
-                                "Osoby do zweryfikowania: ${Provider.of<UserData>(context, listen: false).usersList!.length}",
+                                "Osoby do zweryfikowania: ${(Provider.of<UserData>(context, listen: false).usersList ?? []).length}",
                                 style: TextStyle(
-                                  color: Provider.of<UserData>(context,
-                                                  listen: false)
-                                              .usersList!
+                                  color: (Provider.of<UserData>(context,
+                                                          listen: false)
+                                                      .usersList ??
+                                                  [])
                                               .length >
                                           0
                                       ? Theme.of(context)
@@ -294,7 +295,8 @@ class _MainScreenState extends State<MainScreen> {
                             ) as PopupMenuEntry,
                       PopupMenuItem(
                         child: Provider.of<UserData>(context, listen: false)
-                                .isVerified!
+                                    .isVerified ??
+                                false
                             ? Text(
                                 'Konto zweryfikowane',
                                 style: TextStyle(
@@ -314,8 +316,9 @@ class _MainScreenState extends State<MainScreen> {
                                 ),
                               ),
                         value: 2,
-                        enabled: !Provider.of<UserData>(context, listen: false)
-                            .isVerified!,
+                        enabled: !(Provider.of<UserData>(context, listen: false)
+                                .isVerified ??
+                            false),
                       ),
                       PopupMenuItem(
                         child: Text(
@@ -383,29 +386,35 @@ class _MainScreenState extends State<MainScreen> {
                             builder: (BuildContext context) {
                               return MyAccountScreen(
                                 adsEnabled: Provider.of<UserData>(context,
-                                        listen: false)
-                                    .showAds!,
+                                            listen: false)
+                                        .showAds ??
+                                    false,
                               );
                             },
                           ),
                         );
                         break;
                       case 4:
-                        UserData().logout().then((value) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (BuildContext context) {
-                                return HomeScreen();
-                              },
-                            ),
-                          );
+                        UserData().logout().then((value) async {
+                          if (mounted) {
+                            await Future.delayed(Duration(seconds: 3));
+                            if (mounted)
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) {
+                                    return HomeScreen();
+                                  },
+                                ),
+                              );
+                          }
                         });
                         break;
                       default:
                     }
                   },
                   child: Image.network(
-                    Provider.of<UserData>(context).currentUserPhoto!,
+                    Provider.of<UserData>(context).currentUserPhoto ??
+                        'https://techpowerusa.com/wp-content/uploads/2017/06/default-user.png',
                   ),
                   // icon: Icon(
                   //   Icons.settings,
@@ -426,8 +435,9 @@ class _MainScreenState extends State<MainScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: Provider.of<UserData>(context, listen: false)
-              .isVerified!
+      floatingActionButton: (Provider.of<UserData>(context, listen: false)
+                  .isVerified ??
+              false)
           ? Container(
               padding: EdgeInsets.all(5.0),
               child: ClipRRect(
@@ -577,7 +587,8 @@ class _MainScreenState extends State<MainScreen> {
             future: firebaseData,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
-                if (Provider.of<UserData>(context, listen: false).isVerified! &&
+                if ((Provider.of<UserData>(context, listen: false).isVerified ??
+                        false) &&
                     isReviewAvailable) {
                   Future.delayed(const Duration(seconds: 3), () {
                     _inAppReview.requestReview();
@@ -632,9 +643,10 @@ class _MainScreenState extends State<MainScreen> {
                               // );
                               return InkWell(
                                 onTap: () => print('tapped'),
-                                child: Provider.of<UserData>(context,
-                                            listen: false)
-                                        .showAds!
+                                child: (Provider.of<UserData>(context,
+                                                listen: false)
+                                            .showAds ??
+                                        false)
                                     ? BannerAd(
                                         unitId: bannerAdUnitId,
                                         size: BannerSize.ADAPTIVE,
@@ -711,9 +723,10 @@ class _MainScreenState extends State<MainScreen> {
                                   Icons.hiking_rounded,
                                   size: 100.0,
                                   color: Theme.of(context)
-                                      .textTheme
-                                      .headline5!
-                                      .color!,
+                                          .textTheme
+                                          .headline5!
+                                          .color ??
+                                      Colors.grey,
                                 ),
                                 SizedBox(height: 15.0),
                                 Text(
@@ -722,9 +735,10 @@ class _MainScreenState extends State<MainScreen> {
                                   style: TextStyle(
                                     fontSize: 24.0,
                                     color: Theme.of(context)
-                                        .textTheme
-                                        .headline5!
-                                        .color!,
+                                            .textTheme
+                                            .headline5!
+                                            .color ??
+                                        Colors.grey,
                                   ),
                                 ),
                                 SizedBox(height: 20.0),
@@ -842,7 +856,8 @@ class Destinations extends StatelessWidget {
                 child: FlatButton(
                   disabledColor: Theme.of(context).accentColor,
                   disabledTextColor:
-                      Theme.of(context).textTheme.headline5!.color!,
+                      Theme.of(context).textTheme.headline5!.color ??
+                          Colors.grey,
                   textColor: Theme.of(context).textTheme.headline5!.color,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
