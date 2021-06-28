@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
   //   return MobileAds.instance.initialize();
   // }
 
-  int apiVersion = 22; //TODO: change when major update been made to api
+  int apiVersion = 25; //TODO: change when major update been made to api
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb)
