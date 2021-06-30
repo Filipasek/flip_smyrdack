@@ -232,6 +232,7 @@ class AuthService {
     int elevDifferences,
     int tripLength,
     bool isAdmin,
+    bool sendPhotos,
   ) async {
     Future<bool> uploadFile(File file, String _id, int index) async {
       // File file = File(filePath);
@@ -249,49 +250,72 @@ class AuthService {
       return true;
     }
 
-    for (int i = 0; i < photos.length; i++) {
-      if (!(await uploadFile(photos[i], _id.toString(), i))) return false;
-    }
+    if (sendPhotos)
+      for (int i = 0; i < photos.length; i++) {
+        if (!(await uploadFile(photos[i], _id.toString(), i))) return false;
+      }
     try {
-      _firestore.collection('/trips').doc(_id.toString()).set({
-        'name': name,
-        'transportCost': transportCost,
-        'otherCosts': otherCosts,
-        'description': description,
-        'date': date,
-        'startTime':
-            '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
-        'endTime':
-            '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
-        'createdTimestamp': _id,
-        'photosCount': photos.length,
-        'photo0': await FirebaseStorage.instance
-            .ref('photos/${_id}_0.${photos[0].path.split(".").last}')
-            .getDownloadURL(),
-        'photo1': await FirebaseStorage.instance
-            .ref('photos/${_id}_1.${photos[1].path.split(".").last}')
-            .getDownloadURL(),
-        'photo2': await FirebaseStorage.instance
-            .ref('photos/${_id}_2.${photos[2].path.split(".").last}')
-            .getDownloadURL(),
-        'photo3': photos.length >= 4
-            ? await FirebaseStorage.instance
-                .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
-                .getDownloadURL()
-            : 'none',
-        'photo4': photos.length >= 5
-            ? await FirebaseStorage.instance
-                .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
-                .getDownloadURL()
-            : 'none',
-        'difficulty': difficulty,
-        'elevation': elevation,
-        'elevation_differences': elevDifferences,
-        'trip_length': tripLength,
-        'showable': true,
-        'verified': isAdmin, //TODO: check
-        // 'transportCost': transportCost,
-      }, SetOptions(merge: true));
+      if (sendPhotos) {
+        _firestore.collection('/trips').doc(_id.toString()).set({
+          'name': name,
+          'transportCost': transportCost,
+          'otherCosts': otherCosts,
+          'description': description,
+          'date': date,
+          'startTime':
+              '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
+          'endTime':
+              '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
+          'createdTimestamp': _id,
+          'photosCount': photos.length,
+          'photo0': await FirebaseStorage.instance
+              .ref('photos/${_id}_0.${photos[0].path.split(".").last}')
+              .getDownloadURL(),
+          'photo1': await FirebaseStorage.instance
+              .ref('photos/${_id}_1.${photos[1].path.split(".").last}')
+              .getDownloadURL(),
+          'photo2': await FirebaseStorage.instance
+              .ref('photos/${_id}_2.${photos[2].path.split(".").last}')
+              .getDownloadURL(),
+          'photo3': photos.length >= 4
+              ? await FirebaseStorage.instance
+                  .ref('photos/${_id}_3.${photos[3].path.split(".").last}')
+                  .getDownloadURL()
+              : 'none',
+          'photo4': photos.length >= 5
+              ? await FirebaseStorage.instance
+                  .ref('photos/${_id}_4.${photos[4].path.split(".").last}')
+                  .getDownloadURL()
+              : 'none',
+          'difficulty': difficulty,
+          'elevation': elevation,
+          'elevation_differences': elevDifferences,
+          'trip_length': tripLength,
+          'showable': true,
+          'verified': isAdmin, //TODO: check
+          // 'transportCost': transportCost,
+        }, SetOptions(merge: true));
+      } else {
+        _firestore.collection('/trips').doc(_id.toString()).set({
+          'name': name,
+          'transportCost': transportCost,
+          'otherCosts': otherCosts,
+          'description': description,
+          'date': date,
+          'startTime':
+              '${startTime.hour < 10 ? '0${startTime.hour}' : startTime.hour}:${startTime.minute < 10 ? '0${startTime.minute}' : startTime.minute}',
+          'endTime':
+              '${endTime.hour < 10 ? '0${endTime.hour}' : endTime.hour}:${endTime.minute < 10 ? '0${endTime.minute}' : endTime.minute}',
+          'createdTimestamp': _id,
+          'difficulty': difficulty,
+          'elevation': elevation,
+          'elevation_differences': elevDifferences,
+          'trip_length': tripLength,
+          'showable': true,
+          'verified': isAdmin, //TODO: check
+          // 'transportCost': transportCost,
+        }, SetOptions(merge: true));
+      }
     } on FirebaseException catch (e, stackTrace) {
       await FirebaseCrashlytics.instance
           .recordError(e, stackTrace, reason: 'Adding trip', fatal: true);

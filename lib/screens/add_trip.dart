@@ -45,7 +45,6 @@ class AddTripScreen extends StatefulWidget {
 }
 
 class _AddTripScreenState extends State<AddTripScreen> {
-  
   // late BannerAd _ad;
   String get bannerAdUnitId {
     if (kDebugMode)
@@ -67,7 +66,14 @@ class _AddTripScreenState extends State<AddTripScreen> {
   TimeOfDay selectedTimeStart = TimeOfDay.now();
   TimeOfDay selectedTimeEnd = TimeOfDay.now();
 
-  List<File>? _image;
+  List<File>? _restoredImages;
+  List<File>? _pickedImages;
+  bool restored = false;
+  bool areImagesChanged = false;
+
+  bool isDateChanged = false,
+      isTimeStartChanged = false,
+      isTimeEndChanged = false;
   final picker = ImagePicker();
 
   final df = DateFormat('dd.MM.yyyy');
@@ -146,9 +152,12 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (!kIsWeb)
       FirebaseCrashlytics.instance.setCustomKey("screen name", 'Add Trip');
 
-    selectedDate = widget.date ?? selectedDate;
-    selectedTimeStart = widget.startTime ?? selectedTimeStart;
-    selectedTimeEnd = widget.endTime ?? selectedTimeEnd;
+    selectedDate = isDateChanged ? selectedDate : widget.date ?? selectedDate;
+    selectedTimeStart = isTimeStartChanged
+        ? selectedTimeStart
+        : widget.startTime ?? selectedTimeStart;
+    selectedTimeEnd =
+        isTimeEndChanged ? selectedTimeEnd : widget.endTime ?? selectedTimeEnd;
     isThisUpdate = widget.tripId != null;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
@@ -211,26 +220,29 @@ class _AddTripScreenState extends State<AddTripScreen> {
               ),
             )
           : Center(
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 900),
-              child: FutureBuilder(
-                  future: getFiles(widget.image ?? []),
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 900),
+                child: FutureBuilder(
+                  future: getFiles(restored ? [] : widget.image ?? []),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      if (snapshot.data != false)
-                        _image = snapshot.data as List<File>;
+                      if (snapshot.data != false && !restored) {
+                        _restoredImages = snapshot.data as List<File>;
+                        restored = true;
+                      }
                       return SingleChildScrollView(
                         child: Column(
                           children: <Widget>[
-                            Provider.of<UserData>(context, listen: false).showAds!
+                            Provider.of<UserData>(context, listen: false)
+                                    .showAds!
                                 ? BannerAd(
                                     unitId: bannerAdUnitId,
                                     size: BannerSize.ADAPTIVE,
-                                    loading:
-                                        Center(child: Text('Ładowanie reklamy')),
+                                    loading: Center(
+                                        child: Text('Ładowanie reklamy')),
                                     error: Center(
-                                        child:
-                                            Text('Brak reklamy. Na nasz koszt :)')),
+                                        child: Text(
+                                            'Brak reklamy. Na nasz koszt :)')),
                                   )
                                 : SizedBox(),
                             // Container(
@@ -250,16 +262,18 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                   children: [
                                     isThisUpdate
                                         ? Container(
-                                          margin: EdgeInsets.only(bottom: 10.0),
-                                          child: FlatButton.icon(
+                                            margin:
+                                                EdgeInsets.only(bottom: 10.0),
+                                            child: FlatButton.icon(
                                               onPressed: loading
                                                   ? null
                                                   : () async {
                                                       setState(() {
                                                         loading = true;
                                                       });
-                                                      await AuthService.hideTrip(
-                                                              widget.tripId
+                                                      await AuthService
+                                                              .hideTrip(widget
+                                                                  .tripId
                                                                   .toString())
                                                           .then((value) {
                                                         if (value) {
@@ -269,13 +283,15 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                                                   builder: (_) =>
                                                                       HomeScreen()));
                                                         }
-                                                      }).onError((error, stackTrace) {
+                                                      }).onError((error,
+                                                              stackTrace) {
                                                         setState(() {
                                                           loading = false;
                                                         });
                                                       });
                                                     },
-                                                    splashColor: Theme.of(context).accentColor,
+                                              splashColor:
+                                                  Theme.of(context).accentColor,
                                               label: Text(
                                                 'Zarchiwizuj wyprawę',
                                                 style: TextStyle(
@@ -287,10 +303,11 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                               ),
                                               icon: Icon(
                                                 Icons.archive_rounded,
-                                                color: Color.fromRGBO(249, 101, 116, 1),
+                                                color: Color.fromRGBO(
+                                                    249, 101, 116, 1),
                                               ),
                                             ),
-                                        )
+                                          )
                                         : SizedBox(height: 20.0),
                                     CustomTextField(
                                       'Nazwa miejsca',
@@ -298,7 +315,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       3,
                                       setName,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.name,
                                     ),
                                     SizedBox(height: 5.0),
@@ -309,7 +329,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       3,
                                       setElevation,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.elevation,
                                     ),
                                     SizedBox(height: 5.0),
@@ -319,7 +342,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       3,
                                       setElevationDifferences,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.elevDifferences,
                                     ),
                                     SizedBox(height: 5.0),
@@ -329,7 +355,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       3,
                                       setTripLength,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.tripLength,
                                     ),
                                     SizedBox(height: 5.0),
@@ -339,7 +368,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       1,
                                       settransportCost,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.transportCost,
                                     ),
                                     SizedBox(height: 5.0),
@@ -349,7 +381,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       1,
                                       setOtherCosts,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.otherCosts,
                                     ),
                                     SizedBox(height: 5.0),
@@ -446,7 +481,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       50,
                                       setDescription,
                                       loading,
-                                      Theme.of(context).textTheme.headline5!.color!,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color!,
                                       widget.description,
                                     ),
                                     SizedBox(height: 5.0),
@@ -513,12 +551,13 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                 ),
                               ),
                             ),
-                            _image == null
+                            _pickedImages == null && _restoredImages == null
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(15.0),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15.0),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
                                         border: Border.all(
                                           width: 3.0,
                                           color: Theme.of(context).accentColor,
@@ -530,7 +569,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                           bottom: 5.0, left: 15.0, right: 15.0),
                                       child: FlatButton(
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(11.0),
+                                          borderRadius:
+                                              BorderRadius.circular(11.0),
                                         ),
                                         splashColor: Theme.of(context)
                                             .accentColor
@@ -542,7 +582,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                         child: Center(
                                           child: Icon(
                                             Icons.add_a_photo_outlined,
-                                            color: Theme.of(context).accentColor,
+                                            color:
+                                                Theme.of(context).accentColor,
                                           ),
                                         ),
                                       ),
@@ -555,19 +596,22 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                     height: 210.0,
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
-                                      itemCount: _image!.length + 1,
+                                      itemCount: (_pickedImages ?? []).length +
+                                          (_restoredImages ?? []).length +
+                                          1,
                                       itemBuilder: (context, index) {
                                         if (index == 0)
                                           return Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 10.0),
+                                            padding: const EdgeInsets.only(
+                                                top: 10.0),
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(15.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                   borderRadius:
-                                                      BorderRadius.circular(15.0),
+                                                      BorderRadius.circular(
+                                                          15.0),
                                                   border: Border.all(
                                                     width: 3.0,
                                                     color: Theme.of(context)
@@ -576,24 +620,27 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                                 ),
                                                 width: 150.0,
                                                 // height: 100.0,
-                                                margin:
-                                                    EdgeInsets.only(right: 15.0),
+                                                margin: EdgeInsets.only(
+                                                    right: 15.0),
                                                 child: FlatButton(
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(11.0),
+                                                        BorderRadius.circular(
+                                                            11.0),
                                                   ),
                                                   splashColor: Theme.of(context)
                                                       .accentColor
                                                       .withOpacity(0.6),
-                                                  highlightColor: Theme.of(context)
-                                                      .accentColor
-                                                      .withOpacity(0.2),
+                                                  highlightColor:
+                                                      Theme.of(context)
+                                                          .accentColor
+                                                          .withOpacity(0.2),
                                                   onPressed:
                                                       loading ? null : getImage,
                                                   child: Center(
                                                     child: Icon(
-                                                      Icons.add_a_photo_outlined,
+                                                      Icons
+                                                          .add_a_photo_outlined,
                                                       color: Color.fromRGBO(
                                                           255, 182, 185, 1),
                                                     ),
@@ -615,14 +662,31 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                               width: 30.0,
                                               child: IconButton(
                                                 padding: EdgeInsets.all(0),
-                                                icon: Icon(Icons.highlight_remove,
+                                                icon: Icon(
+                                                    Icons.highlight_remove,
                                                     color: Colors.white),
                                                 onPressed: loading
                                                     ? null
                                                     : () {
                                                         setState(() {
-                                                          _image!
-                                                              .removeAt(index - 1);
+                                                          int pickedLength =
+                                                              (_pickedImages ??
+                                                                      [])
+                                                                  .length;
+                                                          // int restoredLength = (_restoredImages ?? []).length;
+                                                          index > pickedLength
+                                                              ? _restoredImages!
+                                                                  .removeAt(index -
+                                                                      (pickedLength +
+                                                                          1))
+                                                              : _pickedImages!
+                                                                  .removeAt(
+                                                                      index -
+                                                                          1);
+                                                          areImagesChanged =
+                                                              true;
+                                                          // _image!.removeAt(
+                                                          //     index - 1);
                                                         });
                                                       },
                                               ),
@@ -633,7 +697,16 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                                 borderRadius:
                                                     BorderRadius.circular(15.0),
                                                 child: Image.file(
-                                                  _image![index - 1],
+                                                  // _image![index - 1],
+                                                  index >
+                                                          (_pickedImages ?? [])
+                                                              .length
+                                                      ? _restoredImages![index -
+                                                          ((_pickedImages ?? [])
+                                                                  .length +
+                                                              1)]
+                                                      : _pickedImages![
+                                                          index - 1],
                                                   height: 200.0,
                                                   fit: BoxFit.fitHeight,
                                                 ),
@@ -654,7 +727,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                 : SizedBox(),
                             Container(
                               margin: EdgeInsets.only(
-                                  bottom: 35.0, left: 15.0, right: 15.0, top: 20.0),
+                                  bottom: 35.0,
+                                  left: 15.0,
+                                  right: 15.0,
+                                  top: 20.0),
                               width: double.infinity,
                               height: 50.0,
                               child: RaisedButton(
@@ -662,7 +738,10 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                     ? null
                                     : () {
                                         if (_formKey.currentState!.validate()) {
-                                          if (_image!.length < 3) {
+                                          if (((_pickedImages ?? []).length +
+                                                  (_restoredImages ?? [])
+                                                      .length) <
+                                              3) {
                                             setState(() {
                                               error = true;
                                               errorText =
@@ -670,7 +749,11 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                               loading = false;
                                               // errorText = _image![0].path.split(".").last;
                                             });
-                                          } else if (_image!.length > 5) {
+                                          } else if (((_pickedImages ?? [])
+                                                      .length +
+                                                  (_restoredImages ?? [])
+                                                      .length) >
+                                              5) {
                                             setState(() {
                                               error = true;
                                               errorText =
@@ -696,20 +779,28 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                                 name ?? widget.name!,
                                                 transportCost ??
                                                     widget.transportCost!,
-                                                otherCosts ?? widget.otherCosts!,
-                                                description ?? widget.description!,
+                                                otherCosts ??
+                                                    widget.otherCosts!,
+                                                description ??
+                                                    widget.description!,
                                                 selectedDate,
                                                 selectedTimeStart,
                                                 selectedTimeEnd,
-                                                _image!,
-                                                difficulty ?? widget.difficulty!,
+                                                [
+                                                  ...(_pickedImages ?? []),
+                                                  ...(_restoredImages ?? []),
+                                                ],
+                                                difficulty ??
+                                                    widget.difficulty!,
                                                 elevation ?? widget.elevation!,
                                                 elevDifferences ??
                                                     widget.elevDifferences!,
-                                                tripLength ?? widget.tripLength!,
+                                                tripLength ??
+                                                    widget.tripLength!,
                                                 Provider.of<UserData>(context,
                                                         listen: false)
                                                     .isAdmin!,
+                                                areImagesChanged,
                                               ).then((bool value) {
                                                 setState(() {
                                                   isSent = value;
@@ -748,8 +839,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                     }
                   },
                 ),
+              ),
             ),
-          ),
     );
   }
 
@@ -764,6 +855,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (picked != null && picked != selectedTimeStart)
       setState(() {
         selectedTimeStart = picked;
+        isTimeStartChanged = true;
       });
   }
 
@@ -778,15 +870,18 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (picked != null && picked != selectedTimeEnd)
       setState(() {
         selectedTimeEnd = picked;
+        isTimeEndChanged = true;
       });
   }
 
   _selectDate(BuildContext context) async {
+    DateTime now = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate, // Refer step 1
-      firstDate: DateTime.now(),
-      lastDate: DateTime.utc(DateTime.now().year + 2),
+      initialDate:
+          selectedDate.isBefore(now) ? now : selectedDate, // Refer step 1
+      firstDate: now,
+      lastDate: DateTime.utc(now.year + 2),
       cancelText: "Anuluj",
       confirmText: "Wybierz",
       helpText: 'Wybierz datę wyprawy',
@@ -795,23 +890,24 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (picked != null && picked != selectedDate)
       setState(() {
         selectedDate = picked;
+        isDateChanged = true;
       });
   }
 
-  void removeImage(int index) {}
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     setState(() {
       if (pickedFile != null) {
         // _image?[_image!.length] = File(pickedFile.path);
-        if (_image == null)
-          _image = [File(pickedFile.path)];
+        if (_pickedImages == null)
+          _pickedImages = [File(pickedFile.path)];
         else
-          _image = [
+          _pickedImages = [
             ...[File(pickedFile.path)],
-            ..._image!
+            ..._pickedImages!
           ];
+        areImagesChanged = true;
       } else {
         print('Nie wybrano obrazów.');
       }

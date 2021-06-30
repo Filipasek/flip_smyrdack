@@ -35,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   bool isReviewAvailable = false;
   bool updateReady = false;
   Future<void> checkForUpdate() async {
-    if (kIsWeb)
+    if (!kIsWeb)
       await InAppUpdate.checkForUpdate().then((info) {
         if (info.updateAvailability == UpdateAvailability.updateAvailable)
           setState(() {
@@ -787,6 +787,29 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+int daysBetween(DateTime from, DateTime to) {
+
+  from = DateTime(from.year, from.month, from.day);
+  to = DateTime(to.year, to.month, to.day);
+  return (from.difference(to).inHours / 24).round();
+}
+
+String textDate(Timestamp from) {
+  
+  int days = daysBetween(from.toDate(), DateTime.now());
+  // int days = -2;
+  if (days == -2)
+    return "Przedwczoraj";
+  else if (days == -1)
+    return "Wczoraj";
+  else if (days == 0)
+    return "Dzisiaj";
+  else if (days == 1)
+    return "Jutro";
+  else if (days == 2) return "Pojutrze";
+  return DateFormat('EEEE, dd MMM', 'pl_PL').format(from.toDate().toLocal());
+}
+
 class Destinations extends StatelessWidget {
   int index;
   String name;
@@ -933,8 +956,7 @@ class Destinations extends StatelessWidget {
                                     color: Colors.transparent,
                                   ),
                                 ),
-                          Text(
-                              "Kiedy: ${DateFormat('EEEE, dd MMM', 'pl_PL').format(date.toDate().toLocal())}"),
+                          Text("Kiedy: ${textDate(date)}"),
                           Tooltip(
                             message:
                                 'Łączne koszty transportu i innych dodatków typu opłaty za wstęp. Po więcej informacji wejdź we wstawkę.',

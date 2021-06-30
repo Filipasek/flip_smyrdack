@@ -246,7 +246,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                   );
                 },
-                child: Icon(Icons.mode_edit_rounded),
+                child: Icon(
+                  Icons.mode_edit_rounded,
+                  color: Colors.white,
+                ),
               )
             // ? Container(
             //     padding: EdgeInsets.all(5.0),
@@ -436,8 +439,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   Container(
                     height: MediaQuery.of(context).size.width > 700
                         ? 500
-                        : ((((MediaQuery.of(context).size.width) / 6) * 4) +
-                            4),
+                        : ((((MediaQuery.of(context).size.width) / 6) * 4) + 4),
                     child: GridView.count(
                       childAspectRatio: 2,
                       physics: NeverScrollableScrollPhysics(),
