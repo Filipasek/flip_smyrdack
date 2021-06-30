@@ -146,9 +146,8 @@ class _MainScreenState extends State<MainScreen> {
                     child: FlatButton(
                       onPressed: () async {
                         InAppUpdate.performImmediateUpdate().catchError((e) =>
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                                    SnackBar(content: Text(e.toString()))));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString()))));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
