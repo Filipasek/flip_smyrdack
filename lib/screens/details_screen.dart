@@ -5,6 +5,7 @@ import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/eagers_screen.dart';
 import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
 import 'package:flip_smyrdack/screens/main_screen.dart';
+import 'package:flip_smyrdack/screens/transport_screen.dart';
 import 'package:flip_smyrdack/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -220,6 +221,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
           // ),
           elevation: 0.0,
           title: Text(widget.name),
+          actions: [
+            Provider.of<UserData>(context, listen: false).isVerified ?? false
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TransportScreen(widget._id),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.directions_car_rounded,
+                      color: Theme.of(context).textTheme.headline5!.color,
+                      size: 30.0,
+                    ),
+                  )
+                : SizedBox(),
+          ],
         ),
         floatingActionButton: !kIsWeb &&
                 (Provider.of<UserData>(context, listen: false).isAdmin ?? false)
@@ -451,7 +471,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             'Szacowana trudność wycieczki'),
                         CreateColumnOfInfo(
                             "Kiedy",
-                            "${DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
+                            "${widget.date.toDate().year == 2000 ? "Wkrótce" : DateFormat('dd MMM', 'pl_PL').format(widget.date.toDate().toLocal())}",
                             'Data dzienna rozpoczęcia wycieczki'),
                         Provider.of<UserData>(context, listen: false)
                                     .isVerified ??

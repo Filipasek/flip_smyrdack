@@ -788,14 +788,13 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 int daysBetween(DateTime from, DateTime to) {
-
   from = DateTime(from.year, from.month, from.day);
   to = DateTime(to.year, to.month, to.day);
   return (from.difference(to).inHours / 24).round();
 }
 
 String textDate(Timestamp from) {
-  
+  if (from.toDate().year == 2000) return "Wkrótce";
   int days = daysBetween(from.toDate(), DateTime.now());
   // int days = -2;
   if (days == -2)

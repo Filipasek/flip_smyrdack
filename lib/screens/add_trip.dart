@@ -152,7 +152,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (!kIsWeb)
       FirebaseCrashlytics.instance.setCustomKey("screen name", 'Add Trip');
 
-    selectedDate = isDateChanged ? selectedDate : widget.date ?? selectedDate;
+    selectedDate = isDateChanged || selectedDate.year == 2000 ? selectedDate : widget.date ?? selectedDate;
     selectedTimeStart = isTimeStartChanged
         ? selectedTimeStart
         : widget.startTime ?? selectedTimeStart;
@@ -487,6 +487,30 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                           .color!,
                                       widget.description,
                                     ),
+                                    FlatButton.icon(
+                                      onPressed: loading
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                selectedDate = DateTime(2000);
+                                              });
+                                            },
+                                      splashColor:
+                                          Theme.of(context).accentColor,
+                                      label: Text(
+                                        'Ustaw datę jako "Wkrótce"',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .headline5!
+                                              .color,
+                                        ),
+                                      ),
+                                      icon: Icon(
+                                        Icons.watch_later_rounded,
+                                        color: Color.fromRGBO(249, 101, 116, 1),
+                                      ),
+                                    ),
                                     SizedBox(height: 5.0),
                                     Container(
                                       margin: EdgeInsets.only(
@@ -500,7 +524,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                             : () => _selectDate(context),
                                         child: Text(
                                           "Data: " +
-                                              "${df.format(selectedDate.toLocal())}"
+                                              "${selectedDate.year == 2000 ? "Wkrótce" :  df.format(selectedDate.toLocal())}"
                                                   .split(' ')[0],
                                           style: TextStyle(
                                             fontSize: 20.0,
@@ -884,6 +908,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
       lastDate: DateTime.utc(now.year + 2),
       cancelText: "Anuluj",
       confirmText: "Wybierz",
+
       helpText: 'Wybierz datę wyprawy',
       // locale: Locale('pl', 'en'),
     );
