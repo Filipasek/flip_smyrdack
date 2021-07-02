@@ -153,6 +153,11 @@ class HomeScreen extends StatelessWidget {
                                       .isAdmin = admin;
                                   Provider.of<UserData>(context, listen: false)
                                       .isVerified = _data['verified'] ?? false;
+                                  Provider.of<UserData>(context, listen: false)
+                                          .name =
+                                      _data.containsKey('realName')
+                                          ? _data['realName']
+                                          : (_user.displayName ?? 'Brak');
                                   if (admin) {
                                     Provider.of<UserData>(context,
                                             listen: false)
@@ -232,8 +237,11 @@ class HomeScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(context).textTheme.headline5!.color ?? Colors.red,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color ??
+                                  Colors.red,
                             ),
                           ),
                           SizedBox(height: 10.0),

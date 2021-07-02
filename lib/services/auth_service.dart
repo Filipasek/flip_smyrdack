@@ -191,6 +191,105 @@ class AuthService {
     return true;
   }
 
+  static Future<bool> joinTransport(
+      String _tripId, String _userId, String _transportId, String place) async {
+    try {
+      Map _clientInfo = {
+        'id': _userId,
+        'where': place,
+      };
+      await _firestore
+          .collection('/trips')
+          .doc(_tripId.toString())
+          .collection('transport')
+          .doc(_transportId)
+          .update({
+        "clients": FieldValue.arrayUnion([_clientInfo]),
+      });
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Joining transport', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
+  static Future<bool> addTransport(
+    String _tripId,
+    String _transportId,
+    int availableSeats,
+    bool calculatePerPerson,
+    int costs,
+    String from,
+    TimeOfDay leaving,
+    String name,
+    String pickup,
+  ) async {
+    try {
+      await _firestore
+          .collection('/trips')
+          .doc(_tripId.toString())
+          .collection('transport')
+          .doc(_transportId)
+          .set({
+        'availableSeats': availableSeats,
+        'calculatePerPerson': calculatePerPerson,
+        'costs': costs,
+        'from': from,
+        'leaving':
+            '${leaving.hour < 10 ? '0${leaving.hour}' : leaving.hour}:${leaving.minute < 10 ? '0${leaving.minute}' : leaving.minute}',
+        'name': name,
+        'pick-up': pickup,
+        'userId': _transportId,
+      });
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Deleting a transport', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
+  static Future<bool> removeTransport(
+      String _tripId, String _transportId) async {
+    try {
+      await _firestore
+          .collection('/trips')
+          .doc(_tripId.toString())
+          .collection('transport')
+          .doc(_transportId)
+          .delete();
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Deleting a transport', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
+  static Future<bool> removeUserFromTransport(
+      String _tripId, String _userId, String _transportId, String place) async {
+    try {
+      Map _clientInfo = {
+        'id': _userId,
+        'where': place,
+      };
+      await _firestore
+          .collection('/trips')
+          .doc(_tripId.toString())
+          .collection('transport')
+          .doc(_transportId)
+          .update({
+        "clients": FieldValue.arrayRemove([_clientInfo]),
+      });
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Removing from transport', fatal: false);
+      return Future.error(e);
+    }
+    return true;
+  }
+
   static Future<bool> addUserToTrip(String _id, String _userId) async {
     try {
       await _firestore.collection('/trips').doc(_id.toString()).update({
