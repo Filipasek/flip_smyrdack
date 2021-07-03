@@ -58,41 +58,95 @@ class _TransportScreenState extends State<TransportScreen> {
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
                 List data = snapshot.data.docs;
-                for (int i = 0; i < data.length; i++) {
-                  if (data[i]['userId'] ==
-                      Provider.of<UserData>(context, listen: false)
-                          .currentUserId) {
-                    masterOfId = data[i]['userId'];
-                  } else {
-                    masterOfId = '';
-                  }
-                  for (int j = 0; j < data[i]['clients'].length; j++) {
-                    if (data[i]['clients'][j]['id'] ==
+                if (data.length > 0) {
+                  for (int i = 0; i < data.length; i++) {
+                    if (data[i]['userId'] ==
                         Provider.of<UserData>(context, listen: false)
                             .currentUserId) {
-                      joinedTransportId = data[i]['userId'];
-                      startingPlace = data[i]['clients'][j]['where'];
-                      j = data[i]['clients'].length;
-                      i = data.length;
-                      break;
+                      masterOfId = data[i]['userId'];
                     } else {
-                      joinedTransportId = '';
+                      masterOfId = '';
+                    }
+                    for (int j = 0; j < data[i]['clients'].length; j++) {
+                      if (data[i]['clients'][j]['id'] ==
+                          Provider.of<UserData>(context, listen: false)
+                              .currentUserId) {
+                        joinedTransportId = data[i]['userId'];
+                        startingPlace = data[i]['clients'][j]['where'];
+                        j = data[i]['clients'].length;
+                        i = data.length;
+                        break;
+                      } else {
+                        joinedTransportId = '';
+                      }
                     }
                   }
+
+                  WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    if (mounted) setState(() {});
+                  });
+                  return ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      dynamic info = data[index];
+
+                      return TransportTile(
+                          info,
+                          index,
+                          widget._tripId.toString(),
+                          joinedTransportId,
+                          masterOfId,
+                          startingPlace);
+                    },
+                  );
+                } else {
+                  return Center(
+                    child: Container(
+                      margin: EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.airport_shuttle_rounded,
+                            size: 100.0,
+                            color:
+                                Theme.of(context).textTheme.bodyText2!.color ??
+                                    Colors.grey,
+                          ),
+                          SizedBox(height: 15.0),
+                          Text(
+                            'Nie ma jeszcze żadnego zorganizowanego transportu.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color ??
+                                  Colors.grey,
+                            ),
+                          ),
+                          SizedBox(height: 15.0),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: FlatButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => AddTransportScreen(
+                                          widget._tripId.toString())),
+                                );
+                              },
+                              icon: Icon(Icons.add),
+                              label: Text('Zostań kierowcą!'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
-
-                WidgetsBinding.instance!.addPostFrameCallback((_) {
-                  if (mounted) setState(() {});
-                });
-                return ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    dynamic info = data[index];
-
-                    return TransportTile(info, index, widget._tripId.toString(),
-                        joinedTransportId, masterOfId, startingPlace);
-                  },
-                );
               } else {
                 return Center(
                   child: CircularProgressIndicator(),
@@ -314,8 +368,13 @@ class _TransportTileState extends State<TransportTile> {
                           : CrossFadeState.showFirst,
                       duration: Duration(milliseconds: 250),
                       firstChild: LeftPart(widget.info),
-                      secondChild: LeftPartClicked(widget.info, isClicked,
-                          widget.tripId, widget.joinedTransportId),
+                      secondChild: LeftPartClicked(
+                        widget.info,
+                        isClicked,
+                        widget.tripId,
+                        widget.joinedTransportId,
+                        widget.masterOfId,
+                      ),
                     ),
                   ),
                   MySeparator(
@@ -420,9 +479,15 @@ class LeftPartClicked extends StatelessWidget {
   bool isClicked;
   String tripId;
   String joinedTransportId;
+  String masterOfId;
 
   LeftPartClicked(
-      this.info, this.isClicked, this.tripId, this.joinedTransportId);
+    this.info,
+    this.isClicked,
+    this.tripId,
+    this.joinedTransportId,
+    this.masterOfId,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -438,7 +503,11 @@ class LeftPartClicked extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => TripClientsScreen(
-                          info['clients'], tripId, info['userId']),
+                        info['clients'],
+                        tripId,
+                        info['userId'],
+                        masterOfId == info['userId'],
+                      ),
                     ),
                   );
                 },
@@ -480,13 +549,8 @@ class RightPartClicked extends StatefulWidget {
 class _RightPartClickedState extends State<RightPartClicked> {
   final _formKey = GlobalKey<FormState>();
   String? joiningPlace;
-  bool isMasterOfSomething = false;
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < widget.info['clients'].length; i++)
-      if (widget.info['clients'][i]['id'] ==
-          Provider.of<UserData>(context, listen: false))
-        isMasterOfSomething = true;
     return Center(
       child: Container(
         height: 204.0,

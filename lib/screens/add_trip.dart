@@ -487,28 +487,31 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                           .color!,
                                       widget.description,
                                     ),
-                                    FlatButton.icon(
-                                      onPressed: loading
-                                          ? null
-                                          : () async {
-                                              setState(() {
-                                                selectedDate = DateTime(2000);
-                                              });
-                                            },
-                                      splashColor:
-                                          Theme.of(context).accentColor,
-                                      label: Text(
-                                        'Ustaw datę jako "Wkrótce"',
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .textTheme
-                                              .headline5!
-                                              .color,
+                                    Container(
+                                      margin: EdgeInsets.symmetric(vertical: kIsWeb ? 10.0 : 0.0),
+                                      child: FlatButton.icon(
+                                        onPressed: loading
+                                            ? null
+                                            : () async {
+                                                setState(() {
+                                                  selectedDate = DateTime(2000);
+                                                });
+                                              },
+                                        splashColor:
+                                            Theme.of(context).accentColor,
+                                        label: Text(
+                                          'Ustaw datę jako "Wkrótce"',
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .headline5!
+                                                .color,
+                                          ),
                                         ),
-                                      ),
-                                      icon: Icon(
-                                        Icons.watch_later_rounded,
-                                        color: Color.fromRGBO(249, 101, 116, 1),
+                                        icon: Icon(
+                                          Icons.watch_later_rounded,
+                                          color: Color.fromRGBO(249, 101, 116, 1),
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: 5.0),

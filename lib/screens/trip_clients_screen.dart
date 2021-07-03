@@ -11,26 +11,24 @@ class TripClientsScreen extends StatefulWidget {
   List clients;
   String tripId;
   String transportId;
-  TripClientsScreen(this.clients, this.tripId, this.transportId);
+  bool isMaster;
+  TripClientsScreen(this.clients, this.tripId, this.transportId, this.isMaster);
 
   @override
   _TripClientsScreenState createState() => _TripClientsScreenState();
 }
 
 class _TripClientsScreenState extends State<TripClientsScreen> {
-  bool isMaster = false;
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < widget.clients.length; i++) {
-      if (widget.clients[i]['id'] == widget.transportId) isMaster = true;
-    }
     if (!kIsWeb)
-      FirebaseCrashlytics.instance.setCustomKey("screen name", 'Eagers List');
+      FirebaseCrashlytics.instance
+          .setCustomKey("screen name", 'Trip clients list');
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
-        title: Text(isMaster ? "Klienci" : 'Towarzysze dojazdu'),
+        title: Text(widget.isMaster ? "Klienci" : 'Towarzysze dojazdu'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -74,7 +72,6 @@ class _TripClientsScreenState extends State<TripClientsScreen> {
                             data.containsKey('realName')
                                 ? data['realName']
                                 : data['name'],
-                            // 'nice',
                             style: TextStyle(
                               fontSize: 25.0,
                               color:
@@ -84,8 +81,7 @@ class _TripClientsScreenState extends State<TripClientsScreen> {
                           (Provider.of<UserData>(context, listen: false)
                                           .isAdmin ??
                                       false) ||
-                                  widget.clients[index]['id'] ==
-                                      widget.transportId
+                                  widget.isMaster
                               ? Text(
                                   'z: ${widget.clients[index]['where']}',
                                   style: TextStyle(
@@ -102,10 +98,12 @@ class _TripClientsScreenState extends State<TripClientsScreen> {
                     );
                   } else {
                     AuthService.removeUserFromTransport(
-                        widget.tripId,
-                        widget.clients[index]['id'],
-                        widget.transportId,
-                        widget.clients[index]['id']);
+                      widget.tripId,
+                      widget.clients[index]['id'],
+                      widget.transportId,
+                      widget.clients[index]['id'],
+                    );
+                    Navigator.of(context).pop(context);
                     return SizedBox();
                   }
                 } else if (snapshot.hasError) {
