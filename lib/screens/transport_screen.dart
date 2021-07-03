@@ -139,7 +139,15 @@ class _TransportScreenState extends State<TransportScreen> {
                                 );
                               },
                               icon: Icon(Icons.add),
-                              label: Text('Zostań kierowcą!'),
+                              label: Text(
+                                'Zostań kierowcą!',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .headline5!
+                                      .color,
+                                ),
+                              ),
                             ),
                           ),
                         ],
