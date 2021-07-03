@@ -741,16 +741,16 @@ class _RightPartClickedState extends State<RightPartClicked> {
               ),
               Text(
                 widget.joinedTransportId == ''
-                    ? 'Wejdź na pokład ${widget.info['userId']}'
+                    ? 'Wejdź na pokład'
                     : widget.joinedTransportId == widget.info['userId']
                         ? widget.info['userId'] ==
                                 Provider.of<UserData>(context, listen: false)
                                     .currentUserId
-                            ? "Zrezygnuj z bycia kierowcą ${widget.info['userId']}"
-                            : "Opuść pokład ${widget.info['userId']} "
+                            ? "Zrezygnuj z bycia kierowcą"
+                            : "Opuść pokład"
                         : widget.masterOfId != ''
-                            ? "Zrezygnuj z bycia kierowcą i dołącz do tego typa tutaj ${widget.info['userId']}"
-                            : "Zmień pokład na ten tutaj ${widget.info['userId']}",
+                            ? "Zrezygnuj z bycia kierowcą i dołącz do tego typa tutaj"
+                            : "Zmień pokład na ten tutaj",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white),
               ),
