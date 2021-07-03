@@ -243,13 +243,27 @@ class _TransportTileState extends State<TransportTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(17.0),
+      //   border: Border.all(
+      //     color: Colors.transparent,
+      //     width: 2.0
+      //   ),
+      // ),
+      margin: EdgeInsets.fromLTRB(13.0, 10.0, 13.0, 10.0),
       height: 290.0,
       child: RaisedButton(
         disabledColor: Theme.of(context).accentColor,
         disabledTextColor: Colors.black,
         textColor: Theme.of(context).textTheme.headline5!.color,
         shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: widget.info['userId'] == widget.joinedTransportId ||
+                    widget.info['userId'] == widget.masterOfId
+                ? Colors.red
+                : Colors.transparent,
+            width: 2.0,
+          ),
           borderRadius: BorderRadius.circular(15.0),
         ),
         // color: Theme.of(context).accentColor,
@@ -776,7 +790,6 @@ Future<void> resignAndJoin(String tripId, String masterOfId,
       transportId,
       startingPlace,
     ).onError((error, stackTrace) {
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Color.fromRGBO(249, 101, 116, 1),
