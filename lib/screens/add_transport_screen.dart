@@ -79,6 +79,7 @@ class _AddTransportScreenState extends State<AddTransportScreen> {
                       //     ),
                       //   ),
                       // ),
+                      SizedBox(height: 10.0),
                       CustomTextField(
                         'Skąd jedziesz',
                         'text',
@@ -154,6 +155,7 @@ class _AddTransportScreenState extends State<AddTransportScreen> {
                               : (String? value) {
                                   setState(() {
                                     dropdownValue = value;
+                                    setPickUp(value);
                                   });
                                 },
                           validator: (String? value) {
@@ -255,10 +257,13 @@ class _AddTransportScreenState extends State<AddTransportScreen> {
                           onPressed: loading
                               ? null
                               : () async {
-                                
                                   if (_formKey.currentState!.validate() &&
                                       selectedTimeStart != null) {
-
+                                    if (mounted)
+                                      setState(() {
+                                        loading = true;
+                                      });
+                                    // throw Exception();
                                     try {
                                       await AuthService.addTransport(
                                         widget._tripId,
@@ -275,16 +280,56 @@ class _AddTransportScreenState extends State<AddTransportScreen> {
                                             .name!,
                                         pickup!,
                                       ).then((bool value) {
-                                        // setState(() {
-                                        //   isSent = value;
-                                        //   isDone = true;
-                                        //   loading = false;
-                                        // });
+                                        print('---------${value.toString}');
+                                        if (mounted)
+                                          setState(() {
+                                            loading = false;
+                                          });
+                                        Navigator.pop(context);
+                                      }).onError((error, stackTrace) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            backgroundColor: Color.fromRGBO(
+                                                249, 101, 116, 1),
+                                            behavior: SnackBarBehavior.floating,
+                                            content: Text(
+                                              error.toString(),
+                                            ),
+                                            duration: Duration(
+                                                seconds:
+                                                    ((error.toString().length) /
+                                                                6)
+                                                            .round() +
+                                                        5),
+                                          ),
+                                        );
+                                        if (mounted)
+                                          setState(() {
+                                            loading = false;
+                                          });
                                       });
                                     } catch (e) {
-                                      setState(() {
-                                        loading = false;
-                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          backgroundColor:
+                                              Color.fromRGBO(249, 101, 116, 1),
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text(
+                                            e.toString(),
+                                          ),
+                                          duration: Duration(
+                                              seconds:
+                                                  ((e.toString().length) / 6)
+                                                          .round() +
+                                                      5),
+                                        ),
+                                      );
+                                      if (mounted)
+                                        setState(() {
+                                          loading = false;
+                                        });
                                     }
                                   }
                                 },
@@ -329,11 +374,11 @@ class _AddTransportScreenState extends State<AddTransportScreen> {
   }
 
   void setAvailableSeats(dynamic data) {
-    availableSeats = data;
+    availableSeats = data == "" ? null : int.parse(data);
   }
 
   void setCosts(dynamic data) {
-    costs = data;
+    costs = data == "" ? null : int.parse(data);
   }
 
   void setPickUp(dynamic data) {

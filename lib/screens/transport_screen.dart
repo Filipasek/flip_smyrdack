@@ -27,21 +27,23 @@ class _TransportScreenState extends State<TransportScreen> {
         elevation: 0.0,
         title: Text('Transport'),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) =>
-                        AddTransportScreen(widget._tripId.toString())),
-              );
-            },
-            icon: Icon(
-              Icons.add_circle_rounded,
-              size: 28.0,
-              color: Theme.of(context).textTheme.headline5!.color,
-            ),
-          ),
+          joinedTransportId == '' && masterOfId == ''
+              ? IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              AddTransportScreen(widget._tripId.toString())),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.add_circle_rounded,
+                    size: 28.0,
+                    color: Theme.of(context).textTheme.headline5!.color,
+                  ),
+                )
+              : SizedBox(),
         ],
       ),
       body: Container(
@@ -56,6 +58,13 @@ class _TransportScreenState extends State<TransportScreen> {
             if (snapshot.hasData) {
               List data = snapshot.data.docs;
               for (int i = 0; i < data.length; i++) {
+                if (data[i]['userId'] ==
+                    Provider.of<UserData>(context, listen: false)
+                        .currentUserId) {
+                  masterOfId = data[i]['userId'];
+                } else {
+                  masterOfId = '';
+                }
                 for (int j = 0; j < data[i]['clients'].length; j++) {
                   if (data[i]['clients'][j]['id'] ==
                       Provider.of<UserData>(context, listen: false)
@@ -63,20 +72,17 @@ class _TransportScreenState extends State<TransportScreen> {
                     joinedTransportId = data[i]['userId'];
                     startingPlace = data[i]['clients'][j]['where'];
                     j = data[i]['clients'].length;
+                    i = data.length;
+                    break;
                   } else {
                     joinedTransportId = '';
                   }
                 }
-                if (data[i]['userId'] ==
-                    Provider.of<UserData>(context, listen: false)
-                        .currentUserId) {
-                  masterOfId = data[i]['userId'];
-                  i = data.length;
-                } else {
-                  masterOfId = '';
-                }
               }
 
+              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                if (mounted) setState(() {});
+              });
               return ListView.builder(
                 itemCount: data.length,
                 itemBuilder: (context, index) {
@@ -597,7 +603,9 @@ class _RightPartClickedState extends State<RightPartClicked> {
                                     );
                                     return true;
                                   });
-                                  if (mounted) setState(() {});
+                                  Navigator.pop(context);
+
+                                  // if (mounted) setState(() {});
                                 }
                                 // print('---------- $newName');
                               }),
@@ -655,49 +663,9 @@ class _RightPartClickedState extends State<RightPartClicked> {
                     }
                   } else if (widget.masterOfId != '') {
                     //zrezygnuj i dołącz
-                    bool done = await AuthService.removeTransport(
-                      widget.tripId,
-                      widget.info['userId'],
-                    ).then((value) {
-                      return value;
-                    }).onError((error, stackTrace) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Color.fromRGBO(249, 101, 116, 1),
-                          behavior: SnackBarBehavior.floating,
-                          content: Text(
-                            error.toString(),
-                          ),
-                          duration: Duration(
-                              seconds:
-                                  ((error.toString().length) / 6).round() + 5),
-                        ),
-                      );
-                      return true;
-                    });
-                    if (done)
-                      await AuthService.joinTransport(
-                        widget.tripId,
-                        Provider.of<UserData>(context, listen: false)
-                            .currentUserId!,
-                        widget.info['userId'],
-                        widget.startingPlace,
-                      ).onError((error, stackTrace) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Color.fromRGBO(249, 101, 116, 1),
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(
-                              error.toString(),
-                            ),
-                            duration: Duration(
-                                seconds:
-                                    ((error.toString().length) / 6).round() +
-                                        5),
-                          ),
-                        );
-                        return true;
-                      });
+
+                    await resignAndJoin(widget.tripId, widget.masterOfId,
+                        context, widget.info['userId'], widget.startingPlace);
                   } else {
                     //zmień na ten tutaj
                     bool done = await AuthService.removeUserFromTransport(
@@ -759,16 +727,16 @@ class _RightPartClickedState extends State<RightPartClicked> {
               ),
               Text(
                 widget.joinedTransportId == ''
-                    ? 'Wejdź na pokład'
+                    ? 'Wejdź na pokład ${widget.info['userId']}'
                     : widget.joinedTransportId == widget.info['userId']
                         ? widget.info['userId'] ==
                                 Provider.of<UserData>(context, listen: false)
                                     .currentUserId
-                            ? "Zrezygnuj z bycia kierowcą"
-                            : "Opuść pokład"
+                            ? "Zrezygnuj z bycia kierowcą ${widget.info['userId']}"
+                            : "Opuść pokład ${widget.info['userId']} "
                         : widget.masterOfId != ''
-                            ? "Zrezygnuj z bycia kierowcą i dołącz do tego typa tutaj"
-                            : "Zmień pokład na ten tutaj",
+                            ? "Zrezygnuj z bycia kierowcą i dołącz do tego typa tutaj ${widget.info['userId']}"
+                            : "Zmień pokład na ten tutaj ${widget.info['userId']}",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white),
               ),
@@ -778,4 +746,48 @@ class _RightPartClickedState extends State<RightPartClicked> {
       ),
     );
   }
+}
+
+Future<void> resignAndJoin(String tripId, String masterOfId,
+    BuildContext context, String transportId, String startingPlace) async {
+  bool done = await AuthService.removeTransport(
+    tripId,
+    masterOfId,
+  ).then((value) {
+    return value;
+  }).onError((error, stackTrace) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          error.toString(),
+        ),
+        duration:
+            Duration(seconds: ((error.toString().length) / 6).round() + 5),
+      ),
+    );
+    return false;
+  });
+  if (done)
+    await AuthService.joinTransport(
+      tripId,
+      Provider.of<UserData>(context, listen: false).currentUserId!,
+      transportId,
+      startingPlace,
+    ).onError((error, stackTrace) {
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            error.toString(),
+          ),
+          duration:
+              Duration(seconds: ((error.toString().length) / 6).round() + 5),
+        ),
+      );
+      return true;
+    });
 }

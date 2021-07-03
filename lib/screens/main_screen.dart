@@ -42,8 +42,17 @@ class _MainScreenState extends State<MainScreen> {
             updateReady = true;
           });
       }).catchError((e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              e.toString(),
+            ),
+            duration:
+                Duration(seconds: ((e.toString().length) / 6).round() + 5),
+          ),
+        );
       });
     bool isRevReady = kIsWeb ? false : await _inAppReview.isAvailable();
     setState(() {
@@ -145,9 +154,20 @@ class _MainScreenState extends State<MainScreen> {
                   child: Center(
                     child: FlatButton(
                       onPressed: () async {
-                        InAppUpdate.performImmediateUpdate().catchError((e) =>
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString()))));
+                        InAppUpdate.performImmediateUpdate().catchError(
+                          (e) => ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: Color.fromRGBO(249, 101, 116, 1),
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(
+                                e.toString(),
+                              ),
+                              duration: Duration(
+                                  seconds:
+                                      ((e.toString().length) / 6).round() + 5),
+                            ),
+                          ),
+                        );
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

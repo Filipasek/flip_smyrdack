@@ -193,6 +193,7 @@ class AuthService {
 
   static Future<bool> joinTransport(
       String _tripId, String _userId, String _transportId, String place) async {
+        
     try {
       Map _clientInfo = {
         'id': _userId,
@@ -225,6 +226,7 @@ class AuthService {
     String name,
     String pickup,
   ) async {
+
     try {
       await _firestore
           .collection('/trips')
@@ -241,6 +243,12 @@ class AuthService {
         'name': name,
         'pick-up': pickup,
         'userId': _transportId,
+        'clients': [
+          {
+            'id': _transportId,
+            'where': from,
+          }
+        ],
       });
     } catch (e, stackTrace) {
       await FirebaseCrashlytics.instance.recordError(e, stackTrace,
