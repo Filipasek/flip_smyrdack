@@ -46,58 +46,60 @@ class _TransportScreenState extends State<TransportScreen> {
               : SizedBox(),
         ],
       ),
-      body: Container(
-        constraints: BoxConstraints(maxWidth: 700.0),
-        child: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('trips')
-              .doc(widget._tripId.toString())
-              .collection('transport')
-              .snapshots(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              List data = snapshot.data.docs;
-              for (int i = 0; i < data.length; i++) {
-                if (data[i]['userId'] ==
-                    Provider.of<UserData>(context, listen: false)
-                        .currentUserId) {
-                  masterOfId = data[i]['userId'];
-                } else {
-                  masterOfId = '';
-                }
-                for (int j = 0; j < data[i]['clients'].length; j++) {
-                  if (data[i]['clients'][j]['id'] ==
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 700.0),
+          child: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('trips')
+                .doc(widget._tripId.toString())
+                .collection('transport')
+                .snapshots(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                List data = snapshot.data.docs;
+                for (int i = 0; i < data.length; i++) {
+                  if (data[i]['userId'] ==
                       Provider.of<UserData>(context, listen: false)
                           .currentUserId) {
-                    joinedTransportId = data[i]['userId'];
-                    startingPlace = data[i]['clients'][j]['where'];
-                    j = data[i]['clients'].length;
-                    i = data.length;
-                    break;
+                    masterOfId = data[i]['userId'];
                   } else {
-                    joinedTransportId = '';
+                    masterOfId = '';
+                  }
+                  for (int j = 0; j < data[i]['clients'].length; j++) {
+                    if (data[i]['clients'][j]['id'] ==
+                        Provider.of<UserData>(context, listen: false)
+                            .currentUserId) {
+                      joinedTransportId = data[i]['userId'];
+                      startingPlace = data[i]['clients'][j]['where'];
+                      j = data[i]['clients'].length;
+                      i = data.length;
+                      break;
+                    } else {
+                      joinedTransportId = '';
+                    }
                   }
                 }
+
+                WidgetsBinding.instance!.addPostFrameCallback((_) {
+                  if (mounted) setState(() {});
+                });
+                return ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    dynamic info = data[index];
+
+                    return TransportTile(info, index, widget._tripId.toString(),
+                        joinedTransportId, masterOfId, startingPlace);
+                  },
+                );
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
-
-              WidgetsBinding.instance!.addPostFrameCallback((_) {
-                if (mounted) setState(() {});
-              });
-              return ListView.builder(
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                  dynamic info = data[index];
-
-                  return TransportTile(info, index, widget._tripId.toString(),
-                      joinedTransportId, masterOfId, startingPlace);
-                },
-              );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
+            },
+          ),
         ),
       ),
     );
@@ -187,7 +189,7 @@ class SingleInfoText extends StatelessWidget {
         maxLines: 2,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Theme.of(context).textTheme.headline5!.color,
+          color: Colors.white,
           // fontWeight: FontWeight.bold,
 
           fontSize: 16.0,
@@ -208,7 +210,7 @@ class SingleInfoTextBold extends StatelessWidget {
       maxLines: 2,
       // textAlign: TextAlign.left,
       style: TextStyle(
-        color: Theme.of(context).textTheme.headline5!.color,
+        color: Colors.white,
         fontWeight: FontWeight.bold,
         fontSize: 18.0,
       ),
@@ -310,7 +312,7 @@ class _TransportTileState extends State<TransportTile> {
                       crossFadeState: isClicked
                           ? CrossFadeState.showSecond
                           : CrossFadeState.showFirst,
-                      duration: Duration(milliseconds: 350),
+                      duration: Duration(milliseconds: 250),
                       firstChild: LeftPart(widget.info),
                       secondChild: LeftPartClicked(widget.info, isClicked,
                           widget.tripId, widget.joinedTransportId),
@@ -324,7 +326,7 @@ class _TransportTileState extends State<TransportTile> {
                       crossFadeState: isClicked
                           ? CrossFadeState.showSecond
                           : CrossFadeState.showFirst,
-                      duration: Duration(milliseconds: 350),
+                      duration: Duration(milliseconds: 250),
                       firstChild: RightPart(widget.info),
                       secondChild: RightPartClicked(
                           widget.info,
@@ -370,7 +372,7 @@ class RightPart extends StatelessWidget {
             CreateColumnOfInfo(
               'Wszystkich',
               '${info['availableSeats']} miejsc',
-              'Określa czy ${info['name'].toString().split(" ")[0]} jest w stanie podjechać i jak daleko',
+              'Określa ile ${info['name'].toString().split(" ")[0]} ma wszystkich miejsc w samochodzie (zajętych i wolnych, łącznie z kierowcą)',
             ),
           ],
         ),
@@ -404,7 +406,7 @@ class LeftPart extends StatelessWidget {
             CreateColumnOfInfo(
               'Zajęte',
               '${info['clients'].length} miejsca',
-              'Określa czy ${info['name'].toString().split(" ")[0]} jest w stanie podjechać i jak daleko',
+              'Określa ile ${info['name'].toString().split(" ")[0]} ma już zajętych miejsc',
             ),
           ],
         ),

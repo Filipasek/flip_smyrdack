@@ -457,11 +457,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     child: SingleInfoTextBold('Informacje podstawowe:'),
                   ),
                   Container(
-                    height: MediaQuery.of(context).size.width > 700
-                        ? 500
-                        : ((((MediaQuery.of(context).size.width) / 6) * 4) + 4),
+                    height: MediaQuery.of(context).size.width >= 700.0
+                        ? 300.0
+                        : (MediaQuery.of(context).size.width /
+                                calculateRatio(
+                                    MediaQuery.of(context).size.width)) +
+                            50.0,
                     child: GridView.count(
-                      childAspectRatio: 2,
+                      childAspectRatio:
+                          calculateRatio(MediaQuery.of(context).size.width),
                       physics: NeverScrollableScrollPhysics(),
                       crossAxisCount: 3,
                       primary: true,
@@ -575,6 +579,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
       ),
     );
   }
+}
+
+double calculateRatio(double width) {
+  if (width >= 700) {
+    return 4.0;
+  } else {
+    return ((((width / 3) / 70.0) * 100).round()) / 100;
+  }
+  return width > 700 ? 500 : ((((width) / 6) * 4) + 4);
 }
 
 class CreateColumnOfInfo extends StatelessWidget {
