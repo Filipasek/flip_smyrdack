@@ -693,17 +693,15 @@ class _MainScreenState extends State<MainScreen> {
                                           ),
                                           title: Text(
                                             "${data.temperature.round().toString()}°C",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headline5!
-                                                .copyWith(fontSize: 19.0),
+                                            style: TextStyle(color: Colors.white, fontSize: 19.0,),
+                                            // style: Theme.of(context)
+                                            //     .textTheme
+                                            //     .headline5!
+                                            //     .copyWith(fontSize: 19.0),
                                           ),
                                           subtitle: Text(
                                             "${data.description.toUpperCase()}\n${data.name.toLowerCase()}",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headline5!
-                                                .copyWith(fontSize: 13.0),
+                                            style: TextStyle(color: Colors.white, fontSize: 13.0,),
                                           ),
                                           children: <Widget>[
                                             Divider(
