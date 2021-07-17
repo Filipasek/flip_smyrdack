@@ -668,175 +668,184 @@ class _MainScreenState extends State<MainScreen> {
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 15.0, vertical: 10),
-                                      child: ExpansionTileCard(
-                                        // baseColor: Colors.cyan[50],
-                                        baseColor:
-                                            Color.fromRGBO(107, 120, 180, 1),
-                                        expandedColor:
-                                            Color.fromRGBO(107, 120, 180, 1),
-                                        key: cardA,
-                                        leading: Container(
-                                          height: 50.0,
-                                          // width: 50.0,
-                                          child: FittedBox(
-                                            child: Image.network(
-                                              "https://openweathermap.org/img/wn/${data.icon}@2x.png",
-                                              // color: Colors.red,
-                                              // fit: BoxFit.none,
-                                              height: 80.0,
-                                              width: 80.0,
-                                            ),
-                                            fit: BoxFit.none,
-                                            alignment: Alignment.center,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          "${data.temperature.round().toString()}°C",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headline5!
-                                              .copyWith(fontSize: 19.0),
-                                        ),
-                                        subtitle: Text(
-                                          "${data.description.toUpperCase()}\n${data.name.toLowerCase()}",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headline5!
-                                              .copyWith(fontSize: 13.0),
-                                        ),
-                                        children: <Widget>[
-                                          Divider(
-                                            thickness: 1.0,
-                                            height: 1.0,
-                                          ),
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 16.0,
-                                                vertical: 8.0,
+                                      child: AbsorbPointer(
+                                        child: ExpansionTileCard(
+                                          // baseColor: Colors.cyan[50],
+                                          baseColor:
+                                              Color.fromRGBO(107, 120, 180, 1),
+                                          expandedColor:
+                                              Color.fromRGBO(107, 120, 180, 1),
+                                          key: cardA,
+                                          leading: Container(
+                                            height: 50.0,
+                                            // width: 50.0,
+                                            child: FittedBox(
+                                              child: Image.network(
+                                                "https://openweathermap.org/img/wn/${data.icon}@2x.png",
+                                                // color: Colors.red,
+                                                // fit: BoxFit.none,
+                                                height: 80.0,
+                                                width: 80.0,
                                               ),
-                                              child: Text(
-                                                "FlutterDevs specializes in creating cost-effective and efficient applications with our perfectly crafted,"
-                                                " creative and leading-edge flutter app development solutions for customers all around the globe.",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .headline5!
-                                                    .copyWith(fontSize: 16.0),
-                                              ),
+                                              fit: BoxFit.none,
+                                              alignment: Alignment.center,
                                             ),
                                           ),
-                                          ButtonBar(
-                                            alignment:
-                                                MainAxisAlignment.spaceAround,
-                                            buttonHeight: 52.0,
-                                            buttonMinWidth: 90.0,
-                                            children: <Widget>[
-                                              FlatButton(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4.0)),
-                                                onPressed: () {
-                                                  cardA.currentState?.expand();
-                                                },
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Icon(
-                                                      Icons.arrow_downward,
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .headline5!
-                                                          .color,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          vertical: 2.0),
-                                                    ),
-                                                    Text(
-                                                      'Open',
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .textTheme
-                                                            .headline5!
-                                                            .color,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              FlatButton(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4.0)),
-                                                onPressed: () {
-                                                  cardA.currentState
-                                                      ?.collapse();
-                                                },
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Icon(
-                                                      Icons.arrow_upward,
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .headline5!
-                                                          .color,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          vertical: 2.0),
-                                                    ),
-                                                    Text(
-                                                      'Close',
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .textTheme
-                                                            .headline5!
-                                                            .color,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              FlatButton(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4.0)),
-                                                onPressed: () {},
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Icon(
-                                                      Icons.swap_vert,
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .headline5!
-                                                          .color,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          vertical: 2.0),
-                                                    ),
-                                                    Text(
-                                                      'Toggle',
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .textTheme
-                                                            .headline5!
-                                                            .color,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                          title: Text(
+                                            "${data.temperature.round().toString()}°C",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headline5!
+                                                .copyWith(fontSize: 19.0),
                                           ),
-                                        ],
+                                          subtitle: Text(
+                                            "${data.description.toUpperCase()}\n${data.name.toLowerCase()}",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headline5!
+                                                .copyWith(fontSize: 13.0),
+                                          ),
+                                          children: <Widget>[
+                                            Divider(
+                                              thickness: 1.0,
+                                              height: 1.0,
+                                            ),
+                                            Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 16.0,
+                                                  vertical: 8.0,
+                                                ),
+                                                child: Text(
+                                                  "FlutterDevs specializes in creating cost-effective and efficient applications with our perfectly crafted,"
+                                                  " creative and leading-edge flutter app development solutions for customers all around the globe.",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headline5!
+                                                      .copyWith(fontSize: 16.0),
+                                                ),
+                                              ),
+                                            ),
+                                            ButtonBar(
+                                              alignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              buttonHeight: 52.0,
+                                              buttonMinWidth: 90.0,
+                                              children: <Widget>[
+                                                FlatButton(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              4.0)),
+                                                  onPressed: () {
+                                                    cardA.currentState
+                                                        ?.expand();
+                                                  },
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Icon(
+                                                        Icons.arrow_downward,
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 2.0),
+                                                      ),
+                                                      Text(
+                                                        'Open',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .headline5!
+                                                                  .color,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                FlatButton(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              4.0)),
+                                                  onPressed: () {
+                                                    cardA.currentState
+                                                        ?.collapse();
+                                                  },
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Icon(
+                                                        Icons.arrow_upward,
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 2.0),
+                                                      ),
+                                                      Text(
+                                                        'Close',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .headline5!
+                                                                  .color,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                FlatButton(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              4.0)),
+                                                  onPressed: () {},
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Icon(
+                                                        Icons.swap_vert,
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 2.0),
+                                                      ),
+                                                      Text(
+                                                        'Toggle',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .headline5!
+                                                                  .color,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     );
                                   } else if (snapshot.hasError) {
