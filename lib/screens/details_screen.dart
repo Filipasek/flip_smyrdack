@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 // import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:ndialog/ndialog.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
@@ -165,8 +166,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       ),
                       child: Hero(
                         tag: item,
-                        child: Image.network(item,
-                            fit: BoxFit.cover, width: 1200.0, height: 600.0),
+                        child: Image.network(
+                          item,
+                          fit: BoxFit.cover,
+                          width: 1200.0,
+                          height: 600.0,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return Center(
+                              // child: CupertinoActivityIndicator(),
+                              child: LoadingIndicator(
+                                indicatorType: Indicator.ballScale,
+                                color: Theme.of(context).textTheme.headline5!.color,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                     // Positioned( //TODO: dodać opis miejsca na zdjęciu

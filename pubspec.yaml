@@ -69,6 +69,14 @@ dependencies:
   ndialog: ^4.1.0
   flutter_statusbarcolor_ns: ^0.3.0-nullsafety
   uuid: ^3.0.4
+  rive: ^0.7.22
+  introduction_screen: ^2.1.0
+  skeleton_text: ^3.0.0
+  background_mode: ^1.0.1
+  expansion_tile_card: ^2.0.0
+  location: ^4.3.0
+  loading_indicator: ^2.1.1
+  flutter_smart_dialog: ^2.1.6
   
 
   # The following adds the Cupertino Icons font to your application.

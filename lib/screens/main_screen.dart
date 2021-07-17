@@ -1,20 +1,24 @@
 import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flip_smyrdack/getters/weather_data.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/models/weather_data_model.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/details_screen.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
 import 'package:flip_smyrdack/screens/my_account_screen.dart';
 import 'package:flip_smyrdack/screens/users_to_be_verified_screen.dart';
 import 'package:flip_smyrdack/screens/verify_user.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 // import 'package:intl/date_symbol_data_local.dart';
@@ -25,6 +29,8 @@ import 'package:in_app_review/in_app_review.dart';
 
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:native_admob_flutter/native_admob_flutter.dart';
+import 'package:skeleton_text/skeleton_text.dart';
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -32,15 +38,18 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
   bool isReviewAvailable = false;
   bool updateReady = false;
   Future<void> checkForUpdate() async {
     if (!kIsWeb)
       await InAppUpdate.checkForUpdate().then((info) {
-        if (info.updateAvailability == UpdateAvailability.updateAvailable)
+        if (info.updateAvailability ==
+            UpdateAvailability.updateAvailable) if (mounted) {
           setState(() {
             updateReady = true;
           });
+        }
       }).catchError((e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -55,9 +64,10 @@ class _MainScreenState extends State<MainScreen> {
         );
       });
     bool isRevReady = kIsWeb ? false : await _inAppReview.isAvailable();
-    setState(() {
-      isReviewAvailable = isRevReady;
-    });
+    if (mounted)
+      setState(() {
+        isReviewAvailable = isRevReady;
+      });
   }
 
   final InAppReview _inAppReview = InAppReview.instance;
@@ -647,7 +657,215 @@ class _MainScreenState extends State<MainScreen> {
                   child: length > 0
                       ? ListView.builder(
                           itemCount: length + 2,
-                          itemBuilder: (context, index) {
+                          itemBuilder: (context, indexo) {
+                            if (indexo == 0) {
+                              return FutureBuilder(
+                                future: getWeatherData(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot snapshot) {
+                                  if (snapshot.hasData) {
+                                    WeatherData data = snapshot.data;
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15.0, vertical: 10),
+                                      child: ExpansionTileCard(
+                                        // baseColor: Colors.cyan[50],
+                                        baseColor:
+                                            Color.fromRGBO(107, 120, 180, 1),
+                                        expandedColor:
+                                            Color.fromRGBO(107, 120, 180, 1),
+                                        key: cardA,
+                                        leading: Container(
+                                          height: 50.0,
+                                          // width: 50.0,
+                                          child: FittedBox(
+                                            child: Image.network(
+                                              "https://openweathermap.org/img/wn/${data.icon}@2x.png",
+                                              // color: Colors.red,
+                                              // fit: BoxFit.none,
+                                              height: 80.0,
+                                              width: 80.0,
+                                            ),
+                                            fit: BoxFit.none,
+                                            alignment: Alignment.center,
+                                          ),
+                                        ),
+                                        title: Text(
+                                          "${data.temperature.round().toString()}°C",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline5!
+                                              .copyWith(fontSize: 19.0),
+                                        ),
+                                        subtitle: Text(
+                                          "${data.description.toUpperCase()}\n${data.name.toLowerCase()}",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline5!
+                                              .copyWith(fontSize: 13.0),
+                                        ),
+                                        children: <Widget>[
+                                          Divider(
+                                            thickness: 1.0,
+                                            height: 1.0,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "FlutterDevs specializes in creating cost-effective and efficient applications with our perfectly crafted,"
+                                                " creative and leading-edge flutter app development solutions for customers all around the globe.",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headline5!
+                                                    .copyWith(fontSize: 16.0),
+                                              ),
+                                            ),
+                                          ),
+                                          ButtonBar(
+                                            alignment:
+                                                MainAxisAlignment.spaceAround,
+                                            buttonHeight: 52.0,
+                                            buttonMinWidth: 90.0,
+                                            children: <Widget>[
+                                              FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4.0)),
+                                                onPressed: () {
+                                                  cardA.currentState?.expand();
+                                                },
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                      Icons.arrow_downward,
+                                                      color: Theme.of(context)
+                                                          .textTheme
+                                                          .headline5!
+                                                          .color,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 2.0),
+                                                    ),
+                                                    Text(
+                                                      'Open',
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4.0)),
+                                                onPressed: () {
+                                                  cardA.currentState
+                                                      ?.collapse();
+                                                },
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                      Icons.arrow_upward,
+                                                      color: Theme.of(context)
+                                                          .textTheme
+                                                          .headline5!
+                                                          .color,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 2.0),
+                                                    ),
+                                                    Text(
+                                                      'Close',
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              FlatButton(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4.0)),
+                                                onPressed: () {},
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                      Icons.swap_vert,
+                                                      color: Theme.of(context)
+                                                          .textTheme
+                                                          .headline5!
+                                                          .color,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 2.0),
+                                                    ),
+                                                    Text(
+                                                      'Toggle',
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .headline5!
+                                                            .color,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15.0, vertical: 10),
+                                      child: Center(
+                                        child: Text(snapshot.error.toString()),
+                                      ),
+                                    );
+                                  } else {
+                                    return Center(
+                                      // child: CircularProgressIndicator(),
+                                      child: Container(
+                                        height: 50.0,
+                                        child: LoadingIndicator(
+                                          indicatorType: Indicator.ballPulse,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .headline5!
+                                              .color,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            }
+                            int index = indexo - 1;
                             if (index == (length + 1))
                               return SizedBox(height: 75.0);
                             if (index == _kAdIndex) {
@@ -772,6 +990,11 @@ class _MainScreenState extends State<MainScreen> {
                                   icon: Icon(
                                     Icons.refresh_rounded,
                                     size: 30.0,
+                                    color: Theme.of(context)
+                                            .textTheme
+                                            .headline5!
+                                            .color ??
+                                        Colors.grey,
                                   ),
                                 ),
                               ],
@@ -886,9 +1109,73 @@ class Destinations extends StatelessWidget {
                   tag: imageUrl[0],
                   child: Image.network(
                     imageUrl[0],
-                    height: 300.0,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                    // 'https://www.pexels.com/photo/1471294/download/',
+                    height: 300.0, width: double.infinity, fit: BoxFit.cover,
+                    // loadingBuilder: ,
+                    // frameBuilder: (BuildContext context, Widget child,
+                    //     int? frame, bool wasSynchronouslyLoaded) {
+                    //   if (wasSynchronouslyLoaded) {
+                    //     return child;
+                    //   } else
+                    //     return SkeletonAnimation(
+                    //       borderRadius: BorderRadius.circular(10.0),
+                    //       shimmerColor:
+                    //           index % 2 != 0 ? Colors.grey : Colors.white54,
+                    //       child: Container(
+                    //         height: 30,
+                    //         width: MediaQuery.of(context).size.width * 0.35,
+                    //         decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(10.0),
+                    //             color: Colors.grey[300]),
+                    //       ),
+                    //     );
+                    // },
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent? loadingProgress) {
+                      Color darken(Color color, [double amount = .1]) {
+                        assert(amount >= 0 && amount <= 1);
+
+                        final hsl = HSLColor.fromColor(color);
+                        final hslDark = hsl.withLightness(
+                            (hsl.lightness - amount).clamp(0.0, 1.0));
+
+                        return hslDark.toColor();
+                      }
+
+                      if (loadingProgress == null) {
+                        // The child (AnimatedOpacity) is build with loading == true, and then the setState will change loading to false, which trigger the animation
+                        // WidgetsBinding.instance!.addPostFrameCallback((_) {
+                        //   setState(() => loading = false);
+                        // });
+
+                        return child;
+                      }
+                      // loading = true;
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 100.0),
+                        child: Center(
+                          // child: CupertinoActivityIndicator(),
+                          child: LoadingIndicator(
+                            indicatorType: Indicator.ballClipRotateMultiple,
+                            color: Theme.of(context).textTheme.headline5!.color,
+                          ),
+                        ),
+                      );
+                      // return SkeletonAnimation(
+                      //   borderRadius: BorderRadius.circular(10.0),
+                      //   shimmerColor: index % 2 != 0
+                      //       ? Theme.of(context).accentColor
+                      //       : darken(Theme.of(context).accentColor, .1),
+                      //   child: Container(
+                      //     height: 300.0,
+                      //     width: double.infinity,
+                      //     decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.circular(10.0),
+                      //       color: Theme.of(context).primaryColor,
+                      //     ),
+                      //   ),
+                      // );
+                    },
                   ),
                 ),
               ),

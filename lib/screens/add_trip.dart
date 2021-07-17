@@ -152,7 +152,9 @@ class _AddTripScreenState extends State<AddTripScreen> {
     if (!kIsWeb)
       FirebaseCrashlytics.instance.setCustomKey("screen name", 'Add Trip');
 
-    selectedDate = isDateChanged || selectedDate.year == 2000 ? selectedDate : widget.date ?? selectedDate;
+    selectedDate = isDateChanged || selectedDate.year == 2000
+        ? selectedDate
+        : widget.date ?? selectedDate;
     selectedTimeStart = isTimeStartChanged
         ? selectedTimeStart
         : widget.startTime ?? selectedTimeStart;
@@ -241,8 +243,11 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                     loading: Center(
                                         child: Text('Ładowanie reklamy')),
                                     error: Center(
-                                        child: Text(
-                                            'Brak reklamy. Na nasz koszt :)')),
+                                      child: Text(
+                                        'Brak reklamy. Na nasz koszt :)',
+                                      ),
+                                    ),
+
                                   )
                                 : SizedBox(),
                             // Container(
@@ -488,7 +493,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                       widget.description,
                                     ),
                                     Container(
-                                      margin: EdgeInsets.symmetric(vertical: kIsWeb ? 10.0 : 0.0),
+                                      margin: EdgeInsets.symmetric(
+                                          vertical: kIsWeb ? 10.0 : 0.0),
                                       child: FlatButton.icon(
                                         onPressed: loading
                                             ? null
@@ -510,7 +516,8 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                         ),
                                         icon: Icon(
                                           Icons.watch_later_rounded,
-                                          color: Color.fromRGBO(249, 101, 116, 1),
+                                          color:
+                                              Color.fromRGBO(249, 101, 116, 1),
                                         ),
                                       ),
                                     ),
@@ -527,7 +534,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                                             : () => _selectDate(context),
                                         child: Text(
                                           "Data: " +
-                                              "${selectedDate.year == 2000 ? "Wkrótce" :  df.format(selectedDate.toLocal())}"
+                                              "${selectedDate.year == 2000 ? "Wkrótce" : df.format(selectedDate.toLocal())}"
                                                   .split(' ')[0],
                                           style: TextStyle(
                                             fontSize: 20.0,

@@ -6,6 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flip_smyrdack/models/config.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
 import 'package:flip_smyrdack/screens/home_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,6 @@ String get bannerAdUnitId {
 }
 
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   if (!kIsWeb)
@@ -125,6 +125,7 @@ class _AppState extends State<App> {
           color: Colors.white,
           brightness: Brightness.light,
         ),
+        cupertinoOverrideTheme: CupertinoThemeData(brightness: Brightness.light),
       ),
       darkTheme: ThemeData(
         fontFamily: 'Comfortaa',
@@ -139,6 +140,7 @@ class _AppState extends State<App> {
           color: Color.fromRGBO(40, 44, 55, 1),
           brightness: Brightness.dark,
         ),
+        cupertinoOverrideTheme: CupertinoThemeData(brightness: Brightness.dark),
       ),
       home: Container(
         padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
