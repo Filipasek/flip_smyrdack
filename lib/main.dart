@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:native_admob_flutter/native_admob_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 String get bannerAdUnitId {
   /// Always test with test ads
@@ -28,10 +29,13 @@ void main() async {
   if (!kIsWeb)
     FirebaseCrashlytics.instance.setCustomKey("screen name", 'main()');
   if (kIsWeb) {
+    timeago.setLocaleMessages('pl', timeago.PlMessages());
     initializeDateFormatting('pl_PL');
     runApp(MyApp());
   } else {
+
     runZonedGuarded<Future<void>>(() async {
+      timeago.setLocaleMessages('pl', timeago.PlMessages());
       MobileAds.initialize(
         bannerAdUnitId: bannerAdUnitId,
       );

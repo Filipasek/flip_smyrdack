@@ -1,4 +1,5 @@
 import 'package:flip_smyrdack/models/weather_data_model.dart';
+import 'package:flip_smyrdack/services/random_color.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:pogoda/models/error_data_model.dart';
@@ -25,8 +26,8 @@ Future getWeatherData() async {
       _serviceEnabled = await location.requestService();
       if (!_serviceEnabled) {
         // throw Exception("We've fucked up");
-        return Future.error('Funkcje lokalizacyjne są wyłączone, przez co nie możemy wyświetlić pogody.');
-
+        return Future.error(
+            'Funkcje lokalizacyjne są wyłączone, przez co nie możemy wyświetlić pogody.');
       }
     }
 
@@ -35,7 +36,8 @@ Future getWeatherData() async {
       _permissionGranted = await location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
         // throw Exception("We've fucked upopp");
-        return Future.error('Brak uprawnień lokalizacyjnych, dlatego nie możemy wyświetlić pogody.');
+        return Future.error(
+            'Brak uprawnień lokalizacyjnych, dlatego nie możemy wyświetlić pogody.');
         //TODO: no location permission given
       }
     }
@@ -50,7 +52,6 @@ Future getWeatherData() async {
   }
   urlReq =
       'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=560de8ac99a3be9bd0bcedb2cb048ac0&units=metric&lang=pl';
-
   var response;
   try {
     response = await http.get(

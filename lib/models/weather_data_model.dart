@@ -5,7 +5,7 @@ class WeatherData {
   final String description;
   final String base; //type of measurement
   final int visibility;
-  final double windSpeed; //speed, deg, gust
+  final int windSpeed;
   final int clouds;
   final String countryCode;
   final int sunRiseTimestamp;
@@ -75,17 +75,20 @@ class WeatherData {
       lon: json["coord"]["lon"],
       main: json['weather'][0]['main'],
       time: json["dt"],
-      windSpeed: json["wind"]["speed"],
+      windSpeed: json["wind"]["speed"].round(),
       visibility: json['visibility'],
       sunRiseTimestamp: json["sys"]["sunrise"],
       sunSetTimestamp: json["sys"]["sunset"],
       icon: json["weather"][0]["icon"],
-      temperature: json["main"]["temp"],
-      feelsLikeTemperature: json["main"]["feels_like"],
+      temperature: json["main"]["temp"] * 1.0,
+      feelsLikeTemperature: json["main"]["feels_like"] * 1.0,
       pressure: json["main"]["pressure"],
       humidity: json["main"]["humidity"],
-      groundLevel: json["main"]["grnd_level"],
-      seaLevel: json["main"]["sea_level"],
+      groundLevel: json["main"].containsKey('grnd_level')
+          ? json["main"]["grnd_level"]
+          : 0,
+      seaLevel:
+          json["main"].containsKey('sea_level') ? json["main"]["sea_level"] : 0,
     );
   }
 }

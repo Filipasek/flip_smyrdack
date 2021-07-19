@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flip_smyrdack/getters/weather_on_trip_data.dart';
 import 'package:flip_smyrdack/models/user_data.dart';
+import 'package:flip_smyrdack/models/weather_data_model.dart';
+import 'package:flip_smyrdack/models/weather_data_on_trip_model.dart';
 import 'package:flip_smyrdack/screens/add_trip.dart';
 import 'package:flip_smyrdack/screens/eagers_screen.dart';
 import 'package:flip_smyrdack/screens/fullscreen_image_screen.dart';
@@ -17,11 +21,12 @@ import 'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:ndialog/ndialog.dart';
+// import 'package:ndialog/ndialog.dart';
 import 'package:provider/provider.dart';
 // import 'package:flip_smyrdack/ad_helper.dart';
 
 import 'package:native_admob_flutter/native_admob_flutter.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class DetailsScreen extends StatefulWidget {
   String name, startTime, endTime, difficulty, description;
@@ -67,6 +72,7 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
   // late BannerAd _ad;
   String get bannerAdUnitId {
     if (kDebugMode)
@@ -180,7 +186,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               // child: CupertinoActivityIndicator(),
                               child: LoadingIndicator(
                                 indicatorType: Indicator.ballScale,
-                                color: Theme.of(context).textTheme.headline5!.color,
+                                // color: Theme.of(context).textTheme.headline5!.color,
+                                colors: [
+                                  Theme.of(context)
+                                          .textTheme
+                                          .headline5!
+                                          .color ??
+                                      Colors.grey
+                                ],
                               ),
                             );
                           },
@@ -470,6 +483,37 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               : Icon(Icons.add_task_rounded,
                                   color: Color.fromRGBO(132, 207, 150, 1)),
                         ),
+                  FutureBuilder(
+                    future: getWeatherOnTripData('50.038923', '22.069992'),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if (snapshot.hasData) {
+                        WeatherDataOnTrip data = snapshot.data;
+                        return WeatherTile(cardA: cardA, data: data);
+                      } else if (snapshot.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0, vertical: 10),
+                          child: Center(
+                            child: Text(snapshot.error.toString()),
+                          ),
+                        );
+                      } else {
+                        return Center(
+                          // child: CircularProgressIndicator(),
+                          child: Container(
+                            height: 50.0,
+                            child: LoadingIndicator(
+                              indicatorType: Indicator.ballPulse,
+                              colors: [
+                                Theme.of(context).textTheme.headline5!.color ??
+                                    Colors.grey
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: SingleInfoTextBold('Informacje podstawowe:'),
@@ -599,6 +643,461 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 }
 
+class WeatherTile extends StatelessWidget {
+  const WeatherTile({
+    Key? key,
+    required this.cardA,
+    required this.data,
+  }) : super(key: key);
+
+  final GlobalKey<ExpansionTileCardState> cardA;
+  final WeatherDataOnTrip data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+      child: ExpansionTileCard(
+        // baseColor: Colors.cyan[50],
+        baseColor: Color.fromRGBO(107, 120, 180, 1),
+        expandedColor: Color.fromRGBO(107, 120, 180, 1),
+        trailing: Icon(Icons.expand_more_rounded, color: Colors.white),
+        animateTrailing: true,
+        key: cardA,
+        leading: Container(
+          height: 50.0,
+          // width: 50.0,
+          child: FittedBox(
+            child: Image.network(
+              "https://openweathermap.org/img/wn/${data.icon}@2x.png",
+              // color: Colors.red,
+              // fit: BoxFit.none,
+              height: 80.0,
+              width: 80.0,
+            ),
+            fit: BoxFit.none,
+            alignment: Alignment.center,
+          ),
+        ),
+        title: Text(
+          "${data.temperature.round().toString()}°C",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 19.0,
+          ),
+          // style: Theme.of(context)
+          //     .textTheme
+          //     .headline5!
+          //     .copyWith(fontSize: 19.0),
+        ),
+        subtitle: Text(
+          "${data.description.toUpperCase()}\n${'teraz'}",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13.0,
+          ),
+        ),
+        children: <Widget>[
+          Divider(
+            thickness: 1.0,
+            height: 1.0,
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 10.0,
+              ),
+              child: Text(
+                'Pogoda teraz',
+                // overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Odczuwalna",
+                          "${(data.feelsLikeTemperature * 10).round() / 10}°C",
+                          "Odczuwalna temperatura",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Wschód",
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.sunRiseTimestamp * 1000).toLocal())}",
+                          "Godzina i minuta wschodu słońca",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Wilgotność",
+                          "${data.humidity}%",
+                          "Wilgotność powietrza wyrażona w procentach",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Widoczność",
+                          convertBigToSmall(data.visibility),
+                          "Widoczność przez powietrze",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Ciśnienie",
+                          "${data.pressure} hPa",
+                          "Ciśnienie powietrza",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Zachód",
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.sunSetTimestamp * 1000).toLocal())}",
+                          "Godzina i minuta zachodu słońca",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Wiatr",
+                          "${(data.windSpeed * 10).round() / 10} m/s",
+                          "Prędkość wiatru",
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CreateColumnOfInfo(
+                          "Zachmurzenie",
+                          "${data.clouds}%",
+                          "Zachmurzenie w tym miejscu wyrażone w procentach",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 10.0,
+              ),
+              child: Text(
+                'Pogoda godzinowa\nna najbliższe 48h',
+                // overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            height: 260.0,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: data.hourlyForecast.length + 1,
+              itemBuilder: (BuildContext context, int i) {
+                if (i == 0)
+                  return Column(
+                    children: [
+                      Container(height: 52.0),
+                      IndexInfo("Godzina", 4),
+                      IndexInfo("Temperatura", 5),
+                      IndexInfo("Ciśnienie", 4),
+                      IndexInfo("Wilgotność", 5),
+                      IndexInfo("Wietrzność", 4),
+                      IndexInfo("Pochmurność", 5),
+                      Tooltip(
+                        message:
+                            'Prawdopodobieństwo wystąpienia opadów w ilości większej niż 0.01" (~0.25 mm)',
+                        child: IndexInfo("POP", 4),
+                      ),
+                      IndexInfo("Opis", 5),
+                    ],
+                  );
+
+                int index = i - 1;
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: Container(
+                            height: 40.0,
+                            // width: 50.0,
+                            child: FittedBox(
+                              child: Image.network(
+                                "https://openweathermap.org/img/wn/${data.hourlyForecast[index].icon}@2x.png",
+                                // color: Colors.red,
+                                // fit: BoxFit.none,
+                                height: 80.0,
+                                width: 80.0,
+                              ),
+                              fit: BoxFit.none,
+                              alignment: Alignment.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IndexInfo(
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.hourlyForecast[index].time * 1000).toLocal())}",
+                          0),
+                      IndexInfo(
+                          "${(data.hourlyForecast[index].temperature * 10).round() / 10}°C",
+                          1),
+                      IndexInfo(
+                          "${data.hourlyForecast[index].pressure} hPa", 0),
+                      IndexInfo("${data.hourlyForecast[index].humidity}%", 1),
+                      IndexInfo(
+                          '${data.hourlyForecast[index].windSpeed} m/s', 0),
+                      IndexInfo("${data.hourlyForecast[index].clouds}%", 1),
+                      IndexInfo("${data.hourlyForecast[index].pop}%", 0),
+                      IndexInfo("${data.hourlyForecast[index].description}", 3),
+                    ],
+                  ),
+                  // child: CreateColumnOfInfo(
+                  //   "Temperatura",
+                  //   "${(data.hourlyForecast[index].temperature * 10).round() / 10}°C",
+                  //   "Zachmurzenie w tym miejscu wyrażone w procentach",
+                  // ),
+                );
+              },
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 0.0,
+              ),
+              child: Text(
+                'Pogoda na\n najbliższe 7 dni',
+                // overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            height: 480.0,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: data.hourlyForecast.length + 1,
+              itemBuilder: (BuildContext context, int i) {
+                if (i == 0)
+                  return Column(
+                    children: [
+                      Container(height: 52.0),
+                      IndexInfo("Dzień", 4),
+                      IndexInfo("Temperatura", 5),
+                      IndexInfo("Ciśnienie", 4),
+                      IndexInfo("Wilgotność", 5),
+                      IndexInfo("Wietrzność", 4),
+                      IndexInfo("Zachmurzenie", 5),
+                      Tooltip(
+                        message:
+                            'Prawdopodobieństwo wystąpienia opadów w ilości większej niż 0.01" (~0.25 mm)',
+                        child: IndexInfo("POP", 4),
+                      ),
+                      Tooltip(
+                        message: 'Szacowana ilość opadów (w mm)',
+                        child: IndexInfo("Opady", 5),
+                      ),
+                      IndexInfo("Wschód słońca", 4),
+                      IndexInfo("Zachód słońca", 5),
+                      IndexInfo("Wchód księżyca", 4),
+                      IndexInfo("Zachód księżyca", 5),
+                      IndexInfo("Min temp", 4),
+                      IndexInfo("Max temp", 5),
+                      IndexInfo("Rano", 4),
+                      IndexInfo("Wieczorem", 5),
+                      IndexInfo("Za dnia", 4),
+                      IndexInfo("W nocy", 5),
+                      IndexInfo("Opis", 4),
+                    ],
+                  );
+
+                int index = i - 1;
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: Container(
+                            height: 40.0,
+                            // width: 50.0,
+                            child: FittedBox(
+                              child: Image.network(
+                                "https://openweathermap.org/img/wn/${data.hourlyForecast[index].icon}@2x.png",
+                                // color: Colors.red,
+                                // fit: BoxFit.none,
+                                height: 80.0,
+                                width: 80.0,
+                              ),
+                              fit: BoxFit.none,
+                              alignment: Alignment.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IndexInfo(
+                          "${DateFormat("dd.MM", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.dailyForecast[index].time * 1000).toLocal())}",
+                          0),
+                      IndexInfo(
+                          "${(data.dailyForecast[index].temps["day"] ?? 1).round()}°C",
+                          1),
+                      IndexInfo("${data.dailyForecast[index].pressure} hPa", 0),
+                      IndexInfo("${data.dailyForecast[index].humidity}%", 1),
+                      IndexInfo(
+                          '${data.dailyForecast[index].windSpeed} m/s', 0),
+                      IndexInfo("${data.dailyForecast[index].clouds}%", 1),
+                      IndexInfo("${data.dailyForecast[index].pop}%", 0),
+                      IndexInfo("${data.dailyForecast[index].rain} mm", 1),
+                      IndexInfo(
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.dailyForecast[index].sunRiseTimestamp * 1000).toLocal())}",
+                          0),
+                      IndexInfo(
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.dailyForecast[index].sunSetTimestamp * 1000).toLocal())}",
+                          1),
+                      IndexInfo(
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.dailyForecast[index].moonRiseTimestamp * 1000).toLocal())}",
+                          0),
+                      IndexInfo(
+                          "${DateFormat("HH:mm", 'pl_PL').format(DateTime.fromMillisecondsSinceEpoch(data.dailyForecast[index].moonSetTimestamp * 1000).toLocal())}",
+                          1),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["min"] ?? 1) * 10).round() / 10}°C",
+                          0),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["max"] ?? 1) * 10).round() / 10}°C",
+                          1),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["morn"] ?? 1) * 10).round() / 10}°C",
+                          0),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["eve"] ?? 1) * 10).round() / 10}°C",
+                          1),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["day"] ?? 1) * 10).round() / 10}°C",
+                          0),
+                      IndexInfo(
+                          "${((data.dailyForecast[index].temps["night"] ?? 1) * 10).round() / 10}°C",
+                          1),
+                      IndexInfo("${data.hourlyForecast[index].description}", 2),
+                    ],
+                  ),
+                  // child: CreateColumnOfInfo(
+                  //   "Temperatura",
+                  //   "${(data.hourlyForecast[index].temperature * 10).round() / 10}°C",
+                  //   "Zachmurzenie w tym miejscu wyrażone w procentach",
+                  // ),
+                );
+              },
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: 10.0,
+              ),
+              child: Text(
+                'Aktualizacja: ${timeago.format(
+                  DateTime.fromMillisecondsSinceEpoch(
+                    data.time * 1000,
+                  ),
+                  locale: "pl",
+                )}',
+                // overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  // fontWeight: FontWeight.bold,
+
+                  fontSize: 12.0,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class IndexInfo extends StatelessWidget {
+  const IndexInfo(
+    this.text,
+    this.index,
+  );
+  final String text;
+  final int index;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Container(
+        width: index > 3 ? 130.0 : 105.0,
+        // height: 20.0,
+        child: Text(
+          text,
+          // overflow: TextOverflow.ellipsis,
+          maxLines: index > 1 && index <= 3 ? 3 : 1,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: index % 2 == 0 ? Colors.white : Colors.grey[300],
+            fontWeight: index % 2 == 0 ? FontWeight.bold : FontWeight.normal,
+            // fontWeight: FontWeight.bold,
+
+            fontSize: 14.0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 double calculateRatio(double width) {
   if (width >= 700) {
     return 4.0;
@@ -652,6 +1151,25 @@ class SingleInfoText extends StatelessWidget {
   }
 }
 
+class SingleInfoTextBold extends StatelessWidget {
+  String text;
+  SingleInfoTextBold(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      // overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+      // textAlign: TextAlign.left,
+      style: TextStyle(
+        color: Theme.of(context).textTheme.headline5!.color,
+        fontWeight: FontWeight.bold,
+        fontSize: 18.0,
+      ),
+    );
+  }
+}
+
 String convertBigToSmall(int meters) {
   if (meters >= 3000) return '${((meters / 100).round()) / 10} km';
   return '$meters m';
@@ -673,25 +1191,6 @@ String numOfPersonToString(int persons) {
   else if ((persons <= 4 && persons > 1) || (lastDigit >= 2 && lastDigit < 5))
     return '$persons osoby';
   return '$persons osób';
-}
-
-class SingleInfoTextBold extends StatelessWidget {
-  String text;
-  SingleInfoTextBold(this.text);
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      // overflow: TextOverflow.ellipsis,
-      maxLines: 2,
-      // textAlign: TextAlign.left,
-      style: TextStyle(
-        color: Theme.of(context).textTheme.headline5!.color,
-        fontWeight: FontWeight.bold,
-        fontSize: 18.0,
-      ),
-    );
-  }
 }
 
 // class MySeparator extends StatelessWidget {
